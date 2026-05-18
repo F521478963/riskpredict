@@ -1,0 +1,7 @@
+Flask
+numpy
+pandas
+openpyxl
+scikit-learn
+openai
+PyMuPDF

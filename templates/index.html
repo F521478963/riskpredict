@@ -1,0 +1,650 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SVR 本地预测工具</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 16px 12px 24px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #172033;
+      background: linear-gradient(135deg, #eef4ff 0%, #f8fbff 55%, #ffffff 100%);
+      overflow-x: auto;
+      box-sizing: border-box;
+    }
+
+    .card {
+      width: min(1760px, max(1200px, calc(100vw - 24px)));
+      min-width: 1080px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid #dbe6f6;
+      border-radius: 24px;
+      box-shadow: 0 24px 70px rgba(52, 84, 140, 0.16);
+      padding: 28px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 32px;
+      letter-spacing: -0.03em;
+    }
+
+    .desc {
+      margin: 0 0 28px;
+      line-height: 1.7;
+      color: #526174;
+    }
+
+    .panel {
+      border: 1px dashed #9db6d8;
+      border-radius: 18px;
+      padding: 24px;
+      background: #f7faff;
+      margin-top: 18px;
+    }
+
+    .feature-groups {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-areas:
+        "face_spectrum left_ear_texture right_ear_texture"
+        "face_texture face_texture face_texture";
+      gap: 12px;
+      align-items: start;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+    }
+
+    .feature-group {
+      margin-top: 0;
+      padding: 12px;
+      border: 1px solid #dbe6f6;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.72);
+      border-left-width: 5px;
+    }
+
+    #face_spectrum {
+      grid-area: face_spectrum;
+      border-left-color: #7c3aed;
+    }
+
+    #face_texture {
+      grid-area: face_texture;
+      border-left-color: #2563eb;
+    }
+
+    #left_ear_texture {
+      grid-area: left_ear_texture;
+      border-left-color: #059669;
+    }
+
+    #right_ear_texture {
+      grid-area: right_ear_texture;
+      border-left-color: #d97706;
+    }
+
+    .feature-group h3 {
+      margin: -2px -2px 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      box-shadow: 0 8px 20px rgba(23, 32, 51, 0.12);
+    }
+
+    #face_spectrum h3 {
+      background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+    }
+
+    #face_texture h3 {
+      background: linear-gradient(135deg, #1d4ed8 0%, #22d3ee 100%);
+    }
+
+    #left_ear_texture h3 {
+      background: linear-gradient(135deg, #047857 0%, #34d399 100%);
+    }
+
+    #right_ear_texture h3 {
+      background: linear-gradient(135deg, #b45309 0%, #fbbf24 100%);
+    }
+
+    .feature-group h3 span {
+      display: block;
+      margin-top: 4px;
+      color: rgba(255, 255, 255, 0.92);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 6px;
+      color: #24324a;
+      font-weight: 700;
+      line-height: 1.3;
+      font-size: 12px;
+    }
+
+    .field label > span {
+      display: block;
+      color: #66758a;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .field-index {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      margin-right: 6px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      color: #1e40af;
+      background: #dbeafe;
+      border: 1px solid #bfdbfe;
+      font-size: 11px;
+      font-weight: 800;
+      vertical-align: middle;
+    }
+
+    .field-label-main {
+      vertical-align: middle;
+    }
+
+    #face_texture {
+      padding: 14px;
+      background: rgba(239, 246, 255, 0.75);
+    }
+
+    #face_texture .feature-grid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    #face_texture .field {
+      padding: 9px 10px 10px;
+      border-radius: 12px;
+      border: 1px solid #d5e3fb;
+      background: #ffffff;
+      box-shadow: 0 4px 12px rgba(30, 64, 175, 0.08);
+    }
+
+    #face_texture input[type="number"] {
+      border-color: #c7d7f4;
+    }
+
+    input[type="file"],
+    input[type="number"] {
+      display: block;
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #d5e0ee;
+      border-radius: 10px;
+      background: #ffffff;
+      box-sizing: border-box;
+    }
+
+    input[type="number"] {
+      width: min(100%, 220px);
+      height: 38px;
+      font-size: 14px;
+    }
+
+    button {
+      margin-top: 18px;
+      width: 100%;
+      border: 0;
+      border-radius: 14px;
+      padding: 15px 18px;
+      color: #ffffff;
+      background: #2457d6;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1c46ad;
+    }
+
+    .hint {
+      margin-top: 18px;
+      color: #66758a;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .error {
+      margin-bottom: 18px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      color: #9b1c1c;
+      background: #fff0f0;
+      border: 1px solid #ffd1d1;
+    }
+
+    .result {
+      margin: 0 0 18px;
+      padding: 18px;
+      border-radius: 16px;
+      color: #123a22;
+      background: #eefbf3;
+      border: 1px solid #bde9cb;
+    }
+
+    .result strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 32px;
+      letter-spacing: -0.03em;
+    }
+
+    .risk-badge {
+      display: inline-flex;
+      align-items: center;
+      margin-top: 14px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .ai-analysis {
+      margin: 18px 0;
+      padding: 20px;
+      border-radius: 18px;
+      color: #1f2937;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+    }
+
+    .ai-analysis h2 {
+      margin: 0 0 12px;
+      color: #9a3412;
+    }
+
+    .ai-analysis-text,
+    .ai-analysis-warning {
+      margin: 0;
+      white-space: pre-wrap;
+      line-height: 1.7;
+    }
+
+    .ai-analysis-warning {
+      color: #9a3412;
+    }
+
+    .analysis-loading {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      color: #9a3412;
+      font-weight: 700;
+    }
+
+    .analysis-loading.is-visible {
+      display: flex;
+    }
+
+    .loading-spinner {
+      width: 22px;
+      height: 22px;
+      border: 3px solid #fed7aa;
+      border-top-color: #ea580c;
+      border-radius: 999px;
+      animation: spin 0.8s linear infinite;
+      flex: 0 0 auto;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .is-submitting button[type="submit"] {
+      cursor: wait;
+      opacity: 0.72;
+    }
+
+    .floating-actions {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    .floating-action-button {
+      width: auto;
+      margin: 0;
+      padding: 14px 18px;
+      border-radius: 999px;
+      box-shadow: 0 16px 38px rgba(37, 99, 235, 0.28);
+    }
+
+    .floating-test-button {
+      background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
+    }
+
+    .floating-test-button:hover {
+      background: linear-gradient(135deg, #6d28d9 0%, #1d4ed8 100%);
+    }
+
+    .floating-high-risk-button {
+      background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
+      box-shadow: 0 16px 38px rgba(220, 38, 38, 0.26);
+    }
+
+    .floating-high-risk-button:hover {
+      background: linear-gradient(135deg, #b91c1c 0%, #ea580c 100%);
+    }
+
+    .floating-reset-button {
+      background: linear-gradient(135deg, #64748b 0%, #334155 100%);
+      box-shadow: 0 16px 38px rgba(51, 65, 85, 0.22);
+    }
+
+    .floating-reset-button:hover {
+      background: linear-gradient(135deg, #475569 0%, #1e293b 100%);
+    }
+
+    @media (max-width: 1320px) {
+      .card {
+        width: min(1320px, calc(100vw - 20px));
+        min-width: 980px;
+      }
+
+      .feature-groups {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-areas:
+          "face_spectrum left_ear_texture"
+          "right_ear_texture right_ear_texture"
+          "face_texture face_texture";
+      }
+
+      #face_texture .feature-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 0;
+        overflow-x: visible;
+      }
+
+      .card {
+        width: calc(100vw - 16px);
+        min-width: auto;
+        border-radius: 18px;
+        padding: 18px;
+      }
+
+      .feature-groups {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "face_spectrum"
+          "left_ear_texture"
+          "right_ear_texture"
+          "face_texture";
+      }
+
+      .feature-grid {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      }
+
+      #face_texture {
+        padding: 12px;
+      }
+
+      #face_texture .feature-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      #face_texture .field {
+        box-shadow: none;
+      }
+
+      .floating-actions {
+        right: 16px;
+        bottom: 16px;
+        max-width: calc(100vw - 32px);
+      }
+    }
+
+    .high-risk {
+      color: #991b1b;
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+    }
+
+    .low-risk {
+      color: #166534;
+      background: #dcfce7;
+      border: 1px solid #bbf7d0;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="floating-actions" aria-label="测试参数快捷操作">
+    <button class="floating-action-button floating-high-risk-button" id="fill-high-risk-data-button" type="button">
+      填入高风险参数 / Fill High-Risk Data
+    </button>
+    <button class="floating-action-button floating-test-button" id="fill-test-data-button" type="button">
+      填入低风险参数 / Fill Low-Risk Data
+    </button>
+    <button class="floating-action-button floating-reset-button" id="reset-test-data-button" type="button">
+      重置参数 / Reset Data
+    </button>
+  </div>
+
+  <main class="card">
+    <h1>SVR 本地预测工具 / Local SVR Prediction Tool</h1>
+    <p class="desc">
+      输入 23 个模型指标值后，系统会在本机加载当前文件夹中的 SVR 模型并显示预测结果。
+      Enter the 23 feature values below to run local SVR prediction and view the result on this page.
+    </p>
+
+    {% if error %}
+      <div class="error">{{ error }}</div>
+    {% endif %}
+
+    {% if result is not none %}
+      <div class="result">
+        预测结果 / Prediction Result
+        <strong>Predicted Value: {{ "%.6f"|format(result) }}</strong>
+        <div class="risk-badge {{ risk.class_name }}">
+          风险分级 / Risk Level: {{ risk.label_zh }} / {{ risk.label_en }}
+        </div>
+      </div>
+    {% endif %}
+
+    <section class="ai-analysis" id="analysis-status">
+      <h2>AI 风险分析 / AI Risk Analysis</h2>
+      <div class="analysis-loading" id="analysis-loading" aria-live="polite">
+        <span class="loading-spinner" aria-hidden="true"></span>
+        <span>正在生成 AI 风险分析，请稍候... / Generating AI risk analysis, please wait...</span>
+      </div>
+      {% if ai_analysis and ai_analysis.content %}
+        <p class="ai-analysis-text">{{ ai_analysis.content }}</p>
+      {% elif ai_analysis and ai_analysis.error %}
+        <p class="ai-analysis-warning">{{ ai_analysis.error }}</p>
+      {% else %}
+        <p class="ai-analysis-warning">
+          点击开始预测后，这里会显示 AI 风险分析结果。
+          After prediction starts, the AI risk analysis result will appear here.
+        </p>
+      {% endif %}
+    </section>
+
+    <form class="panel" method="post" id="manual-prediction-form">
+      <input type="hidden" name="mode" value="manual">
+      <h2>指标输入 / Feature Inputs</h2>
+      <div class="feature-groups">
+        {% for group in feature_groups %}
+          <section class="feature-group" id="{{ group.id }}">
+            <h3>
+              {{ group.title_zh }}
+              <span>{{ group.title_en }}</span>
+            </h3>
+            <div class="feature-grid">
+              {% for field in group.fields %}
+                <div class="field">
+                  <label for="{{ field.name }}">
+                    <span class="field-index">#{{ field.index }}</span>
+                    <span class="field-label-main">{{ field.label_zh }}</span>
+                    <span>{{ field.label_en }}</span>
+                  </label>
+                  <input
+                    id="{{ field.name }}"
+                    name="{{ field.name }}"
+                    type="number"
+                    step="any"
+                    required
+                    value="{{ values.get(field.name, '') }}"
+                    placeholder="请输入数值 / Enter value"
+                  >
+                </div>
+              {% endfor %}
+            </div>
+          </section>
+        {% endfor %}
+      </div>
+      <button type="submit">开始预测 / Predict</button>
+      <div class="hint">
+        所有输入都只在本机处理，不会上传到外部服务器。
+        All values are processed locally on this machine.
+      </div>
+    </form>
+    <script>
+      const HIGH_RISK_FEATURE_VALUES = [
+        177.508639, 0.037621, 0.037621, 0.037621, 0.037621, 0.037621,
+        0.171066, 219.381653, 0.249554, 0.099184, 0.32212, 0.569326,
+        0.423279, 0.504386, 0.272308, 0.037621, 0.037621, 0.037621,
+        0.037621, 0.209795, 0.209399, 0.207437, 0.847371
+      ];
+
+      const LOW_RISK_FEATURE_VALUES = [
+        183.912743, 0.031297, 0.031297, 0.031297, 0.031297, 0.031297,
+        0.031297, 224.114795, 0.256986, 0.079967, 0.306688, 0.616521,
+        0.395528, 0.496073, 0.274379, 0.031297, 0.031297, 0.031297,
+        0.031297, 0.199246, 0.191938, 0.198293, 0.864854
+      ];
+
+      function fillFeatureValues(values) {
+        values.forEach((value, index) => {
+          const input = document.getElementById(`feature_${index}`);
+          if (input) {
+            input.value = value;
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+        });
+
+        const form = document.getElementById("manual-prediction-form");
+        if (form) {
+          form.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
+
+      function fillLowRiskData() {
+        fillFeatureValues(LOW_RISK_FEATURE_VALUES);
+      }
+
+      function fillHighRiskData() {
+        fillFeatureValues(HIGH_RISK_FEATURE_VALUES);
+      }
+
+      function resetTestData() {
+        TEST_FEATURE_VALUES.forEach((_, index) => {
+          const input = document.getElementById(`feature_${index}`);
+          if (input) {
+            input.value = "";
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+        });
+
+        const form = document.getElementById("manual-prediction-form");
+        if (form) {
+          form.classList.remove("is-submitting");
+          form.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
+
+      function showAnalysisLoading(event) {
+        const form = event.currentTarget;
+        if (!form.checkValidity()) {
+          return;
+        }
+
+        const loading = document.getElementById("analysis-loading");
+        const status = document.getElementById("analysis-status");
+        const submitButton = form.querySelector('button[type="submit"]');
+
+        form.classList.add("is-submitting");
+        if (loading) {
+          loading.classList.add("is-visible");
+        }
+        if (status) {
+          status.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        if (submitButton) {
+          submitButton.disabled = true;
+          submitButton.textContent = "预测与分析中... / Predicting and analyzing...";
+        }
+      }
+
+      document
+        .getElementById("manual-prediction-form")
+        .addEventListener("submit", showAnalysisLoading);
+
+      document
+        .getElementById("fill-test-data-button")
+        .addEventListener("click", fillLowRiskData);
+
+      document
+        .getElementById("fill-high-risk-data-button")
+        .addEventListener("click", fillHighRiskData);
+
+      document
+        .getElementById("reset-test-data-button")
+        .addEventListener("click", resetTestData);
+    </script>
+
+    <form class="panel" method="post" enctype="multipart/form-data">
+      <h2>Excel 批量预测 / Excel Batch Prediction</h2>
+      <input type="file" name="file" accept=".xlsx,.xls" required>
+      <button type="submit">开始预测并下载结果 / Predict and Download</button>
+      <div class="hint">
+        支持两种输入：只包含模型筛选后的 {{ feature_count }} 列特征；
+        或包含完整特征表，至少 {{ full_feature_count }} 列，系统会自动按模型特征索引取列。
+        Supports either {{ feature_count }} selected feature columns, or a full feature table with at least
+        {{ full_feature_count }} columns.
+      </div>
+    </form>
+  </main>
+</body>
+</html>
