@@ -1,0 +1,32 @@
+# 可选：覆盖自动发现的文档元数据
+# 未列出的文件仍会按文件名与所在目录索引
+
+version: 1
+defaults:
+  chunk_size: 1800
+  chunk_overlap: 200
+  top_k: 5
+
+categories:
+  guidelines:
+    label: 临床指南
+    priority: 3
+  screening:
+    label: 无创筛查证据
+    priority: 2
+  methods:
+    label: 方法学参考
+    priority: 1
+  papers:
+    label: 参考文献
+    priority: 1
+  inbox:
+    label: 待整理 inbox
+    priority: 1
+
+documents: []
+# 示例：
+# - path: guidelines/2025_ACC_AHA_ACS.pdf
+#   title: 2025 ACC/AHA ACS Guideline
+#   enabled: true
+#   weight: 1.0

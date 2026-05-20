@@ -16,23 +16,9 @@ class TextChunk:
 
 
 def build_risk_query(risk):
-    label = f"{risk.get('label_zh', '')} {risk.get('label_en', '')}".lower()
-    base_terms = (
-        "acute coronary syndrome ACS guideline management chest pain "
-        "risk stratification clinical evaluation"
-    )
+    from clinical_query import build_risk_query as _build_risk_query
 
-    if "high" in label or "高" in label:
-        return (
-            f"high risk {base_terms} invasive evaluation early invasive "
-            "urgent emergency reperfusion antiplatelet anticoagulation "
-            "guideline-directed management"
-        )
-
-    return (
-        f"low risk {base_terms} discharge follow-up outpatient observation "
-        "serial troponin noninvasive testing shared decision-making"
-    )
+    return _build_risk_query(risk)
 
 
 class GuidelineRAGRetriever:

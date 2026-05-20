@@ -2,14 +2,13 @@ import unittest
 from unittest.mock import patch
 
 from app import (
-    ACS_GUIDELINE_PDF_PATH,
-    CONSENSUS_GUIDELINE_PDF_PATH,
-    ESC_GUIDELINE_PDF_PATH,
+    RAG_CORPUS_DIR,
     app,
     ai_analyzer,
     classify_risk,
     FEATURE_FIELDS,
     FEATURE_GROUPS,
+    rag_corpus_store,
 )
 
 
@@ -34,20 +33,54 @@ class AppTest(unittest.TestCase):
 
     def test_manual_form_prediction_displays_ai_analysis_when_available(self):
         client = app.test_client()
-        data = {"mode": "manual"}
+        data = {"mode": "manual", "ai_judgment_mode": "rag_only"}
         for field in FEATURE_FIELDS:
             data[field["name"]] = "1.0"
 
         with patch("app.ai_analyzer.analyze") as analyze:
             analyze.return_value = {
-                "content": "AI 风险分析报告 / AI Risk Analysis Report",
+                "content": "### 风险等级\n\nAI 风险分析报告 / AI Risk Analysis Report",
                 "error": None,
+                "judgment_mode": "rag_only",
+                "judgment_label": "仅RAG判断",
             }
             response = client.post("/", data=data)
 
         self.assertEqual(response.status_code, 200)
+        analyze.assert_called_once()
+        self.assertEqual(
+            analyze.call_args.kwargs.get("judgment_mode"),
+            "rag_only",
+        )
         self.assertIn("AI 风险分析 / AI Risk Analysis".encode("utf-8"), response.data)
-        self.assertIn("AI 风险分析报告 / AI Risk Analysis Report".encode("utf-8"), response.data)
+        self.assertIn(b"analysis-report-data", response.data)
+        self.assertIn(b"btn-export-markdown", response.data)
+
+    def test_homepage_contains_dual_judgment_submit_buttons(self):
+        response = app.test_client().get("/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("仅RAG判断".encode("utf-8"), response.data)
+        self.assertIn("综合判断".encode("utf-8"), response.data)
+        self.assertIn(b'id="ai_judgment_mode"', response.data)
+        self.assertIn(b"setJudgmentMode", response.data)
+        self.assertIn(b"submit-combined", response.data)
+
+    def test_manual_form_passes_combined_judgment_mode(self):
+        client = app.test_client()
+        data = {"mode": "manual", "ai_judgment_mode": "combined"}
+        for field in FEATURE_FIELDS:
+            data[field["name"]] = "1.0"
+
+        with patch("app.ai_analyzer.analyze") as analyze:
+            analyze.return_value = {
+                "content": "综合报告",
+                "error": None,
+                "judgment_label": "综合判断",
+            }
+            client.post("/", data=data)
+
+        self.assertEqual(analyze.call_args.kwargs.get("judgment_mode"), "combined")
 
     def test_homepage_groups_feature_inputs_by_feature_type(self):
         response = app.test_client().get("/")
@@ -67,6 +100,28 @@ class AppTest(unittest.TestCase):
         self.assertIn(b'class="loading-spinner"', response.data)
         self.assertIn("正在生成 AI 风险分析".encode("utf-8"), response.data)
         self.assertIn(b"showAnalysisLoading", response.data)
+        self.assertIn(b"initMarkdownReader", response.data)
+        self.assertIn("Markdown 阅读器".encode("utf-8"), response.data)
+
+    def test_manual_form_renders_markdown_reader_when_analysis_exists(self):
+        client = app.test_client()
+        data = {"mode": "manual", "ai_judgment_mode": "rag_only"}
+        for field in FEATURE_FIELDS:
+            data[field["name"]] = "1.0"
+
+        with patch("app.ai_analyzer.analyze") as analyze:
+            analyze.return_value = {
+                "content": "### 风险等级\n\n测试内容",
+                "error": None,
+                "judgment_mode": "rag_only",
+                "judgment_label": "仅RAG判断",
+            }
+            response = client.post("/", data=data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'id="markdown-reader"', response.data)
+        self.assertIn(b"analysis-report-data", response.data)
+        self.assertIn("\\u98ce\\u9669\\u7b49\\u7ea7".encode("utf-8"), response.data)
 
     def test_homepage_contains_fill_test_data_button(self):
         response = app.test_client().get("/")
@@ -106,22 +161,12 @@ class AppTest(unittest.TestCase):
         self.assertIn(b"177.508639", response.data)
         self.assertIn(b"0.847371", response.data)
 
-    def test_app_wires_both_local_guideline_pdfs_into_rag(self):
-        self.assertTrue(ACS_GUIDELINE_PDF_PATH.endswith("Guidelines.pdf"))
-        self.assertTrue(ESC_GUIDELINE_PDF_PATH.endswith("2024 ESC(1).pdf"))
-        self.assertTrue(CONSENSUS_GUIDELINE_PDF_PATH.endswith("冠状动脉功能学临床应用专家共识(1).pdf"))
-        source_names = [
-            name for name, _retriever in ai_analyzer.guideline_retriever.retrievers
-        ]
-
-        self.assertEqual(
-            source_names,
-            [
-                "2025 ACC/AHA ACS Guideline",
-                "2024 ESC CCS Guideline",
-                "冠状动脉功能学临床应用专家共识",
-            ],
-        )
+    def test_app_wires_rag_corpus_store(self):
+        self.assertTrue(RAG_CORPUS_DIR.endswith("rag_corpus"))
+        status = rag_corpus_store.status()
+        self.assertGreaterEqual(status["document_count"], 1)
+        categories = {doc["category"] for doc in status["documents"]}
+        self.assertIn("guidelines", categories)
 
     def test_homepage_uses_compact_feature_input_layout(self):
         response = app.test_client().get("/")

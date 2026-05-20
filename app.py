@@ -7,7 +7,9 @@ from werkzeug.utils import secure_filename
 
 from ai_analysis import DeepSeekAnalyzer
 from model_service import FeatureShapeError, PredictionService
-from pdf_rag import CombinedGuidelineRAGRetriever, GuidelineRAGRetriever
+from llm_pipeline import JUDGMENT_LABELS, normalize_judgment_mode
+from rag_store import get_default_corpus_store
+from report_export import build_analysis_report
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -15,14 +17,7 @@ MODEL_PATH = os.path.join(
     BASE_DIR,
     "SVR_StandardScaler_RRMSE_2026-05-17_23-17-32.666985.dat",
 )
-ACS_GUIDELINE_PDF_PATH = os.path.join(
-    BASE_DIR,
-    "2025 ACC AHA ACEP NAEMSP SCAI Guideline for the Management of Patients With Acute Coronary Syndromes A Report of the American College of Cardiology American Heart Association Joint Committee on Clinical Practice Guidelines.pdf",
-)
-ESC_GUIDELINE_PDF_PATH = os.path.join(BASE_DIR, "2024 ESC(1).pdf")
-CONSENSUS_GUIDELINE_PDF_PATH = os.path.join(
-    BASE_DIR, "冠状动脉功能学临床应用专家共识(1).pdf"
-)
+RAG_CORPUS_DIR = os.path.join(BASE_DIR, "rag_corpus")
 FEATURE_LABELS = [
     ("面部光谱均值1", "Face spectrum mean 1"),
     ("面部纹理均值30", "Face texture mean 30"),
@@ -82,20 +77,18 @@ app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
 
 prediction_service = PredictionService.from_shelve(MODEL_PATH)
+rag_corpus_store = get_default_corpus_store()
+try:
+    rag_corpus_store.ensure_index(auto_build=True)
+except Exception as exc:
+    print(f"[riskpredict] RAG index not ready: {exc}")
+
 ai_analyzer = DeepSeekAnalyzer(
     api_key=os.environ.get("DEEPSEEK_API_KEY"),
-    model=os.environ.get("DEEPSEEK_MODEL", "deepseek-v4-flash"),
+    model=os.environ.get("DEEPSEEK_MODEL", "deepseek-v4-pro"),
     verify_ssl=os.environ.get("DEEPSEEK_SSL_VERIFY", "true").lower() != "false",
-    guideline_retriever=CombinedGuidelineRAGRetriever(
-        [
-            ("2025 ACC/AHA ACS Guideline", GuidelineRAGRetriever(ACS_GUIDELINE_PDF_PATH)),
-            ("2024 ESC CCS Guideline", GuidelineRAGRetriever(ESC_GUIDELINE_PDF_PATH)),
-            (
-                "冠状动脉功能学临床应用专家共识",
-                GuidelineRAGRetriever(CONSENSUS_GUIDELINE_PDF_PATH),
-            ),
-        ]
-    ),
+    corpus_store=rag_corpus_store,
+    rag_mode=os.environ.get("LLM_RAG_MODE", "rag"),
 )
 
 
@@ -164,19 +157,44 @@ def _handle_manual_prediction():
         return _render_error(f"预测失败：{exc}", values=form_values)
 
     risk = classify_risk(prediction)
+    judgment_mode = normalize_judgment_mode(request.form.get("ai_judgment_mode"))
     ai_analysis = ai_analyzer.analyze(
         fields=FEATURE_FIELDS,
         values=values,
         prediction=prediction,
         risk=risk,
+        judgment_mode=judgment_mode,
     )
+    ai_analysis = _attach_judgment_metadata(ai_analysis, judgment_mode)
+
+    analysis_report = None
+    if ai_analysis and (ai_analysis.get("content") or ai_analysis.get("error")):
+        analysis_report = build_analysis_report(
+            result=prediction,
+            risk=risk,
+            ai_analysis=ai_analysis,
+            judgment_mode=judgment_mode,
+            judgment_labels=JUDGMENT_LABELS,
+        )
 
     return _render_index(
         result=prediction,
         risk=risk,
         ai_analysis=ai_analysis,
+        analysis_report=analysis_report,
         values=form_values,
+        judgment_mode=judgment_mode,
     )
+
+
+def _attach_judgment_metadata(ai_analysis, judgment_mode):
+    payload = dict(ai_analysis or {})
+    mode = normalize_judgment_mode(
+        payload.get("judgment_mode") or judgment_mode
+    )
+    payload["judgment_mode"] = mode
+    payload["judgment_label"] = JUDGMENT_LABELS.get(mode, mode)
+    return payload
 
 
 def classify_risk(value):
@@ -199,7 +217,9 @@ def _render_index(
     result=None,
     risk=None,
     ai_analysis=None,
+    analysis_report=None,
     values=None,
+    judgment_mode="rag_only",
     status=200,
 ):
     return (
@@ -209,11 +229,15 @@ def _render_index(
             result=result,
             risk=risk,
             ai_analysis=ai_analysis,
+            analysis_report=analysis_report,
             values=values or {},
             feature_fields=FEATURE_FIELDS,
             feature_groups=FEATURE_GROUPS,
             feature_count=len(prediction_service.feature_indexes),
             full_feature_count=max(prediction_service.feature_indexes) + 1,
+            rag_status=rag_corpus_store.status(),
+            judgment_mode=judgment_mode,
+            judgment_labels=JUDGMENT_LABELS,
         ),
         status,
     )

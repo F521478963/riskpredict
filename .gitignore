@@ -8,6 +8,10 @@ __pycache__/
 uploads/
 outputs/
 
+rag_corpus/.rag_index/
+*.rag_cache.json
+eval/gold_cases.json
+
 .pytest_cache/
 .coverage
 htmlcov/

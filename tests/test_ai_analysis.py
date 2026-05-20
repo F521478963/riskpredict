@@ -37,13 +37,13 @@ class FakeClient:
         self.chat = FakeChat(captured)
 
 
-class FakeGuidelineRetriever:
+class FakeCorpusStore:
     def __init__(self, snippets):
         self.snippets = snippets
         self.calls = []
 
-    def search_for_risk(self, risk):
-        self.calls.append(risk)
+    def search_for_prediction(self, prediction, risk, patient_context=None):
+        self.calls.append({"prediction": prediction, "risk": risk})
         return self.snippets
 
 
@@ -60,7 +60,7 @@ class DeepSeekAnalyzerTest(unittest.TestCase):
         self.assertIn("右耳纹理均值71 / Right ear texture mean 71: 0.34", summary)
 
     def test_analyzer_skips_api_when_key_is_missing(self):
-        analyzer = DeepSeekAnalyzer(api_key=None)
+        analyzer = DeepSeekAnalyzer(api_key=None, corpus_store=FakeCorpusStore([]))
 
         result = analyzer.analyze(
             fields=[],
@@ -82,7 +82,21 @@ class DeepSeekAnalyzerTest(unittest.TestCase):
             captured["verify_ssl"] = verify_ssl
             return FakeClient(captured)
 
-        analyzer = DeepSeekAnalyzer(api_key="test-key", client_factory=fake_client_factory)
+        analyzer = DeepSeekAnalyzer(
+            api_key="test-key",
+            client_factory=fake_client_factory,
+            corpus_store=FakeCorpusStore(
+                [
+                    {
+                        "source": "2025 ACC/AHA ACS Guideline",
+                        "category": "guidelines",
+                        "page": 12,
+                        "text": "High-risk ACS patients should receive guideline-directed management.",
+                        "score": 3.5,
+                    }
+                ]
+            ),
+        )
         result = analyzer.analyze(
             fields=[{"label_zh": "面部光谱均值1", "label_en": "Face spectrum mean 1"}],
             values=[0.1],
@@ -95,14 +109,14 @@ class DeepSeekAnalyzerTest(unittest.TestCase):
         self.assertEqual(captured["api_key"], "test-key")
         self.assertEqual(captured["base_url"], DEEPSEEK_BASE_URL)
         self.assertTrue(captured["verify_ssl"])
-        self.assertEqual(captured["completion_kwargs"]["model"], "deepseek-v4-flash")
+        self.assertEqual(captured["completion_kwargs"]["model"], "deepseek-v4-pro")
         self.assertFalse(captured["completion_kwargs"]["stream"])
         prompt = captured["completion_kwargs"]["messages"][1]["content"]
-        self.assertIn("冠状动脉功能学状态", prompt)
-        self.assertIn("只允许依据【本地指南检索片段】", prompt)
-        self.assertIn("必须引用预测值", prompt)
-        self.assertIn("对应风险等级的建议治疗措施", prompt)
-        self.assertNotIn("【指标-结果对应分析】", prompt)
+        self.assertIn("无创筛查", prompt)
+        self.assertIn("【本地指南检索片段】", prompt)
+        self.assertIn("[片段1]", prompt)
+        self.assertIn("### 建议评估与管理措施", prompt)
+        self.assertIn("### 模型与筛查局限性", prompt)
 
     def test_analyzer_includes_local_guideline_context_for_risk(self):
         captured = {}
@@ -110,52 +124,59 @@ class DeepSeekAnalyzerTest(unittest.TestCase):
         def fake_client_factory(api_key, base_url, timeout, verify_ssl):
             return FakeClient(captured)
 
-        retriever = FakeGuidelineRetriever(
+        risk = {"label_zh": "高风险", "label_en": "High Risk"}
+        store = FakeCorpusStore(
             [
                 {
+                    "source": "2024 ESC CCS Guideline",
+                    "category": "guidelines",
                     "page": 12,
                     "text": "High-risk ACS patients should be evaluated promptly with guideline-directed management.",
                     "score": 3.5,
                 }
             ]
         )
-        risk = {"label_zh": "高风险", "label_en": "High Risk"}
         analyzer = DeepSeekAnalyzer(
             api_key="test-key",
             client_factory=fake_client_factory,
-            guideline_retriever=retriever,
+            corpus_store=store,
         )
 
-        result = analyzer.analyze(fields=[], values=[], prediction=0.92, risk=risk)
+        result = analyzer.analyze(
+            fields=[],
+            values=[],
+            prediction=0.92,
+            risk=risk,
+            judgment_mode="rag_only",
+        )
 
         self.assertIsNone(result["error"])
-        self.assertEqual(retriever.calls, [risk])
+        self.assertEqual(result["judgment_label"], "仅RAG判断")
+        self.assertEqual(len(store.calls), 1)
         prompt = captured["completion_kwargs"]["messages"][1]["content"]
-        self.assertIn("【本地指南检索片段】", prompt)
         self.assertIn("Page 12", prompt)
         self.assertIn("High-risk ACS patients should be evaluated promptly", prompt)
-        self.assertIn("只允许依据上述本地指南片段", prompt)
 
-    def test_analyzer_prompt_restricts_deepseek_to_local_rag_treatment_advice(self):
+    def test_analyzer_prompt_restricts_to_local_rag(self):
         captured = {}
 
         def fake_client_factory(api_key, base_url, timeout, verify_ssl):
             return FakeClient(captured)
 
-        retriever = FakeGuidelineRetriever(
-            [
-                {
-                    "source": "2024 ESC CCS Guideline",
-                    "page": 88,
-                    "text": "Low-risk patients may receive guideline-directed medical therapy and outpatient follow-up.",
-                    "score": 6.0,
-                }
-            ]
-        )
         analyzer = DeepSeekAnalyzer(
             api_key="test-key",
             client_factory=fake_client_factory,
-            guideline_retriever=retriever,
+            corpus_store=FakeCorpusStore(
+                [
+                    {
+                        "source": "2024 ESC CCS Guideline",
+                        "category": "guidelines",
+                        "page": 88,
+                        "text": "Low-risk patients may receive guideline-directed medical therapy and outpatient follow-up.",
+                        "score": 6.0,
+                    }
+                ]
+            ),
         )
 
         analyzer.analyze(
@@ -168,38 +189,26 @@ class DeepSeekAnalyzerTest(unittest.TestCase):
         messages = captured["completion_kwargs"]["messages"]
         system_prompt = messages[0]["content"]
         user_prompt = messages[1]["content"]
-        self.assertIn("只能依据用户提供的本地 RAG 指南片段回答", system_prompt)
-        self.assertIn("不要联网查询", system_prompt)
-        self.assertIn("不要使用未出现在本地片段中的医学常识补充", system_prompt)
-        self.assertIn("【本地指南检索片段】", user_prompt)
-        self.assertIn("2024 ESC CCS Guideline", user_prompt)
-        self.assertIn("只允许依据【本地指南检索片段】", user_prompt)
-        self.assertIn("对应风险等级的建议治疗措施", user_prompt)
-        self.assertIn("### 建议治疗措施", user_prompt)
-        self.assertIn("### 本地依据", user_prompt)
+        self.assertIn("【本地 RAG 检索片段】", system_prompt)
+        self.assertIn("不能替代冠状动脉造影", user_prompt)
         self.assertNotIn("面部光谱", user_prompt)
 
-    def test_analyzer_can_disable_ssl_verification_for_local_development(self):
-        captured = {}
-
-        def fake_client_factory(api_key, base_url, timeout, verify_ssl):
-            captured["verify_ssl"] = verify_ssl
-            return FakeClient(captured)
-
+    def test_analyzer_returns_fallback_when_no_snippets(self):
         analyzer = DeepSeekAnalyzer(
             api_key="test-key",
-            verify_ssl=False,
-            client_factory=fake_client_factory,
+            corpus_store=FakeCorpusStore([]),
+            client_factory=lambda *args, **kwargs: FakeClient({}),
         )
+
         result = analyzer.analyze(
             fields=[],
             values=[],
-            prediction=0.9,
+            prediction=0.5,
             risk={"label_zh": "高风险", "label_en": "High Risk"},
         )
 
-        self.assertEqual(result["content"], "AI 风险分析报告 / AI Risk Analysis Report")
-        self.assertFalse(captured["verify_ssl"])
+        self.assertIsNone(result["error"])
+        self.assertIn("未检索到", result["content"])
 
 
 if __name__ == "__main__":

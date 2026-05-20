@@ -220,6 +220,44 @@
       background: #1c46ad;
     }
 
+    .judgment-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .judgment-actions button {
+      margin-top: 0;
+    }
+
+    .judgment-button-rag-only {
+      background: #2457d6;
+    }
+
+    .judgment-button-rag-only:hover {
+      background: #1c46ad;
+    }
+
+    .judgment-button-combined {
+      background: #0f766e;
+    }
+
+    .judgment-button-combined:hover {
+      background: #0d5f58;
+    }
+
+    .judgment-mode-badge {
+      display: inline-flex;
+      margin: 0 0 12px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #ffedd5;
+      color: #9a3412;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
     .hint {
       margin-top: 18px;
       color: #66758a;
@@ -276,15 +314,186 @@
       color: #9a3412;
     }
 
-    .ai-analysis-text,
     .ai-analysis-warning {
       margin: 0;
-      white-space: pre-wrap;
       line-height: 1.7;
+      color: #9a3412;
     }
 
-    .ai-analysis-warning {
-      color: #9a3412;
+    .ai-analysis-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin: 0 0 14px;
+    }
+
+    .ai-analysis-toolbar button {
+      margin-top: 0;
+      width: auto;
+      padding: 10px 14px;
+      font-size: 14px;
+      border-radius: 10px;
+    }
+
+    .ai-analysis-toolbar .toolbar-primary {
+      background: #ea580c;
+    }
+
+    .ai-analysis-toolbar .toolbar-primary:hover {
+      background: #c2410c;
+    }
+
+    .ai-analysis-toolbar .toolbar-secondary {
+      background: #475569;
+    }
+
+    .ai-analysis-toolbar .toolbar-secondary:hover {
+      background: #334155;
+    }
+
+    .ai-analysis-toolbar .toolbar-export {
+      background: #0f766e;
+    }
+
+    .ai-analysis-toolbar .toolbar-export:hover {
+      background: #0d5f58;
+    }
+
+    .ai-analysis-toolbar .is-active {
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.85);
+    }
+
+    .markdown-reader-panel {
+      display: none;
+      margin-top: 8px;
+      padding: 22px 24px;
+      border-radius: 14px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      max-height: 72vh;
+      overflow: auto;
+      line-height: 1.75;
+      font-size: 15px;
+      color: #1e293b;
+    }
+
+    .markdown-reader-panel.is-visible {
+      display: block;
+    }
+
+    .markdown-source-panel {
+      display: none;
+      margin-top: 8px;
+      padding: 16px;
+      border-radius: 14px;
+      background: #0f172a;
+      color: #e2e8f0;
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      max-height: 72vh;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .markdown-source-panel.is-visible {
+      display: block;
+    }
+
+    .markdown-body h1,
+    .markdown-body h2,
+    .markdown-body h3,
+    .markdown-body h4 {
+      margin: 1.2em 0 0.55em;
+      line-height: 1.35;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+    }
+
+    .markdown-body h1 { font-size: 1.55rem; border-bottom: 2px solid #fed7aa; padding-bottom: 0.35em; }
+    .markdown-body h2 { font-size: 1.3rem; color: #9a3412; }
+    .markdown-body h3 { font-size: 1.12rem; color: #b45309; }
+    .markdown-body h4 { font-size: 1rem; color: #334155; }
+
+    .markdown-body p {
+      margin: 0.65em 0;
+    }
+
+    .markdown-body ul,
+    .markdown-body ol {
+      margin: 0.5em 0 0.8em;
+      padding-left: 1.35em;
+    }
+
+    .markdown-body li {
+      margin: 0.35em 0;
+    }
+
+    .markdown-body li > p {
+      margin: 0.2em 0;
+    }
+
+    .markdown-body strong {
+      color: #0f172a;
+    }
+
+    .markdown-body blockquote {
+      margin: 0.8em 0;
+      padding: 10px 14px;
+      border-left: 4px solid #fb923c;
+      background: #fff7ed;
+      color: #7c2d12;
+      border-radius: 0 10px 10px 0;
+    }
+
+    .markdown-body code {
+      padding: 0.15em 0.4em;
+      border-radius: 6px;
+      background: #f1f5f9;
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 0.92em;
+    }
+
+    .markdown-body pre {
+      margin: 0.8em 0;
+      padding: 14px;
+      border-radius: 12px;
+      background: #0f172a;
+      color: #e2e8f0;
+      overflow: auto;
+    }
+
+    .markdown-body pre code {
+      padding: 0;
+      background: transparent;
+      color: inherit;
+    }
+
+    .markdown-body hr {
+      border: 0;
+      border-top: 1px solid #e2e8f0;
+      margin: 1.2em 0;
+    }
+
+    .markdown-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.8em 0;
+      font-size: 14px;
+    }
+
+    .markdown-body th,
+    .markdown-body td {
+      border: 1px solid #e2e8f0;
+      padding: 8px 10px;
+      text-align: left;
+    }
+
+    .markdown-body th {
+      background: #f8fafc;
     }
 
     .analysis-loading {
@@ -463,9 +672,18 @@
   <main class="card">
     <h1>SVR 本地预测工具 / Local SVR Prediction Tool</h1>
     <p class="desc">
-      输入 23 个模型指标值后，系统会在本机加载当前文件夹中的 SVR 模型并显示预测结果。
-      Enter the 23 feature values below to run local SVR prediction and view the result on this page.
+      输入 23 个模型指标值后，系统会在本机加载 SVR 模型并显示预测结果；AI 报告通过
+      <code>rag_corpus/</code> 资料库检索指南后生成（新材料放入目录后请运行
+      <code>python scripts/rebuild_rag_index.py</code>）。
+      Enter 23 feature values for local SVR prediction; AI reports use the local RAG corpus.
     </p>
+    {% if rag_status %}
+      <p class="hint">
+        RAG 资料库：{{ rag_status.document_count }} 份文档，
+        索引状态 {% if rag_status.index_built %}已构建{% else %}未构建{% endif %}
+        （检索模式 {{ rag_status.retrieval_mode }}，Top-{{ rag_status.top_k }}）。
+      </p>
+    {% endif %}
 
     {% if error %}
       <div class="error">{{ error }}</div>
@@ -482,19 +700,46 @@
     {% endif %}
 
     <section class="ai-analysis" id="analysis-status">
-      <h2>AI 风险分析 / AI Risk Analysis</h2>
+      <div class="ai-analysis-header">
+        <h2>AI 风险分析 / AI Risk Analysis</h2>
+        {% if result is not none %}
+          {% set active_judgment_mode = ai_analysis.judgment_mode if ai_analysis and ai_analysis.judgment_mode else judgment_mode %}
+          {% set active_judgment_label = ai_analysis.judgment_label if ai_analysis and ai_analysis.judgment_label else judgment_labels.get(active_judgment_mode, active_judgment_mode) %}
+          <p class="judgment-mode-badge">分析模式 / Mode：{{ active_judgment_label }}</p>
+        {% endif %}
+      </div>
       <div class="analysis-loading" id="analysis-loading" aria-live="polite">
         <span class="loading-spinner" aria-hidden="true"></span>
         <span>正在生成 AI 风险分析，请稍候... / Generating AI risk analysis, please wait...</span>
       </div>
-      {% if ai_analysis and ai_analysis.content %}
-        <p class="ai-analysis-text">{{ ai_analysis.content }}</p>
+      {% if analysis_report %}
+        <div class="ai-analysis-toolbar">
+          <button type="button" class="toolbar-primary is-active" id="btn-markdown-reader">
+            Markdown 阅读器 / Reader
+          </button>
+          <button type="button" class="toolbar-secondary" id="btn-markdown-source">
+            查看源码 / Source
+          </button>
+          <button type="button" class="toolbar-export" id="btn-export-markdown">
+            导出 Markdown / .md
+          </button>
+          <button type="button" class="toolbar-export" id="btn-export-html">
+            导出 HTML / .html
+          </button>
+        </div>
+        <div
+          id="markdown-reader"
+          class="markdown-body markdown-reader-panel is-visible"
+          aria-label="AI analysis markdown reader"
+        ></div>
+        <pre id="markdown-source" class="markdown-source-panel" aria-label="AI analysis markdown source"></pre>
+        <script id="analysis-report-data" type="application/json">{{ analysis_report | tojson }}</script>
       {% elif ai_analysis and ai_analysis.error %}
         <p class="ai-analysis-warning">{{ ai_analysis.error }}</p>
       {% else %}
         <p class="ai-analysis-warning">
-          点击开始预测后，这里会显示 AI 风险分析结果。
-          After prediction starts, the AI risk analysis result will appear here.
+          点击开始预测后，这里会显示 AI 风险分析结果（Markdown 阅读器）。
+          After prediction starts, the AI risk analysis will appear in the Markdown reader.
         </p>
       {% endif %}
     </section>
@@ -532,12 +777,31 @@
           </section>
         {% endfor %}
       </div>
-      <button type="submit">开始预测 / Predict</button>
+      <input type="hidden" name="ai_judgment_mode" id="ai_judgment_mode" value="rag_only">
+      <div class="judgment-actions">
+        <button
+          type="submit"
+          id="submit-rag-only"
+          class="judgment-button-rag-only"
+        >
+          仅RAG判断 / RAG Only
+        </button>
+        <button
+          type="submit"
+          id="submit-combined"
+          class="judgment-button-combined"
+        >
+          综合判断 / Combined
+        </button>
+      </div>
       <div class="hint">
-        所有输入都只在本机处理，不会上传到外部服务器。
-        All values are processed locally on this machine.
+        <strong>仅RAG判断</strong>：只依据本地资料库片段，禁止模型自行补充医学常识。<br>
+        <strong>综合判断</strong>：先 RAG 检索，再结合模型医学知识综合归纳（仍非联网实时搜索）。<br>
+        所有输入在本机处理；LLM 调用需配置 DEEPSEEK_API_KEY。
       </div>
     </form>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js"></script>
     <script>
       const HIGH_RISK_FEATURE_VALUES = [
         177.508639, 0.037621, 0.037621, 0.037621, 0.037621, 0.037621,
@@ -602,7 +866,7 @@
 
         const loading = document.getElementById("analysis-loading");
         const status = document.getElementById("analysis-status");
-        const submitButton = form.querySelector('button[type="submit"]');
+        const submitButtons = form.querySelectorAll('button[type="submit"]');
 
         form.classList.add("is-submitting");
         if (loading) {
@@ -611,11 +875,31 @@
         if (status) {
           status.scrollIntoView({ behavior: "smooth", block: "start" });
         }
-        if (submitButton) {
+        submitButtons.forEach((submitButton) => {
           submitButton.disabled = true;
           submitButton.textContent = "预测与分析中... / Predicting and analyzing...";
+        });
+      }
+
+      function setJudgmentMode(mode) {
+        const field = document.getElementById("ai_judgment_mode");
+        if (field) {
+          field.value = mode;
         }
       }
+
+      function bindJudgmentButton(buttonId, mode) {
+        const button = document.getElementById(buttonId);
+        if (!button) {
+          return;
+        }
+        ["mousedown", "click"].forEach((eventName) => {
+          button.addEventListener(eventName, () => setJudgmentMode(mode));
+        });
+      }
+
+      bindJudgmentButton("submit-rag-only", "rag_only");
+      bindJudgmentButton("submit-combined", "combined");
 
       document
         .getElementById("manual-prediction-form")
@@ -632,6 +916,154 @@
       document
         .getElementById("reset-test-data-button")
         .addEventListener("click", resetTestData);
+
+      function loadAnalysisReport() {
+        const node = document.getElementById("analysis-report-data");
+        if (!node) {
+          return null;
+        }
+        try {
+          return JSON.parse(node.textContent);
+        } catch (error) {
+          console.error("Failed to parse analysis report payload", error);
+          return null;
+        }
+      }
+
+      function renderMarkdownReport(report) {
+        const reader = document.getElementById("markdown-reader");
+        const source = document.getElementById("markdown-source");
+        if (!reader || !report) {
+          return;
+        }
+
+        const markdown = report.full_markdown || report.body_markdown || "";
+        if (source) {
+          source.textContent = markdown;
+        }
+
+        if (typeof marked === "undefined") {
+          reader.textContent = markdown;
+          return;
+        }
+
+        marked.setOptions({
+          gfm: true,
+          breaks: true,
+          headerIds: true,
+          mangle: false,
+        });
+
+        const rawHtml = marked.parse(markdown);
+        reader.innerHTML =
+          typeof DOMPurify !== "undefined"
+            ? DOMPurify.sanitize(rawHtml)
+            : rawHtml;
+      }
+
+      function setMarkdownView(mode) {
+        const reader = document.getElementById("markdown-reader");
+        const source = document.getElementById("markdown-source");
+        const btnReader = document.getElementById("btn-markdown-reader");
+        const btnSource = document.getElementById("btn-markdown-source");
+        if (!reader || !source) {
+          return;
+        }
+
+        const showReader = mode === "reader";
+        reader.classList.toggle("is-visible", showReader);
+        source.classList.toggle("is-visible", !showReader);
+        btnReader?.classList.toggle("is-active", showReader);
+        btnSource?.classList.toggle("is-active", !showReader);
+
+        if (!showReader) {
+          reader.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
+
+      function downloadTextFile(filename, content, mimeType) {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      function buildExportFilename(report, extension) {
+        const stamp = (report.generated_at || "")
+          .replace(/[^0-9]/g, "")
+          .slice(0, 14);
+        const risk = (report.risk_zh || "report").replace(/\s+/g, "");
+        return `ai_risk_report_${risk}_${stamp || "export"}.${extension}`;
+      }
+
+      function buildExportHtml(report) {
+        const markdown = report.full_markdown || report.body_markdown || "";
+        const bodyHtml =
+          typeof marked !== "undefined"
+            ? marked.parse(markdown)
+            : `<pre>${markdown}</pre>`;
+        const safeBody =
+          typeof DOMPurify !== "undefined" ? DOMPurify.sanitize(bodyHtml) : bodyHtml;
+
+        return `<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>${report.title || "AI风险分析报告"}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1e293b; line-height: 1.75; max-width: 920px; margin: 32px auto; padding: 0 20px; }
+    h1,h2,h3,h4 { color: #0f172a; }
+    h2 { color: #9a3412; }
+    blockquote { border-left: 4px solid #fb923c; background: #fff7ed; padding: 10px 14px; }
+    code { background: #f1f5f9; padding: 0.15em 0.4em; border-radius: 6px; }
+    pre { background: #0f172a; color: #e2e8f0; padding: 14px; border-radius: 12px; overflow: auto; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #e2e8f0; padding: 8px 10px; }
+  </style>
+</head>
+<body>
+${safeBody}
+</body>
+</html>`;
+      }
+
+      function initMarkdownReader() {
+        const report = loadAnalysisReport();
+        if (!report) {
+          return;
+        }
+
+        renderMarkdownReport(report);
+
+        document.getElementById("btn-markdown-reader")?.addEventListener("click", () => {
+          setMarkdownView("reader");
+        });
+        document.getElementById("btn-markdown-source")?.addEventListener("click", () => {
+          setMarkdownView("source");
+        });
+        document.getElementById("btn-export-markdown")?.addEventListener("click", () => {
+          const markdown = report.full_markdown || report.body_markdown || "";
+          downloadTextFile(
+            buildExportFilename(report, "md"),
+            markdown,
+            "text/markdown;charset=utf-8"
+          );
+        });
+        document.getElementById("btn-export-html")?.addEventListener("click", () => {
+          downloadTextFile(
+            buildExportFilename(report, "html"),
+            buildExportHtml(report),
+            "text/html;charset=utf-8"
+          );
+        });
+      }
+
+      initMarkdownReader();
     </script>
 
     <form class="panel" method="post" enctype="multipart/form-data">

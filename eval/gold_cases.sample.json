@@ -1,0 +1,16 @@
+[
+  {
+    "id": "high_risk_01",
+    "prediction": 0.42,
+    "risk": {"label_zh": "高风险", "label_en": "High Risk"},
+    "expected_keywords": ["invasive", "troponin", "ACS"],
+    "expected_core_recommendation": "High-risk NSTE-ACS pathway with prompt clinical evaluation and guideline-directed management including consideration of early invasive strategy when appropriate."
+  },
+  {
+    "id": "low_risk_01",
+    "prediction": 0.85,
+    "risk": {"label_zh": "低风险", "label_en": "Low Risk"},
+    "expected_keywords": ["observation", "follow-up", "discharge"],
+    "expected_core_recommendation": "Low-risk pathway with appropriate observation, serial biomarkers or testing as guideline-supported, and outpatient follow-up when clinically appropriate."
+  }
+]

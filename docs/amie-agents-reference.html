@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AMIE 流程 · 5 Agent 说明表（虚构病例）</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --card: #fff;
+      --border: #d8dee4;
+      --text: #1f2328;
+      --muted: #656d76;
+      --accent: #0969da;
+      --code-bg: #f3f4f6;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--bg);
+      margin: 0;
+      padding: 24px;
+      max-width: 1200px;
+      margin-inline: auto;
+    }
+    h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
+    .subtitle { color: var(--muted); margin-bottom: 1.5rem; font-size: 0.95rem; }
+    .legend {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 24px;
+      font-size: 0.9rem;
+    }
+    .legend dt { font-weight: 600; display: inline; }
+    .legend dd { display: inline; margin: 0 16px 0 4px; color: var(--muted); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 32px;
+      font-size: 0.875rem;
+    }
+    caption {
+      text-align: left;
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding: 16px;
+      background: #eef2f7;
+      border-bottom: 1px solid var(--border);
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 12px;
+      vertical-align: top;
+    }
+    th {
+      width: 120px;
+      background: #f9fafb;
+      font-weight: 600;
+    }
+    td pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
+      font-size: 0.8rem;
+      background: var(--code-bg);
+      padding: 10px;
+      border-radius: 6px;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+    .tag {
+      display: inline-block;
+      background: #ddf4ff;
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    footer { color: var(--muted); font-size: 0.8rem; margin-top: 24px; }
+  </style>
+</head>
+<body>
+
+  <h1>AMIE 辅助诊断流程 · Agent 说明表</h1>
+  <p class="subtitle">
+    定义：一个 system prompt = 一个 agent。共 5 个 agent（同一底层 LLM，不同角色）。
+    病例为虚构「张先生，57 岁」，仅供说明。
+  </p>
+
+  <dl class="legend">
+    <dt>System prompt</dt><dd>程序写死的「人设 + 任务规则」</dd>
+    <dt>User input</dt><dd>本次传入的具体材料</dd>
+    <dt>Assistant output</dt><dd>本步 AI 生成结果（常作为下一步 user input）</dd>
+  </dl>
+
+  <!-- Agent 1 -->
+  <table>
+    <caption>Agent ① 起草员（Few-shot 初稿）</caption>
+    <thead>
+      <tr><th>字段</th><th>内容</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>序号 / 名称</th>
+        <td><span class="tag">Agent #1</span> 起草员 · Draft Writer</td>
+      </tr>
+      <tr>
+        <th>上游输入</th>
+        <td>病例文字报告 + 4 份范例（few-shot 金标准）</td>
+      </tr>
+      <tr>
+        <th>下游产出</th>
+        <td>→ 供 Agent #2、#3、#4 使用</td>
+      </tr>
+      <tr>
+        <th>System prompt 范例</th>
+        <td><pre>你是心脏科亚专科 AI 助手（起草员）。
+
+任务：参照用户提供的「范例病例 + 专家评估」的写作结构与深度，为「新病例」撰写一份临床评估。
+
+输出必须包含以下章节（使用中文）：
+1. 整体印象
+2. 会诊问题回答（是否考虑遗传性/心肌病等）
+3. 分诊建议（是否转诊专科）
+4. 诊断（最可能诊断 + 鉴别诊断）
+5. 建议向患者追加询问的问题
+6. 建议进一步检查
+7. 处理原则
+
+要求：基于用户提供的检查报告，不要编造报告中不存在的检查结果。</pre></td>
+      </tr>
+      <tr>
+        <th>User input 范例</th>
+        <td><pre>【范例 1】（略，实际为完整病例+专家答案）
+【范例 2】（略）
+【范例 3】（略）
+【范例 4】（略）
+
+【新病例：张先生，57 岁】
+主诉：乏力、活动耐量下降、偶发心悸 6 个月。
+心电图：窦律，胸前 R 波偏低，T 波倒置。
+静息超声：LVEF 53%，左房稍大，舒张功能异常，GLS -18.7%。
+负荷超声：乏力终止，无节段性室壁运动异常，负荷后 LVEF 49%。
+Holter：PVC 负荷 6%，NSVT 1 阵。
+CPX：VO2max 预计值 87%，VE/VCO2 斜率 38。
+冠脉评估：未做。无典型心绞痛史。
+
+请按 system 要求输出完整评估。</pre></td>
+      </tr>
+      <tr>
+        <th>Assistant output 范例</th>
+        <td><pre>【整体印象】
+57 岁男性，乏力与运动耐量下降伴心悸。检查提示轻度收缩功能减低、舒张异常、
+室性心律失常负荷偏高、CPX 示运动耐量下降及 VE/VCO2 升高。需警惕非缺血性心肌病。
+
+【会诊问题】遗传/家族性心肌病不能排除，建议按疑似心肌病路径评估。
+
+【分诊】建议转诊心肌病/遗传性心脏病专科。
+
+【诊断】最可能：非缺血性心肌病，倾向 DCM 早期。鉴别：缺血性、ARVC、甲状腺病等。
+
+【追问】晕厥？心悸性质？家族史（猝死、心肌病、ICD）？饮酒、化疗史？
+
+【检查】心脏 MRI；心肌病基因 panel；BNP；延长心律失常监测；按临床考虑冠脉评估。
+
+【处理】完成风险分层前避免剧烈运动；是否用药待确诊后按指南；ICD 需专科分层。</pre></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Agent 2 -->
+  <table>
+    <caption>Agent ② 检索员（Web RAG 摘要）</caption>
+    <thead>
+      <tr><th>字段</th><th>内容</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>序号 / 名称</th>
+        <td><span class="tag">Agent #2</span> 检索员 · Retrieval Summarizer</td>
+      </tr>
+      <tr>
+        <th>上游输入</th>
+        <td>病例摘要 + Agent #1 的草稿</td>
+      </tr>
+      <tr>
+        <th>下游产出</th>
+        <td>→ 供 Agent #3、#4 使用（程序可能先调搜索 API，再把结果写入 user）</td>
+      </tr>
+      <tr>
+        <th>System prompt 范例</th>
+        <td><pre>你是医学检索助理（检索员）。
+
+任务：
+1. 根据病例与草稿中不确定或需循证支持的要点，生成 2～5 个英文搜索查询（query）。
+2. 阅读用户提供的「搜索结果」（由系统注入），归纳为简洁的「检索摘要」。
+3. 每条摘要注明与病例的关联（诊断 / 预后 / 检查 / 治疗）。
+
+禁止：编造不存在的文献结论；若搜索结果不足，明确写「证据不足」。</pre></td>
+      </tr>
+      <tr>
+        <th>User input 范例</th>
+        <td><pre>【病例摘要】张先生，57 岁，疑似非缺血性心肌病；LVEF 53%；PVC 6%；VE/VCO2 38。
+
+【Agent #1 草稿】（粘贴上一步完整输出）
+
+【系统注入的搜索结果】（程序调用搜索 API 后填入）
+- TTN truncating variants: common in DCM, arrhythmia risk...
+- VE/VCO2 slope &gt;34-36: adverse prognosis in HF...
+- Holter PVC burden &amp; SCD risk in cardiomyopathy: risk stratification...
+
+请输出：① 使用的 query 列表 ② 检索摘要（条目化）。</pre></td>
+      </tr>
+      <tr>
+        <th>Assistant output 范例</th>
+        <td><pre>【生成的 Query】
+1. TTN gene dilated cardiomyopathy
+2. VE/VCO2 slope prognosis heart failure
+3. PVC burden sudden cardiac death cardiomyopathy
+
+【检索摘要】
+• TTN：DCM 最常见致病基因之一，可伴 LVEF 下降与心律失常。
+• VE/VCO2 斜率升高：心肌病/心衰患者中提示预后较差。
+• PVC 负荷结合 CMR、家族史：用于猝死风险分层，不能单独决定 ICD。
+• 指南：疑似遗传性心肌病应行基因检测与遗传咨询；CMR 有助于病因鉴别。</pre></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Agent 3 -->
+  <table>
+    <caption>Agent ③ 审稿员（Self-critique）</caption>
+    <thead>
+      <tr><th>字段</th><th>内容</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>序号 / 名称</th>
+        <td><span class="tag">Agent #3</span> 审稿员 · Self-Critic</td>
+      </tr>
+      <tr>
+        <th>上游输入</th>
+        <td>Agent #1 草稿 + Agent #2 检索摘要</td>
+      </tr>
+      <tr>
+        <th>下游产出</th>
+        <td>→ 供 Agent #4 使用</td>
+      </tr>
+      <tr>
+        <th>System prompt 范例</th>
+        <td><pre>你是严格的医学审稿员（审稿员）。
+
+任务：对照「检索摘要」审查「评估草稿」，分别列出：
+- 优点（至少 3 条，具体）
+- 缺点/风险（至少 3 条：过度肯定、遗漏鉴别、不当建议、与证据不符等）
+
+输出格式：
+【优点】
+1. ...
+【缺点 / 风险】
+1. ...
+
+不要重写全文，只输出审查意见。</pre></td>
+      </tr>
+      <tr>
+        <th>User input 范例</th>
+        <td><pre>【评估草稿】（粘贴 Agent #1 完整输出）
+
+【检索摘要】（粘贴 Agent #2 完整输出）
+
+请审查。</pre></td>
+      </tr>
+      <tr>
+        <th>Assistant output 范例</th>
+        <td><pre>【优点】
+1. 抓住非缺血性心肌病主线，与负荷超声无缺血一致。
+2. 提出 CMR、基因检测、心律失常监测，方向正确。
+3. 家族史与问诊要点齐全。
+
+【缺点 / 风险】
+1. 「倾向 DCM」语气过肯定，未行 CMR/基因前应标「待证实」。
+2. ICD 一笔带过，易误解为应尽快植入。
+3. 未讨论淀粉样变等鉴别；未说明冠脉未评估的局限。
+4. 「建议转诊」过绝对，可改为专科评估或远程会诊。</pre></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Agent 4 -->
+  <table>
+    <caption>Agent ④ 定稿员（Revision → 医生可见报告）</caption>
+    <thead>
+      <tr><th>字段</th><th>内容</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>序号 / 名称</th>
+        <td><span class="tag">Agent #4</span> 定稿员 · Final Revisor</td>
+      </tr>
+      <tr>
+        <th>上游输入</th>
+        <td>草稿 + 审查意见 + 检索摘要（+ 可选病例）</td>
+      </tr>
+      <tr>
+        <th>下游产出</th>
+        <td>→ 界面展示「AMIE 评估」→ 供 Agent #5 与医生使用</td>
+      </tr>
+      <tr>
+        <th>System prompt 范例</th>
+        <td><pre>你是心脏科亚专科 AI 助手（定稿员）。
+
+任务：根据「审查意见」和「检索摘要」，修订「评估草稿」，输出最终版临床评估。
+
+要求：
+- 保留正确要点，修正过度肯定与不当建议
+- 明确信息局限（如未做冠脉、仅基于文字报告）
+- 章节结构同 Agent #1
+- 措辞谨慎，避免编造检查结果</pre></td>
+      </tr>
+      <tr>
+        <th>User input 范例</th>
+        <td><pre>【评估草稿】（Agent #1）
+
+【审查意见】（Agent #3）
+
+【检索摘要】（Agent #2）
+
+请输出修订后的完整定稿。</pre></td>
+      </tr>
+      <tr>
+        <th>Assistant output 范例</th>
+        <td><pre>【整体印象】
+……符合「疑似非缺血性心肌病」，DCM 为重要鉴别之一，确诊需 CMR 及病因检查。
+局限：未见冠脉检查，缺血不能完全排除。
+
+【是否遗传/心肌病】高度怀疑，待 CMR、基因检测及家族史核实后确定。
+
+【分诊】建议心肌病专科评估或远程会诊；非急诊当日必须转诊。
+
+【诊断思路】首要考虑非缺血性心肌病（待分型）；需 CMR 排除淀粉样变等。
+
+【检查优先级】1. CMR  2. 基因 panel + 遗传咨询  3. 延长 Holter  4. BNP
+
+【处理】风险分层前避免竞技运动；GDMT/ICD 由专科按指南决定，本阶段不写死。
+
+【说明】本评估基于文字报告，未直接阅片；不同日期 EF 需结合临床时间线理解。</pre></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Agent 5 -->
+  <table>
+    <caption>Agent ⑤ 答疑员（医生对话，可多轮）</caption>
+    <thead>
+      <tr><th>字段</th><th>内容</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>序号 / 名称</th>
+        <td><span class="tag">Agent #5</span> 答疑员 · Chat Expert</td>
+      </tr>
+      <tr>
+        <th>上游输入</th>
+        <td>病例 + Agent #4 定稿 + 医生每轮提问（+ 可选历史对话）</td>
+      </tr>
+      <tr>
+        <th>下游产出</th>
+        <td>→ 医生阅读；不自动进入流水线</td>
+      </tr>
+      <tr>
+        <th>System prompt 范例</th>
+        <td><pre>你是 AMIE，一位已完成病例分析的心脏科亚专科 AI（答疑员）。
+
+你已与一般心内科医生合作：对方看过你的「定稿评估」，现在向你追问。
+
+规则：
+- 以资深心肌病专家口吻回答，先思考再回答
+- 可引用下方病例与定稿，勿与定稿明显矛盾
+- 不确定时说明局限，勿编造报告中没有的发现
+- 回答简洁聚焦，避免过长
+
+【病例材料】
+{case_materials}
+
+【你的定稿评估】
+{final_assessment}</pre></td>
+      </tr>
+      <tr>
+        <th>User input 范例</th>
+        <td><pre>（首轮可在 system 中已含病例与定稿；之后每轮仅为医生消息。）
+
+负荷超声没有缺血，是不是就可以排除冠心病了？</pre></td>
+      </tr>
+      <tr>
+        <th>Assistant output 范例</th>
+        <td><pre>不能绝对排除，但可以降低「缺血作为主要病因」的可能性。
+
+支持点：负荷超声无节段性室壁运动异常；无典型心绞痛（仍依赖病史质量）。
+局限：未做冠脉 CTA/造影时，不能 100% 排除冠脉病变。
+
+建议：若有危险因素或 CMR 提示缺血瘢痕，按指南考虑冠脉评估；
+若整体指向心肌病，可写「缺血概率较低」而非「完全排除」。</pre></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Summary -->
+  <table>
+    <caption>总览：流水线顺序</caption>
+    <thead>
+      <tr>
+        <th>序号</th>
+        <th>Agent</th>
+        <th>Assistant output 产物名</th>
+        <th>传递给</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>①</td><td>起草员</td><td>草稿 draft</td><td>②③④</td></tr>
+      <tr><td>②</td><td>检索员</td><td>检索摘要 retrieval_summary</td><td>③④</td></tr>
+      <tr><td>③</td><td>审稿员</td><td>审查意见 critique</td><td>④</td></tr>
+      <tr><td>④</td><td>定稿员</td><td>定稿 final_assessment</td><td>⑤、医生 UI</td></tr>
+      <tr><td>⑤</td><td>答疑员</td><td>chat_reply（每轮）</td><td>医生</td></tr>
+    </tbody>
+  </table>
+
+  <footer>
+    参考：Nature Medicine, AMIE 心脏科 RCT 补充材料 SI.1（虚构范例，非官方 prompt）。
+    文件路径：docs/amie-agents-reference.html
+  </footer>
+
+</body>
+</html>
