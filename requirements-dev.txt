@@ -1,0 +1,4 @@
+-r requirements.txt
+
+PyMuPDF
+sentence-transformers>=2.2.0

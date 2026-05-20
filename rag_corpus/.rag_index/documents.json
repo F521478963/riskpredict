@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "built_at": "2026-05-20T08:55:19.406609+00:00",
+  "chunk_size": 1800,
+  "chunk_overlap": 200,
+  "chunk_count": 446,
+  "document_count": 3,
+  "embedding_model": "all-MiniLM-L6-v2",
+  "embedding_enabled": false,
+  "documents": [
+    {
+      "doc_id": "guidelines/2025 ACC AHA ACEP NAEMSP SCAI Guideline for the Management of Patients With Acute Coronary Syndromes A Report of the American College of Cardiology American Heart Association Joint Committee on Clinical Practice Guidelines.pdf",
+      "title": "Guideline: 2025 ACC AHA ACEP NAEMSP SCAI Guideline for the Management of Patients With Acute Coronary Syndromes A Report of the American College of Cardiology American Heart Association Joint Committee on Clinical Practice Guidelines",
+      "category": "guidelines",
+      "rel_path": "guidelines/2025 ACC AHA ACEP NAEMSP SCAI Guideline for the Management of Patients With Acute Coronary Syndromes A Report of the American College of Cardiology American Heart Association Joint Committee on Clinical Practice Guidelines.pdf"
+    },
+    {
+      "doc_id": "guidelines/冠状动脉功能学临床应用专家共识(1).pdf",
+      "title": "Guideline: 冠状动脉功能学临床应用专家共识(1)",
+      "category": "guidelines",
+      "rel_path": "guidelines/冠状动脉功能学临床应用专家共识(1).pdf"
+    },
+    {
+      "doc_id": "screening/Exploration of oral microbiota alteration and AI-driven non-invasive hyperspectral imaging for CAD prediction.pdf",
+      "title": "Screening: Exploration of oral microbiota alteration and AI-driven non-invasive hyperspectral imaging for CAD prediction",
+      "category": "screening",
+      "rel_path": "screening/Exploration of oral microbiota alteration and AI-driven non-invasive hyperspectral imaging for CAD prediction.pdf"
+    }
+  ]
+}

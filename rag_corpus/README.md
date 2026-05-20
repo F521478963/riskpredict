@@ -45,7 +45,14 @@ python app.py
 | 变量 | 默认 | 说明 |
 |------|------|------|
 | `RAG_CORPUS_DIR` | `./rag_corpus` | 资料库根目录 |
-| `RAG_RETRIEVAL_MODE` | `hybrid` | `hybrid` / `embedding` / `lexical` |
+| `RAG_RETRIEVAL_MODE` | `hybrid` | `hybrid` / `embedding` / `lexical`（Vercel 建议 `lexical`） |
 | `RAG_TOP_K` | `5` | 检索返回片段数（对齐 JACC 论文） |
+| `RAG_SKIP_EMBEDDINGS` | - | `1` 时跳过向量；Vercel 部署默认开启 |
 | `LLM_RAG_MODE` | `rag` | `rag` 正式环境；`no_rag` 仅离线评测 |
 | `DEEPSEEK_TIMEOUT` | `300` | API 读取超时（秒）；综合判断 + V4-Pro 建议 300–600 |
+
+## 依赖与部署
+
+- 本地开发：`pip install -r requirements-dev.txt`（包含 PyMuPDF、sentence-transformers）。
+- Vercel 生产：使用根目录的 `requirements.txt`（已剔除 PyMuPDF / sentence-transformers，强制 lexical 模式）。
+- 详细 Vercel 部署步骤见 `docs/vercel-deploy.md`。

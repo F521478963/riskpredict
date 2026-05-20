@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "built_at": "2026-05-20T08:55:19.406609+00:00",
+  "chunk_size": 1800,
+  "chunk_overlap": 200,
+  "chunk_count": 446,
+  "document_count": 3,
+  "embedding_model": "all-MiniLM-L6-v2",
+  "embedding_enabled": false
+}

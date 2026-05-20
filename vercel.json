@@ -11,5 +11,11 @@
       "src": "/(.*)",
       "dest": "api/index.py"
     }
-  ]
+  ],
+  "env": {
+    "RAG_RETRIEVAL_MODE": "lexical",
+    "RAG_SKIP_EMBEDDINGS": "1",
+    "LLM_RAG_MODE": "rag",
+    "DEEPSEEK_TIMEOUT": "180"
+  }
 }

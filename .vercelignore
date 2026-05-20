@@ -1,0 +1,42 @@
+.git/
+.gitignore
+.gitattributes
+.venv/
+venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.swp
+.DS_Store
+**/.DS_Store
+
+# tests / docs / scripts not needed at runtime
+tests/
+eval/
+docs/
+scripts/
+
+# data not needed in production
+y_test.xlsx
+Inversion.py
+uploads/
+outputs/
+
+# legacy duplicate PDFs at repo root (real copies already live in rag_corpus/)
+2024 ESC(1).pdf
+2025 ACC AHA ACEP NAEMSP SCAI Guideline for the Management of Patients With Acute Coronary Syndromes A Report of the American College of Cardiology American Heart Association Joint Committee on Clinical Practice Guidelines.pdf
+冠状动脉功能学临床应用专家共识(1).pdf
+
+# old single-file RAG caches; not used by rag_corpus
+*.rag_cache.json
+rag_corpus/**/*.rag_cache.json
+
+# Heavy embedding matrix; production runs lexical-only mode
+rag_corpus/.rag_index/embeddings.npy
+
+# dev-only deps file
+requirements-dev.txt
+
+.pytest_cache/
+.coverage
+htmlcov/

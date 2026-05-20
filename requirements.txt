@@ -4,6 +4,4 @@ pandas
 openpyxl
 scikit-learn
 openai
-PyMuPDF
 PyYAML>=6.0
-sentence-transformers>=2.2.0

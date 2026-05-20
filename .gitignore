@@ -8,7 +8,7 @@ __pycache__/
 uploads/
 outputs/
 
-rag_corpus/.rag_index/
+rag_corpus/.rag_index/embeddings.npy
 *.rag_cache.json
 eval/gold_cases.json
 
