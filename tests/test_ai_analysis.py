@@ -115,8 +115,9 @@ class DeepSeekAnalyzerTest(unittest.TestCase):
         self.assertIn("无创筛查", prompt)
         self.assertIn("【本地指南检索片段】", prompt)
         self.assertIn("[片段1]", prompt)
-        self.assertIn("### 建议评估与管理措施", prompt)
-        self.assertIn("### 模型与筛查局限性", prompt)
+        self.assertIn("### RAG 要点", prompt)
+        self.assertIn("### 综合判断", prompt)
+        self.assertIn("### 依据来源", prompt)
 
     def test_analyzer_includes_local_guideline_context_for_risk(self):
         captured = {}

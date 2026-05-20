@@ -222,9 +222,15 @@
 
     .judgment-actions {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
       margin-top: 18px;
+    }
+
+    @media (min-width: 1100px) {
+      .judgment-actions {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
     }
 
     .judgment-actions button {
@@ -245,6 +251,22 @@
 
     .judgment-button-combined:hover {
       background: #0d5f58;
+    }
+
+    .judgment-button-zero {
+      background: #64748b;
+    }
+
+    .judgment-button-zero:hover {
+      background: #475569;
+    }
+
+    .judgment-button-simple {
+      background: #7c3aed;
+    }
+
+    .judgment-button-simple:hover {
+      background: #6d28d9;
     }
 
     .judgment-mode-badge {
@@ -312,6 +334,46 @@
     .ai-analysis h2 {
       margin: 0 0 12px;
       color: #9a3412;
+    }
+
+    .research-disclaimer {
+      margin: 0 0 16px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      color: #92400e;
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .research-disclaimer strong {
+      color: #b45309;
+    }
+
+    .analysis-module {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px dashed #fdba74;
+    }
+
+    .analysis-module:first-of-type {
+      margin-top: 12px;
+      padding-top: 0;
+      border-top: none;
+    }
+
+    .analysis-module h3 {
+      margin: 0 0 10px;
+      font-size: 1.05rem;
+      color: #c2410c;
+    }
+
+    .analysis-module .module-desc {
+      margin: 0 0 12px;
+      font-size: 13px;
+      color: #78716c;
+      line-height: 1.6;
     }
 
     .ai-analysis-warning {
@@ -701,45 +763,91 @@
 
     <section class="ai-analysis" id="analysis-status">
       <div class="ai-analysis-header">
-        <h2>AI 风险分析 / AI Risk Analysis</h2>
+        <h2>AI 辅助分析 / AI-Assisted Analysis</h2>
         {% if result is not none %}
           {% set active_judgment_mode = ai_analysis.judgment_mode if ai_analysis and ai_analysis.judgment_mode else judgment_mode %}
           {% set active_judgment_label = ai_analysis.judgment_label if ai_analysis and ai_analysis.judgment_label else judgment_labels.get(active_judgment_mode, active_judgment_mode) %}
           <p class="judgment-mode-badge">分析模式 / Mode：{{ active_judgment_label }}</p>
         {% endif %}
       </div>
+      <div class="research-disclaimer" role="note">
+        <strong>研究用途声明：</strong>
+        体表高光谱无创筛查模型（SVR）的输出旨在为<strong>医学研究</strong>提供<strong>更详细的检查建议</strong>参考，
+        不用于实际临床治疗决策，亦不能替代临床诊断。本系统不会在临床场景中直接指导用药或处置。
+      </div>
       <div class="analysis-loading" id="analysis-loading" aria-live="polite">
         <span class="loading-spinner" aria-hidden="true"></span>
-        <span>正在生成 AI 风险分析，请稍候... / Generating AI risk analysis, please wait...</span>
+        <span>正在生成 AI 辅助分析，请稍候... / Generating AI-assisted analysis, please wait...</span>
       </div>
       {% if analysis_report %}
-        <div class="ai-analysis-toolbar">
-          <button type="button" class="toolbar-primary is-active" id="btn-markdown-reader">
-            Markdown 阅读器 / Reader
-          </button>
-          <button type="button" class="toolbar-secondary" id="btn-markdown-source">
-            查看源码 / Source
-          </button>
-          <button type="button" class="toolbar-export" id="btn-export-markdown">
-            导出 Markdown / .md
-          </button>
-          <button type="button" class="toolbar-export" id="btn-export-html">
-            导出 HTML / .html
-          </button>
-        </div>
-        <div
-          id="markdown-reader"
-          class="markdown-body markdown-reader-panel is-visible"
-          aria-label="AI analysis markdown reader"
-        ></div>
-        <pre id="markdown-source" class="markdown-source-panel" aria-label="AI analysis markdown source"></pre>
+        <article class="analysis-module" data-module="evidence">
+          <h3>判断依据 / Judgment Evidence</h3>
+          <p class="module-desc">
+            含风险分级、RAG 要点（及模型补充，若适用）与文献/片段依据；供研究中对齐指南与溯源。
+          </p>
+          <div class="ai-analysis-toolbar" data-module-toolbar="evidence">
+            <button type="button" class="toolbar-primary is-active" data-action="reader" data-module="evidence">
+              Markdown 阅读器 / Reader
+            </button>
+            <button type="button" class="toolbar-secondary" data-action="source" data-module="evidence">
+              查看源码 / Source
+            </button>
+            <button type="button" class="toolbar-export" data-action="export-md" data-module="evidence">
+              导出 Markdown / .md
+            </button>
+            <button type="button" class="toolbar-export" data-action="export-html" data-module="evidence">
+              导出 HTML / .html
+            </button>
+          </div>
+          <div
+            id="evidence-markdown-reader"
+            class="markdown-body markdown-reader-panel is-visible"
+            aria-label="Judgment evidence markdown reader"
+          ></div>
+          <pre
+            id="evidence-markdown-source"
+            class="markdown-source-panel"
+            aria-label="Judgment evidence markdown source"
+          ></pre>
+        </article>
+
+        <article class="analysis-module" data-module="assessment">
+          <h3>诊断评估与检查建议 / Diagnostic Assessment &amp; Recommendations</h3>
+          <p class="module-desc">
+            综合判断与检查建议（非治疗处方）；侧重研究场景下「还应完善哪些评估」。
+          </p>
+          <div class="ai-analysis-toolbar" data-module-toolbar="assessment">
+            <button type="button" class="toolbar-primary is-active" data-action="reader" data-module="assessment">
+              Markdown 阅读器 / Reader
+            </button>
+            <button type="button" class="toolbar-secondary" data-action="source" data-module="assessment">
+              查看源码 / Source
+            </button>
+            <button type="button" class="toolbar-export" data-action="export-md" data-module="assessment">
+              导出 Markdown / .md
+            </button>
+            <button type="button" class="toolbar-export" data-action="export-html" data-module="assessment">
+              导出 HTML / .html
+            </button>
+          </div>
+          <div
+            id="assessment-markdown-reader"
+            class="markdown-body markdown-reader-panel is-visible"
+            aria-label="Assessment markdown reader"
+          ></div>
+          <pre
+            id="assessment-markdown-source"
+            class="markdown-source-panel"
+            aria-label="Assessment markdown source"
+          ></pre>
+        </article>
         <script id="analysis-report-data" type="application/json">{{ analysis_report | tojson }}</script>
       {% elif ai_analysis and ai_analysis.error %}
         <p class="ai-analysis-warning">{{ ai_analysis.error }}</p>
       {% else %}
         <p class="ai-analysis-warning">
-          点击开始预测后，这里会显示 AI 风险分析结果（Markdown 阅读器）。
-          After prediction starts, the AI risk analysis will appear in the Markdown reader.
+          点击开始预测后，这里将分「判断依据」与「诊断评估与检查建议」两个模块展示结果，并支持分别导出。
+          After prediction, results appear in two modules with separate export options.
         </p>
       {% endif %}
     </section>
@@ -781,6 +889,20 @@
       <div class="judgment-actions">
         <button
           type="submit"
+          id="submit-zero-prompt"
+          class="judgment-button-zero"
+        >
+          0提示词 / Zero Prompt
+        </button>
+        <button
+          type="submit"
+          id="submit-simple-prompt"
+          class="judgment-button-simple"
+        >
+          简易提示词 / Simple
+        </button>
+        <button
+          type="submit"
           id="submit-rag-only"
           class="judgment-button-rag-only"
         >
@@ -795,8 +917,10 @@
         </button>
       </div>
       <div class="hint">
-        <strong>仅RAG判断</strong>：只依据本地资料库片段，禁止模型自行补充医学常识。<br>
-        <strong>综合判断</strong>：先 RAG 检索，再结合模型医学知识综合归纳（仍非联网实时搜索）。<br>
+        <strong>0提示词</strong>：几乎不约束，仅传入预测值、风险档与 RAG 原文（无 system 角色），用于对照基线。<br>
+        <strong>简易提示词</strong>：简短任务说明，无完整章节/合规约束，便于观察轻量提示效果。<br>
+        <strong>仅RAG判断</strong>：完整 prompt，只依据本地资料库片段。<br>
+        <strong>综合判断</strong>：完整 prompt，RAG + 模型医学知识补充。<br>
         所有输入在本机处理；LLM 调用需配置 DEEPSEEK_API_KEY。
       </div>
     </form>
@@ -898,6 +1022,8 @@
         });
       }
 
+      bindJudgmentButton("submit-zero-prompt", "zero_prompt");
+      bindJudgmentButton("submit-simple-prompt", "simple_prompt");
       bindJudgmentButton("submit-rag-only", "rag_only");
       bindJudgmentButton("submit-combined", "combined");
 
@@ -930,30 +1056,27 @@
         }
       }
 
-      function renderMarkdownReport(report) {
-        const reader = document.getElementById("markdown-reader");
-        const source = document.getElementById("markdown-source");
-        if (!reader || !report) {
-          return;
-        }
-
-        const markdown = report.full_markdown || report.body_markdown || "";
-        if (source) {
-          source.textContent = markdown;
-        }
-
+      function configureMarked() {
         if (typeof marked === "undefined") {
-          reader.textContent = markdown;
           return;
         }
-
         marked.setOptions({
           gfm: true,
           breaks: true,
           headerIds: true,
           mangle: false,
         });
+      }
 
+      function renderMarkdownInto(reader, markdown) {
+        if (!reader) {
+          return;
+        }
+        if (typeof marked === "undefined") {
+          reader.textContent = markdown;
+          return;
+        }
+        configureMarked();
         const rawHtml = marked.parse(markdown);
         reader.innerHTML =
           typeof DOMPurify !== "undefined"
@@ -961,11 +1084,26 @@
             : rawHtml;
       }
 
-      function setMarkdownView(mode) {
-        const reader = document.getElementById("markdown-reader");
-        const source = document.getElementById("markdown-source");
-        const btnReader = document.getElementById("btn-markdown-reader");
-        const btnSource = document.getElementById("btn-markdown-source");
+      function renderModuleReport(moduleKey, moduleReport) {
+        const reader = document.getElementById(`${moduleKey}-markdown-reader`);
+        const source = document.getElementById(`${moduleKey}-markdown-source`);
+        if (!moduleReport) {
+          return;
+        }
+        const markdown =
+          moduleReport.full_markdown || moduleReport.body_markdown || "";
+        if (source) {
+          source.textContent = markdown;
+        }
+        renderMarkdownInto(reader, markdown);
+      }
+
+      function setModuleMarkdownView(moduleKey, mode) {
+        const reader = document.getElementById(`${moduleKey}-markdown-reader`);
+        const source = document.getElementById(`${moduleKey}-markdown-source`);
+        const toolbar = document.querySelector(
+          `[data-module-toolbar="${moduleKey}"]`
+        );
         if (!reader || !source) {
           return;
         }
@@ -973,11 +1111,15 @@
         const showReader = mode === "reader";
         reader.classList.toggle("is-visible", showReader);
         source.classList.toggle("is-visible", !showReader);
-        btnReader?.classList.toggle("is-active", showReader);
-        btnSource?.classList.toggle("is-active", !showReader);
+        toolbar
+          ?.querySelector('[data-action="reader"]')
+          ?.classList.toggle("is-active", showReader);
+        toolbar
+          ?.querySelector('[data-action="source"]')
+          ?.classList.toggle("is-active", !showReader);
 
         if (!showReader) {
-          reader.scrollIntoView({ behavior: "smooth", block: "start" });
+          source.scrollIntoView({ behavior: "smooth", block: "nearest" });
         }
       }
 
@@ -993,12 +1135,13 @@
         URL.revokeObjectURL(url);
       }
 
-      function buildExportFilename(report, extension) {
-        const stamp = (report.generated_at || "")
+      function buildExportFilename(moduleReport, extension) {
+        const stamp = (moduleReport.generated_at || "")
           .replace(/[^0-9]/g, "")
           .slice(0, 14);
-        const risk = (report.risk_zh || "report").replace(/\s+/g, "");
-        return `ai_risk_report_${risk}_${stamp || "export"}.${extension}`;
+        const risk = (moduleReport.risk_zh || "report").replace(/\s+/g, "");
+        const slug = moduleReport.export_slug || "report";
+        return `ai_${slug}_${risk}_${stamp || "export"}.${extension}`;
       }
 
       function buildExportHtml(report) {
@@ -1032,38 +1175,52 @@ ${safeBody}
 </html>`;
       }
 
-      function initMarkdownReader() {
+      function initAnalysisModules() {
         const report = loadAnalysisReport();
         if (!report) {
           return;
         }
 
-        renderMarkdownReport(report);
+        const modules = [
+          ["evidence", report.evidence_report],
+          ["assessment", report.assessment_report],
+        ];
 
-        document.getElementById("btn-markdown-reader")?.addEventListener("click", () => {
-          setMarkdownView("reader");
-        });
-        document.getElementById("btn-markdown-source")?.addEventListener("click", () => {
-          setMarkdownView("source");
-        });
-        document.getElementById("btn-export-markdown")?.addEventListener("click", () => {
-          const markdown = report.full_markdown || report.body_markdown || "";
-          downloadTextFile(
-            buildExportFilename(report, "md"),
-            markdown,
-            "text/markdown;charset=utf-8"
+        modules.forEach(([moduleKey, moduleReport]) => {
+          if (!moduleReport) {
+            return;
+          }
+          renderModuleReport(moduleKey, moduleReport);
+
+          const toolbar = document.querySelector(
+            `[data-module-toolbar="${moduleKey}"]`
           );
-        });
-        document.getElementById("btn-export-html")?.addEventListener("click", () => {
-          downloadTextFile(
-            buildExportFilename(report, "html"),
-            buildExportHtml(report),
-            "text/html;charset=utf-8"
-          );
+          toolbar?.querySelector('[data-action="reader"]')?.addEventListener("click", () => {
+            setModuleMarkdownView(moduleKey, "reader");
+          });
+          toolbar?.querySelector('[data-action="source"]')?.addEventListener("click", () => {
+            setModuleMarkdownView(moduleKey, "source");
+          });
+          toolbar?.querySelector('[data-action="export-md"]')?.addEventListener("click", () => {
+            const markdown =
+              moduleReport.full_markdown || moduleReport.body_markdown || "";
+            downloadTextFile(
+              buildExportFilename(moduleReport, "md"),
+              markdown,
+              "text/markdown;charset=utf-8"
+            );
+          });
+          toolbar?.querySelector('[data-action="export-html"]')?.addEventListener("click", () => {
+            downloadTextFile(
+              buildExportFilename(moduleReport, "html"),
+              buildExportHtml(moduleReport),
+              "text/html;charset=utf-8"
+            );
+          });
         });
       }
 
-      initMarkdownReader();
+      initAnalysisModules();
     </script>
 
     <form class="panel" method="post" enctype="multipart/form-data">

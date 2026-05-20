@@ -17,13 +17,18 @@ from rag_store import RagCorpusStore, get_default_corpus_store
 PROMPTS_DIR = Path(__file__).resolve().parent / "prompts"
 DEFAULT_JUDGMENT_MODE = "rag_only"
 PROMPT_FILES = {
+    "zero_prompt": PROMPTS_DIR / "clinical_assistant_zero.yaml",
+    "simple_prompt": PROMPTS_DIR / "clinical_assistant_simple.yaml",
     "rag_only": PROMPTS_DIR / "clinical_assistant_v1.yaml",
     "combined": PROMPTS_DIR / "clinical_assistant_v2_combined.yaml",
 }
 JUDGMENT_LABELS = {
+    "zero_prompt": "0提示词模式",
+    "simple_prompt": "简易提示词",
     "rag_only": "仅RAG判断",
     "combined": "综合判断",
 }
+RAG_ONLY_FALLBACK_MODES = frozenset({"rag_only"})
 
 
 def load_prompt_config(judgment_mode=DEFAULT_JUDGMENT_MODE, path=None):
@@ -113,7 +118,7 @@ class ClinicalAssistantPipeline:
                     "judgment_label": label,
                 }
 
-        if self.rag_mode != "no_rag" and not snippets and mode == "rag_only":
+        if self.rag_mode != "no_rag" and not snippets and mode in RAG_ONLY_FALLBACK_MODES:
             return {
                 "content": _format_fallback(prompt_config, prediction, risk),
                 "error": None,
@@ -145,15 +150,18 @@ class ClinicalAssistantPipeline:
 
     def _generate(self, prompt_config, prediction, risk, snippets, judgment_mode):
         client = self._create_client()
-        messages = [
-            {"role": "system", "content": prompt_config["system"].strip()},
+        messages = []
+        system_text = (prompt_config.get("system") or "").strip()
+        if prompt_config.get("use_system_prompt", True) and system_text:
+            messages.append({"role": "system", "content": system_text})
+        messages.append(
             {
                 "role": "user",
                 "content": self._build_user_prompt(
                     prompt_config, prediction, risk, snippets, judgment_mode
                 ),
-            },
-        ]
+            }
+        )
         generation = prompt_config.get("generation", {})
         response = client.chat.completions.create(
             model=self.model,
@@ -179,17 +187,22 @@ class ClinicalAssistantPipeline:
         if not snippets:
             if judgment_mode == "combined":
                 return "【本地 RAG 检索片段】\n未检索到可用的本地指南片段（可主要依据 [模型] 补充）。"
+            if judgment_mode in ("zero_prompt", "simple_prompt"):
+                return "参考资料：无"
             return "【本地指南检索片段】\n未检索到可用的本地指南片段。"
 
-        if judgment_mode == "combined":
+        if judgment_mode in ("zero_prompt", "simple_prompt"):
+            lines = ["参考资料："]
+        elif judgment_mode == "combined":
             header = "【本地 RAG 检索片段】\n请先阅读下列片段，再结合 [模型] 知识综合判断；引用标注 [片段#]。"
+            lines = [header]
         else:
             header = (
                 "【本地指南检索片段】\n"
                 "只允许依据下列片段提出建议；引用时用 [片段#] 标注序号。"
             )
+            lines = [header]
 
-        lines = [header]
         for index, snippet in enumerate(snippets, start=1):
             source = snippet.get("source", "本地资料")
             page = snippet.get("page", "未知")
@@ -200,7 +213,10 @@ class ClinicalAssistantPipeline:
             prefix = f"{source}"
             if category:
                 prefix = f"{prefix} ({category})"
-            lines.append(f"[片段{index}] {prefix} Page {page}: {text}")
+            if judgment_mode in ("zero_prompt", "simple_prompt"):
+                lines.append(f"{index}. {prefix} p.{page}: {text}")
+            else:
+                lines.append(f"[片段{index}] {prefix} Page {page}: {text}")
         return "\n".join(lines)
 
     def _create_client(self):

@@ -52,19 +52,36 @@ class AppTest(unittest.TestCase):
             analyze.call_args.kwargs.get("judgment_mode"),
             "rag_only",
         )
-        self.assertIn("AI 风险分析 / AI Risk Analysis".encode("utf-8"), response.data)
+        self.assertIn("AI 辅助分析".encode("utf-8"), response.data)
         self.assertIn(b"analysis-report-data", response.data)
-        self.assertIn(b"btn-export-markdown", response.data)
+        self.assertIn(b'data-action="export-md"', response.data)
+        self.assertIn("研究用途声明".encode("utf-8"), response.data)
 
-    def test_homepage_contains_dual_judgment_submit_buttons(self):
+    def test_homepage_contains_all_judgment_submit_buttons(self):
         response = app.test_client().get("/")
 
         self.assertEqual(response.status_code, 200)
+        self.assertIn("0提示词".encode("utf-8"), response.data)
+        self.assertIn("简易提示词".encode("utf-8"), response.data)
         self.assertIn("仅RAG判断".encode("utf-8"), response.data)
         self.assertIn("综合判断".encode("utf-8"), response.data)
         self.assertIn(b'id="ai_judgment_mode"', response.data)
         self.assertIn(b"setJudgmentMode", response.data)
+        self.assertIn(b"submit-zero-prompt", response.data)
+        self.assertIn(b"submit-simple-prompt", response.data)
         self.assertIn(b"submit-combined", response.data)
+
+    def test_manual_form_passes_zero_prompt_judgment_mode(self):
+        client = app.test_client()
+        data = {"mode": "manual", "ai_judgment_mode": "zero_prompt"}
+        for field in FEATURE_FIELDS:
+            data[field["name"]] = "1.0"
+
+        with patch("app.ai_analyzer.analyze") as analyze:
+            analyze.return_value = {"content": "baseline", "error": None}
+            client.post("/", data=data)
+
+        self.assertEqual(analyze.call_args.kwargs.get("judgment_mode"), "zero_prompt")
 
     def test_manual_form_passes_combined_judgment_mode(self):
         client = app.test_client()
@@ -98,10 +115,11 @@ class AppTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'id="analysis-status"', response.data)
         self.assertIn(b'class="loading-spinner"', response.data)
-        self.assertIn("正在生成 AI 风险分析".encode("utf-8"), response.data)
+        self.assertIn("正在生成 AI 辅助分析".encode("utf-8"), response.data)
         self.assertIn(b"showAnalysisLoading", response.data)
-        self.assertIn(b"initMarkdownReader", response.data)
-        self.assertIn("Markdown 阅读器".encode("utf-8"), response.data)
+        self.assertIn(b"initAnalysisModules", response.data)
+        self.assertIn("判断依据".encode("utf-8"), response.data)
+        self.assertIn("诊断评估与检查建议".encode("utf-8"), response.data)
 
     def test_manual_form_renders_markdown_reader_when_analysis_exists(self):
         client = app.test_client()
@@ -119,7 +137,8 @@ class AppTest(unittest.TestCase):
             response = client.post("/", data=data)
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'id="markdown-reader"', response.data)
+        self.assertIn(b'id="evidence-markdown-reader"', response.data)
+        self.assertIn(b'id="assessment-markdown-reader"', response.data)
         self.assertIn(b"analysis-report-data", response.data)
         self.assertIn("\\u98ce\\u9669\\u7b49\\u7ea7".encode("utf-8"), response.data)
 
