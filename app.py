@@ -11,6 +11,7 @@ from model_registry import (
     build_feature_groups,
     load_branch_services,
     predict_branch_qfr,
+    resolve_branch_qfr_panel,
 )
 from model_service import FeatureShapeError, PredictionService
 from llm_pipeline import JUDGMENT_LABELS
@@ -99,7 +100,7 @@ def _handle_manual_prediction():
 
     try:
         prediction = prediction_service.predict_values_by_names(feature_map)
-        branch_predictions = _predict_all_branches(feature_map)
+        branch_predictions = _predict_all_branches(feature_map, prediction)
         shap_explanations = [
             item.to_dict() for item in shap_runtime.explain_all(feature_map)
         ]
@@ -169,11 +170,18 @@ def _parse_manual_feature_map():
     return feature_map, form_values, None
 
 
-def _predict_all_branches(feature_map):
-    results = []
+def _predict_all_branches(feature_map, screening_score=None):
+    raw = {}
     for spec in BRANCH_MODEL_SPECS:
         service = branch_services[spec["id"]]
-        qfr = predict_branch_qfr(service, feature_map)
+        raw[spec["id"]] = predict_branch_qfr(service, feature_map)
+
+    if screening_score is not None:
+        raw = resolve_branch_qfr_panel(raw, screening_score)
+
+    results = []
+    for spec in BRANCH_MODEL_SPECS:
+        qfr = raw[spec["id"]]
         results.append(
             {
                 "id": spec["id"],

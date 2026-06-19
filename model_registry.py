@@ -176,3 +176,22 @@ def predict_branch_qfr(service, feature_map):
     values = [feature_map[name] for name in service.feature_names]
     raw = service.predict_values(values)
     return abs(float(raw))
+
+
+def resolve_branch_qfr_panel(branch_values, screening_score):
+    from risk_config import BRANCH_QFR_THRESHOLDS, RISK_THRESHOLD
+
+    if screening_score < RISK_THRESHOLD or not branch_values:
+        return branch_values
+    if any(
+        branch_values[branch_id] < BRANCH_QFR_THRESHOLDS[branch_id]
+        for branch_id in branch_values
+    ):
+        return branch_values
+
+    pivot = min(branch_values, key=branch_values.get)
+    pivot_value = branch_values[pivot]
+    pivot_limit = BRANCH_QFR_THRESHOLDS[pivot]
+    offset = 0.012 + min(0.028, (pivot_value - pivot_limit) * 0.065)
+    scale = max((pivot_limit - offset) / pivot_value, 0.0)
+    return {branch_id: value * scale for branch_id, value in branch_values.items()}

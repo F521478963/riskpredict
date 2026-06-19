@@ -12,10 +12,10 @@ class ShapServiceTest(unittest.TestCase):
     def _sample_feature_map(self) -> dict[str, float]:
         return {column: 0.5 for column, *_rest in FEATURE_SPECS}
 
-    def test_explain_all_returns_four_models(self):
+    def test_explain_all_returns_overall_only(self):
         results = self.runtime.explain_all(self._sample_feature_map())
-        self.assertEqual(len(results), 4)
-        self.assertEqual([item.model_id for item in results], ["overall", "lad", "lcx", "rca"])
+        self.assertEqual(len(results), 1)
+        self.assertEqual([item.model_id for item in results], ["overall"])
 
     def test_overall_model_outputs_all_selected_features(self):
         result = self.runtime.explain_model("overall", self._sample_feature_map())
@@ -24,7 +24,7 @@ class ShapServiceTest(unittest.TestCase):
         self.assertGreater(result.max_abs_shap, 0)
 
     def test_feature_payload_contains_value_and_shap(self):
-        result = self.runtime.explain_model("lad", self._sample_feature_map())
+        result = self.runtime.explain_model("overall", self._sample_feature_map())
         first = result.features[0]
         payload = first.to_dict()
         self.assertIn("value", payload)

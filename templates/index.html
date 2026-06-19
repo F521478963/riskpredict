@@ -1142,7 +1142,7 @@
             Contributions are stacked on one axis with top features labeled; the table lists all feature details.
           </p>
 
-          <div class="shap-model-tabs" role="tablist" aria-label="SHAP model tabs">
+          <div class="shap-model-tabs" role="tablist" aria-label="SHAP model tabs"{% if shap_explanations | length <= 1 %} hidden{% endif %}>
             {% for explanation in shap_explanations %}
               <button
                 type="button"

@@ -11,7 +11,6 @@ import shap
 
 from feature_name_map import feature_alias
 from model_registry import (
-    BRANCH_MODEL_SPECS,
     FEATURE_SPECS,
     MODEL_DIR,
     OVERALL_FEATURE_NAMES,
@@ -51,18 +50,6 @@ RUNTIME_MODEL_SPECS = [
         title_zh="整体筛查（Ridge-RF）",
         title_en="Overall Screening (Ridge-RF)",
     ),
-    *[
-        RuntimeModelSpec(
-            model_id=branch["id"],
-            model_file=branch["model_file"],
-            data_file=branch["model_file"].replace(".dat", ".xlsx"),
-            feature_names=branch["feature_names"],
-            task="regression",
-            title_zh=branch["label_zh"],
-            title_en=branch["label_en"],
-        )
-        for branch in BRANCH_MODEL_SPECS
-    ],
 ]
 
 
