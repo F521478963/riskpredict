@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate SHAP interpretability figures for Ridge prediction models."""
+"""Generate SHAP interpretability figures for Ridge-RF prediction models."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from shap_analysis import DEFAULT_OUTPUT_DIR, run_all
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run SHAP analysis for Ridge models.")
+    parser = argparse.ArgumentParser(description="Run SHAP analysis for Ridge-RF models.")
     parser.add_argument(
         "--output-dir",
         type=Path,

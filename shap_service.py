@@ -44,8 +44,8 @@ RUNTIME_MODEL_SPECS = [
         data_file="y_Ridge.xlsx",
         feature_names=OVERALL_FEATURE_NAMES,
         task="classification",
-        title_zh="整体筛查",
-        title_en="Overall Screening",
+        title_zh="整体筛查（Ridge-RF）",
+        title_en="Overall Screening (Ridge-RF)",
     ),
     *[
         RuntimeModelSpec(

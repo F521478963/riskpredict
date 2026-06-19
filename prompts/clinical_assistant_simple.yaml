@@ -13,7 +13,7 @@ system: |
   回答须简洁，仅供研究讨论，不构成临床诊断或治疗建议。
 
 user_template: |
-  体表高光谱无创筛查模型（SVR）输出如下：
+  体表高光谱无创筛查模型（Ridge-RF）输出如下：
   - 预测值：{prediction:.6f}
   - 风险分级：{risk_label_zh} / {risk_label_en}
   - 阈值规则：预测值 >= {threshold} 为高风险（可能有问题），预测值 < {threshold} 为低风险（可能没问题）

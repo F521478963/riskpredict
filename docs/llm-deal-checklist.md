@@ -3,7 +3,7 @@
 | Section | Item | 本项目填写 |
 |---------|------|------------|
 | Model | LLM | DeepSeek API（默认 `deepseek-v4-pro`） |
-| Model | 用途 | SVR 筛查输出 + 本地指南 RAG → 辅助报告 |
+| Model | 用途 | Ridge-RF 筛查输出 + 本地指南 RAG → 辅助报告 |
 | Model | 参数 | 仅RAG: max_tokens=4096；综合判断: max_tokens=8192, top_k=5 |
 | Model | RAG | `rag_corpus/` + hybrid 检索（embedding + lexical） |
 | Prompt | 策略 | Zero-shot + 固定章节 schema（`prompts/clinical_assistant_v1.yaml`） |

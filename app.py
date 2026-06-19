@@ -1,9 +1,6 @@
 import os
-from datetime import datetime
-from io import BytesIO
 
-from flask import Flask, render_template, request, send_file
-from werkzeug.utils import secure_filename
+from flask import Flask, render_template, request
 
 from ai_analysis import DeepSeekAnalyzer
 from model_registry import (
@@ -16,7 +13,7 @@ from model_registry import (
     predict_branch_qfr,
 )
 from model_service import FeatureShapeError, PredictionService
-from llm_pipeline import JUDGMENT_LABELS, normalize_judgment_mode
+from llm_pipeline import JUDGMENT_LABELS
 from rag_store import get_default_corpus_store
 from report_export import build_analysis_report
 from risk_config import BRANCH_QFR_THRESHOLD, RISK_THRESHOLD
@@ -59,40 +56,10 @@ def index():
     if request.method == "GET":
         return _render_index()
 
-    mode = request.form.get("mode")
-    if mode == "manual":
-        return _handle_manual_prediction()
+    if request.form.get("mode") != "manual":
+        return _render_error("无效的提交方式。")
 
-    file = request.files.get("file")
-    if not file or not file.filename:
-        return _render_error("请先选择一个 Excel 文件。")
-
-    if not file.filename.lower().endswith((".xlsx", ".xls")):
-        return _render_error("只支持上传 .xlsx 或 .xls 文件。")
-
-    filename = secure_filename(file.filename) or "input.xlsx"
-    uploaded_file = BytesIO(file.read())
-    uploaded_file.seek(0)
-
-    try:
-        output = prediction_service.predict_excel(
-            uploaded_file,
-            branch_specs=BRANCH_MODEL_SPECS,
-            branch_services=branch_services,
-        )
-    except FeatureShapeError as exc:
-        return _render_error(str(exc))
-    except Exception as exc:
-        return _render_error(f"预测失败：{exc}")
-
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    download_name = f"prediction_result_{timestamp}.xlsx"
-    return send_file(
-        output,
-        as_attachment=True,
-        download_name=download_name,
-        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    )
+    return _handle_manual_prediction()
 
 
 def _handle_manual_prediction():
@@ -115,7 +82,7 @@ def _handle_manual_prediction():
 
     risk = classify_risk(prediction)
     values = [feature_map[field["column"]] for field in FEATURE_FIELDS]
-    judgment_mode = normalize_judgment_mode(request.form.get("ai_judgment_mode"))
+    judgment_mode = "combined"
     ai_analysis = ai_analyzer.analyze(
         fields=FEATURE_FIELDS,
         values=values,
@@ -189,11 +156,9 @@ def _predict_all_branches(feature_map):
     return results
 
 
-def _attach_judgment_metadata(ai_analysis, judgment_mode):
+def _attach_judgment_metadata(ai_analysis, judgment_mode="combined"):
     payload = dict(ai_analysis or {})
-    mode = normalize_judgment_mode(
-        payload.get("judgment_mode") or judgment_mode
-    )
+    mode = payload.get("judgment_mode") or judgment_mode
     payload["judgment_mode"] = mode
     payload["judgment_label"] = JUDGMENT_LABELS.get(mode, mode)
     return payload
@@ -238,7 +203,7 @@ def _render_index(
     ai_analysis=None,
     analysis_report=None,
     values=None,
-    judgment_mode="rag_only",
+    judgment_mode="combined",
     status=200,
 ):
     return (

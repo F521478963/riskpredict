@@ -1,4 +1,4 @@
-"""Shared risk stratification threshold for the Ridge screening model."""
+"""Shared risk stratification threshold for the Ridge-RF screening model."""
 
 # 预测值 >= RISK_THRESHOLD 视为有问题（高风险）；< RISK_THRESHOLD 视为没问题（低风险）。
 RISK_THRESHOLD = 0.5

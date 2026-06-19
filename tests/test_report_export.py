@@ -45,7 +45,7 @@ class ReportExportTest(unittest.TestCase):
         self.assertNotIn("不确定性", cleaned)
         self.assertIn("评估结语", cleaned)
 
-    def test_build_analysis_report_includes_dual_modules(self):
+    def test_build_analysis_report_includes_assessment_module(self):
         report = build_analysis_report(
             result=0.42,
             risk={"label_zh": "高风险", "label_en": "High Risk"},
@@ -63,12 +63,11 @@ class ReportExportTest(unittest.TestCase):
             judgment_labels={"combined": "综合判断", "rag_only": "仅RAG判断"},
         )
 
-        self.assertIn("0.420000", report["full_markdown"])
         self.assertIn("### 综合判断", report["assessment_markdown"])
-        self.assertIn("### 风险等级", report["evidence_markdown"])
-        self.assertIn("仅供医学研究参考", report["evidence_report"]["full_markdown"])
-        self.assertEqual(report["evidence_report"]["export_slug"], "evidence")
+        self.assertNotIn("### 风险等级", report["assessment_markdown"])
+        self.assertIn("仅供医学研究参考", report["assessment_report"]["full_markdown"])
         self.assertEqual(report["assessment_report"]["export_slug"], "assessment")
+        self.assertNotIn("evidence_report", report)
 
 
 if __name__ == "__main__":

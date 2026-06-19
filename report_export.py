@@ -51,7 +51,7 @@ def split_analysis_body(body):
 
 def build_analysis_report(result, risk, ai_analysis, judgment_mode, judgment_labels):
     ai_analysis = ai_analysis or {}
-    mode = ai_analysis.get("judgment_mode") or judgment_mode or "rag_only"
+    mode = ai_analysis.get("judgment_mode") or judgment_mode or "combined"
     label = ai_analysis.get("judgment_label") or judgment_labels.get(mode, mode)
     risk = risk or {}
     body = ai_analysis.get("content") or ""
@@ -60,8 +60,8 @@ def build_analysis_report(result, risk, ai_analysis, judgment_mode, judgment_lab
     if error and not body:
         body = f"> ⚠️ {error}"
 
-    evidence_body, assessment_body = split_analysis_body(body)
-    if body.strip() and not evidence_body and not assessment_body:
+    _, assessment_body = split_analysis_body(body)
+    if body.strip() and not assessment_body:
         assessment_body = sanitize_assessment_markdown(body.strip())
 
     meta = {
@@ -74,18 +74,6 @@ def build_analysis_report(result, risk, ai_analysis, judgment_mode, judgment_lab
         "error": error,
     }
 
-    full_markdown = _build_full_markdown(
-        title="AI 风险分析报告",
-        meta=meta,
-        body=body.strip(),
-    )
-    evidence_report = _build_module_report(
-        module_key="evidence",
-        title="判断依据",
-        title_en="Judgment Evidence",
-        meta=meta,
-        body=evidence_body,
-    )
     assessment_report = _build_module_report(
         module_key="assessment",
         title="诊断评估与检查建议",
@@ -98,10 +86,7 @@ def build_analysis_report(result, risk, ai_analysis, judgment_mode, judgment_lab
         "title": "AI风险分析报告",
         **meta,
         "body_markdown": body.strip(),
-        "full_markdown": full_markdown,
-        "evidence_markdown": evidence_body,
         "assessment_markdown": assessment_body,
-        "evidence_report": evidence_report,
         "assessment_report": assessment_report,
     }
 
@@ -114,7 +99,7 @@ def _build_module_report(module_key, title, title_en, meta, body):
         body=body,
         empty_message="（本节暂无内容）",
     )
-    export_slug = "evidence" if module_key == "evidence" else "assessment"
+    export_slug = "assessment"
     return {
         "module": module_key,
         "title": title,

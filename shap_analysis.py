@@ -1,4 +1,4 @@
-"""SHAP interpretability analysis for Ridge prediction models."""
+"""SHAP interpretability analysis for Ridge-RF prediction models."""
 
 from __future__ import annotations
 
@@ -37,7 +37,7 @@ CLASSIFICATION_SPEC = ModelSpec(
     data_file="y_Ridge.xlsx",
     feature_names=OVERALL_FEATURE_NAMES,
     task="classification",
-    title_en="Overall Screening (Ridge)",
+    title_en="Overall Screening (Ridge-RF)",
     figure_prefix="figure5",
 )
 

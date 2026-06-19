@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ridge 本地预测工具</title>
+  <title>Ridge-RF 本地预测工具</title>
   <style>
     body {
       margin: 0;
@@ -220,64 +220,12 @@
       background: #1c46ad;
     }
 
-    .judgment-actions {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 18px;
-    }
-
-    @media (min-width: 1100px) {
-      .judgment-actions {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-      }
-    }
-
-    .judgment-actions button {
-      margin-top: 0;
-    }
-
-    .judgment-button-rag-only {
-      background: #2457d6;
-    }
-
-    .judgment-button-rag-only:hover {
-      background: #1c46ad;
-    }
-
-    .judgment-button-combined {
+    .submit-combined {
       background: #0f766e;
     }
 
-    .judgment-button-combined:hover {
+    .submit-combined:hover {
       background: #0d5f58;
-    }
-
-    .judgment-button-zero {
-      background: #64748b;
-    }
-
-    .judgment-button-zero:hover {
-      background: #475569;
-    }
-
-    .judgment-button-simple {
-      background: #7c3aed;
-    }
-
-    .judgment-button-simple:hover {
-      background: #6d28d9;
-    }
-
-    .judgment-mode-badge {
-      display: inline-flex;
-      margin: 0 0 12px;
-      padding: 6px 12px;
-      border-radius: 999px;
-      background: #ffedd5;
-      color: #9a3412;
-      font-size: 13px;
-      font-weight: 800;
     }
 
     .hint {
@@ -499,14 +447,6 @@
 
     .ai-analysis-toolbar .toolbar-secondary:hover {
       background: #334155;
-    }
-
-    .ai-analysis-toolbar .toolbar-export {
-      background: #0f766e;
-    }
-
-    .ai-analysis-toolbar .toolbar-export:hover {
-      background: #0d5f58;
     }
 
     .ai-analysis-toolbar .is-active {
@@ -986,12 +926,12 @@
   </div>
 
   <main class="card">
-    <h1>Ridge 本地预测工具 / Local Ridge Prediction Tool</h1>
+    <h1>Ridge-RF 本地预测工具 / Local Ridge-RF Prediction Tool</h1>
     <p class="desc">
-      输入 33 个模型指标值后，系统会在本机加载 Ridge 模型并显示整体风险与三分支 QFR 预测；AI 报告通过
+      输入 33 个模型指标值后，系统会在本机加载 Ridge-RF 模型并显示整体风险与三分支 QFR 预测；AI 报告通过
       <code>rag_corpus/</code> 资料库检索指南后生成（新材料放入目录后请运行
       <code>python scripts/rebuild_rag_index.py</code>）。
-      Enter 33 feature values for local Ridge prediction with LAD/LCX/RCA QFR panel; AI reports use the local RAG corpus.
+      Enter 33 feature values for local Ridge-RF prediction with LAD/LCX/RCA QFR panel; AI reports use the local RAG corpus.
     </p>
     {% if rag_status %}
       <p class="hint">
@@ -1141,15 +1081,10 @@
     <section class="ai-analysis" id="analysis-status">
       <div class="ai-analysis-header">
         <h2>AI 辅助分析 / AI-Assisted Analysis</h2>
-        {% if result is not none %}
-          {% set active_judgment_mode = ai_analysis.judgment_mode if ai_analysis and ai_analysis.judgment_mode else judgment_mode %}
-          {% set active_judgment_label = ai_analysis.judgment_label if ai_analysis and ai_analysis.judgment_label else judgment_labels.get(active_judgment_mode, active_judgment_mode) %}
-          <p class="judgment-mode-badge">分析模式 / Mode：{{ active_judgment_label }}</p>
-        {% endif %}
       </div>
       <div class="research-disclaimer" role="note">
         <strong>研究用途声明：</strong>
-        体表高光谱无创筛查模型（Ridge）的输出旨在为<strong>医学研究</strong>提供<strong>更详细的检查建议</strong>参考，
+        体表高光谱无创筛查模型（Ridge-RF）的输出旨在为<strong>医学研究</strong>提供<strong>更详细的检查建议</strong>参考，
         不用于实际临床治疗决策，亦不能替代临床诊断。本系统不会在临床场景中直接指导用药或处置。
       </div>
       <div class="analysis-loading" id="analysis-loading" aria-live="polite">
@@ -1157,37 +1092,6 @@
         <span>正在生成 AI 辅助分析，请稍候... / Generating AI-assisted analysis, please wait...</span>
       </div>
       {% if analysis_report %}
-        <article class="analysis-module" data-module="evidence">
-          <h3>判断依据 / Judgment Evidence</h3>
-          <p class="module-desc">
-            含风险分级、RAG 要点（及模型补充，若适用）与文献/片段依据；供研究中对齐指南与溯源。
-          </p>
-          <div class="ai-analysis-toolbar" data-module-toolbar="evidence">
-            <button type="button" class="toolbar-primary is-active" data-action="reader" data-module="evidence">
-              Markdown 阅读器 / Reader
-            </button>
-            <button type="button" class="toolbar-secondary" data-action="source" data-module="evidence">
-              查看源码 / Source
-            </button>
-            <button type="button" class="toolbar-export" data-action="export-md" data-module="evidence">
-              导出 Markdown / .md
-            </button>
-            <button type="button" class="toolbar-export" data-action="export-html" data-module="evidence">
-              导出 HTML / .html
-            </button>
-          </div>
-          <div
-            id="evidence-markdown-reader"
-            class="markdown-body markdown-reader-panel is-visible"
-            aria-label="Judgment evidence markdown reader"
-          ></div>
-          <pre
-            id="evidence-markdown-source"
-            class="markdown-source-panel"
-            aria-label="Judgment evidence markdown source"
-          ></pre>
-        </article>
-
         <article class="analysis-module" data-module="assessment">
           <h3>诊断评估与检查建议 / Diagnostic Assessment &amp; Recommendations</h3>
           <p class="module-desc">
@@ -1199,12 +1103,6 @@
             </button>
             <button type="button" class="toolbar-secondary" data-action="source" data-module="assessment">
               查看源码 / Source
-            </button>
-            <button type="button" class="toolbar-export" data-action="export-md" data-module="assessment">
-              导出 Markdown / .md
-            </button>
-            <button type="button" class="toolbar-export" data-action="export-html" data-module="assessment">
-              导出 HTML / .html
             </button>
           </div>
           <div
@@ -1223,8 +1121,8 @@
         <p class="ai-analysis-warning">{{ ai_analysis.error }}</p>
       {% else %}
         <p class="ai-analysis-warning">
-          点击开始预测后，这里将分「判断依据」与「诊断评估与检查建议」两个模块展示结果，并支持分别导出。
-          After prediction, results appear in two modules with separate export options.
+          点击「综合判断」开始预测后，这里将展示诊断评估与检查建议。
+          After prediction, diagnostic assessment and recommendations will appear here.
         </p>
       {% endif %}
     </section>
@@ -1262,43 +1160,11 @@
           </section>
         {% endfor %}
       </div>
-      <input type="hidden" name="ai_judgment_mode" id="ai_judgment_mode" value="rag_only">
-      <div class="judgment-actions">
-        <button
-          type="submit"
-          id="submit-zero-prompt"
-          class="judgment-button-zero"
-        >
-          0提示词 / Zero Prompt
-        </button>
-        <button
-          type="submit"
-          id="submit-simple-prompt"
-          class="judgment-button-simple"
-        >
-          简易提示词 / Simple
-        </button>
-        <button
-          type="submit"
-          id="submit-rag-only"
-          class="judgment-button-rag-only"
-        >
-          仅RAG判断 / RAG Only
-        </button>
-        <button
-          type="submit"
-          id="submit-combined"
-          class="judgment-button-combined"
-        >
-          综合判断 / Combined
-        </button>
-      </div>
+      <button type="submit" id="submit-combined" class="submit-combined">
+        综合判断 / Combined Analysis
+      </button>
       <div class="hint">
-        <strong>0提示词</strong>：几乎不约束，仅传入预测值、风险档与 RAG 原文（无 system 角色），用于对照基线。<br>
-        <strong>简易提示词</strong>：简短任务说明，无完整章节/合规约束，便于观察轻量提示效果。<br>
-        <strong>仅RAG判断</strong>：完整 prompt，只依据本地资料库片段。<br>
-        <strong>综合判断</strong>：完整 prompt，RAG + 模型医学知识补充。<br>
-        所有输入在本机处理；LLM 调用需配置 DEEPSEEK_API_KEY。
+        使用 RAG 资料库检索 + 模型医学知识进行综合判断；输入在本机处理，LLM 调用需配置 DEEPSEEK_API_KEY。
       </div>
     </form>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -1383,28 +1249,6 @@
           submitButton.textContent = "预测与分析中... / Predicting and analyzing...";
         });
       }
-
-      function setJudgmentMode(mode) {
-        const field = document.getElementById("ai_judgment_mode");
-        if (field) {
-          field.value = mode;
-        }
-      }
-
-      function bindJudgmentButton(buttonId, mode) {
-        const button = document.getElementById(buttonId);
-        if (!button) {
-          return;
-        }
-        ["mousedown", "click"].forEach((eventName) => {
-          button.addEventListener(eventName, () => setJudgmentMode(mode));
-        });
-      }
-
-      bindJudgmentButton("submit-zero-prompt", "zero_prompt");
-      bindJudgmentButton("submit-simple-prompt", "simple_prompt");
-      bindJudgmentButton("submit-rag-only", "rag_only");
-      bindJudgmentButton("submit-combined", "combined");
 
       document
         .getElementById("manual-prediction-form")
@@ -1502,100 +1346,24 @@
         }
       }
 
-      function downloadTextFile(filename, content, mimeType) {
-        const blob = new Blob([content], { type: mimeType });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        URL.revokeObjectURL(url);
-      }
-
-      function buildExportFilename(moduleReport, extension) {
-        const stamp = (moduleReport.generated_at || "")
-          .replace(/[^0-9]/g, "")
-          .slice(0, 14);
-        const risk = (moduleReport.risk_zh || "report").replace(/\s+/g, "");
-        const slug = moduleReport.export_slug || "report";
-        return `ai_${slug}_${risk}_${stamp || "export"}.${extension}`;
-      }
-
-      function buildExportHtml(report) {
-        const markdown = report.full_markdown || report.body_markdown || "";
-        const bodyHtml =
-          typeof marked !== "undefined"
-            ? marked.parse(markdown)
-            : `<pre>${markdown}</pre>`;
-        const safeBody =
-          typeof DOMPurify !== "undefined" ? DOMPurify.sanitize(bodyHtml) : bodyHtml;
-
-        return `<!doctype html>
-<html lang="zh-CN">
-<head>
-  <meta charset="utf-8">
-  <title>${report.title || "AI风险分析报告"}</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1e293b; line-height: 1.75; max-width: 920px; margin: 32px auto; padding: 0 20px; }
-    h1,h2,h3,h4 { color: #0f172a; }
-    h2 { color: #9a3412; }
-    blockquote { border-left: 4px solid #fb923c; background: #fff7ed; padding: 10px 14px; }
-    code { background: #f1f5f9; padding: 0.15em 0.4em; border-radius: 6px; }
-    pre { background: #0f172a; color: #e2e8f0; padding: 14px; border-radius: 12px; overflow: auto; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #e2e8f0; padding: 8px 10px; }
-  </style>
-</head>
-<body>
-${safeBody}
-</body>
-</html>`;
-      }
-
       function initAnalysisModules() {
         const report = loadAnalysisReport();
-        if (!report) {
+        if (!report || !report.assessment_report) {
           return;
         }
 
-        const modules = [
-          ["evidence", report.evidence_report],
-          ["assessment", report.assessment_report],
-        ];
+        const moduleKey = "assessment";
+        const moduleReport = report.assessment_report;
+        renderModuleReport(moduleKey, moduleReport);
 
-        modules.forEach(([moduleKey, moduleReport]) => {
-          if (!moduleReport) {
-            return;
-          }
-          renderModuleReport(moduleKey, moduleReport);
-
-          const toolbar = document.querySelector(
-            `[data-module-toolbar="${moduleKey}"]`
-          );
-          toolbar?.querySelector('[data-action="reader"]')?.addEventListener("click", () => {
-            setModuleMarkdownView(moduleKey, "reader");
-          });
-          toolbar?.querySelector('[data-action="source"]')?.addEventListener("click", () => {
-            setModuleMarkdownView(moduleKey, "source");
-          });
-          toolbar?.querySelector('[data-action="export-md"]')?.addEventListener("click", () => {
-            const markdown =
-              moduleReport.full_markdown || moduleReport.body_markdown || "";
-            downloadTextFile(
-              buildExportFilename(moduleReport, "md"),
-              markdown,
-              "text/markdown;charset=utf-8"
-            );
-          });
-          toolbar?.querySelector('[data-action="export-html"]')?.addEventListener("click", () => {
-            downloadTextFile(
-              buildExportFilename(moduleReport, "html"),
-              buildExportHtml(moduleReport),
-              "text/html;charset=utf-8"
-            );
-          });
+        const toolbar = document.querySelector(
+          `[data-module-toolbar="${moduleKey}"]`
+        );
+        toolbar?.querySelector('[data-action="reader"]')?.addEventListener("click", () => {
+          setModuleMarkdownView(moduleKey, "reader");
+        });
+        toolbar?.querySelector('[data-action="source"]')?.addEventListener("click", () => {
+          setModuleMarkdownView(moduleKey, "source");
         });
       }
 
@@ -1628,19 +1396,6 @@ ${safeBody}
 
       initShapTabs();
     </script>
-
-    <form class="panel" method="post" enctype="multipart/form-data">
-      <h2>Excel 批量预测 / Excel Batch Prediction</h2>
-      <input type="file" name="file" accept=".xlsx,.xls" required>
-      <button type="submit">开始预测并下载结果 / Predict and Download</button>
-      <div class="hint">
-        支持两种输入：包含全部 {{ full_feature_count }} 列特征（按顺序排列）；
-        或 Excel 表头包含模型特征列名（英文列名，如 face guangpu mean1）。
-        输出含整体 Predicted 及 LAD_QFR、LCX_QFR、RCA_QFR（取绝对值）。
-        Supports either {{ full_feature_count }} feature columns in model order, or matching English column headers.
-        Output includes overall Predicted plus absolute LAD/LCX/RCA QFR values.
-      </div>
-    </form>
   </main>
 </body>
 </html>
