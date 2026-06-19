@@ -1563,48 +1563,71 @@
         return value.toFixed(6);
       }
 
-      function shouldLabelForceFeature(feature, index, totalAbs, thresholdRatio) {
-        return feature.abs_shap >= totalAbs * thresholdRatio || index < 6;
+      const FORCE_LABEL_MAX_COUNT = 8;
+      const FORCE_LABEL_MIN_CONTRIBUTION = 0.08;
+      const FORCE_LABEL_MIN_GAP_PERCENT = 10;
+
+      function selectForceLabelSegments(segments) {
+        const totalAbs = segments.reduce(
+          (sum, segment) => sum + Number(segment.abs_shap || 0),
+          0
+        );
+        if (totalAbs <= 0) {
+          return [];
+        }
+
+        return segments
+          .filter(
+            (segment) =>
+              Number(segment.abs_shap || 0) >= totalAbs * FORCE_LABEL_MIN_CONTRIBUTION
+          )
+          .slice(0, FORCE_LABEL_MAX_COUNT)
+          .map((segment) => ({ segment }));
+      }
+
+      function filterNonOverlappingForceLabels(labeledSegments, toPercent) {
+        const sorted = [...labeledSegments].sort((left, right) => {
+          const centerLeft = (left.segment.start + left.segment.end) / 2;
+          const centerRight = (right.segment.start + right.segment.end) / 2;
+          return centerLeft - centerRight;
+        });
+
+        const placedCenters = [];
+        const visible = [];
+        sorted.forEach((item) => {
+          const center = toPercent((item.segment.start + item.segment.end) / 2);
+          const overlaps = placedCenters.some(
+            (position) => Math.abs(position - center) < FORCE_LABEL_MIN_GAP_PERCENT
+          );
+          if (!overlaps) {
+            placedCenters.push(center);
+            visible.push(item);
+          }
+        });
+        return visible;
       }
 
       function renderShapForcePlot(container, explanation) {
         const base = Number(explanation.base_value);
         const prediction = Number(explanation.prediction);
         const features = Array.isArray(explanation.features) ? explanation.features : [];
-        const positive = features
-          .filter((item) => item.shap_value >= 0)
-          .sort((a, b) => b.abs_shap - a.abs_shap);
-        const negative = features
-          .filter((item) => item.shap_value < 0)
-          .sort((a, b) => b.abs_shap - a.abs_shap);
 
+        // Standard force plot: stack all contributions sequentially from base to f(x).
+        const ordered = [...features].sort((a, b) => b.abs_shap - a.abs_shap);
         let cursor = base;
-        const positiveSegments = positive.map((feature) => {
+        const segments = ordered.map((feature) => {
+          const shapValue = Number(feature.shap_value);
           const segment = {
             ...feature,
             start: cursor,
-            end: cursor + Number(feature.shap_value),
-          };
-          cursor = segment.end;
-          return segment;
-        });
-
-        cursor = prediction;
-        const negativeSegments = negative.map((feature) => {
-          const segment = {
-            ...feature,
-            start: cursor,
-            end: cursor + Number(feature.shap_value),
+            end: cursor + shapValue,
           };
           cursor = segment.end;
           return segment;
         });
 
         const axisValues = [base, prediction, cursor];
-        positiveSegments.forEach((segment) => {
-          axisValues.push(segment.start, segment.end);
-        });
-        negativeSegments.forEach((segment) => {
+        segments.forEach((segment) => {
           axisValues.push(segment.start, segment.end);
         });
 
@@ -1615,12 +1638,6 @@
         const maxValue = axisMax + padding;
         const range = maxValue - minValue || 1;
         const toPercent = (value) => ((value - minValue) / range) * 100;
-
-        const totalAbs = features.reduce(
-          (sum, feature) => sum + Number(feature.abs_shap || 0),
-          0
-        );
-        const thresholdRatio = 0.05;
 
         const axis = document.createElement("div");
         axis.className = "shap-force-axis";
@@ -1637,7 +1654,7 @@
         predictionMarker.textContent = `f(x) = ${formatShapNumber(prediction)}`;
         axis.appendChild(predictionMarker);
 
-        [...positiveSegments, ...negativeSegments].forEach((segment) => {
+        segments.forEach((segment) => {
           const bar = document.createElement("div");
           bar.className = `shap-force-segment ${segment.direction}`;
           const left = Math.min(segment.start, segment.end);
@@ -1650,11 +1667,9 @@
         const labels = document.createElement("div");
         labels.className = "shap-force-labels";
 
-        const labeledSegments = [
-          ...positiveSegments.map((segment, index) => ({ segment, index })),
-          ...negativeSegments.map((segment, index) => ({ segment, index })),
-        ].filter(({ segment, index }) =>
-          shouldLabelForceFeature(segment, index, totalAbs, thresholdRatio)
+        const labeledSegments = filterNonOverlappingForceLabels(
+          selectForceLabelSegments(segments),
+          toPercent
         );
 
         labeledSegments.forEach(({ segment }) => {
