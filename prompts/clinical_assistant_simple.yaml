@@ -1,7 +1,7 @@
 version: simple
 name: clinical_assistant_simple_prompt
 judgment_mode: simple_prompt
-judgment_label: 简易提示词
+judgment_label: Simple Prompt
 description: Lightweight prompt for comparing against full RAG-only and combined modes
 
 generation:
@@ -9,24 +9,24 @@ generation:
   max_tokens: 4096
 
 system: |
-  你是医学研究辅助助手。根据用户给出的无创筛查结果与参考资料，用简体中文简要回答。
-  回答须简洁，仅供研究讨论，不构成临床诊断或治疗建议。
+  You are a medical research assistant. Based on the non-invasive screening results and reference materials provided, respond briefly in English.
+  Keep answers concise, for research discussion only—not clinical diagnosis or treatment advice.
 
 user_template: |
-  体表高光谱无创筛查模型（Ridge-RF）输出如下：
-  - 预测值：{prediction:.6f}
-  - 风险分级：{risk_label_zh} / {risk_label_en}
-  - 阈值规则：预测值 >= {threshold} 为高风险（可能有问题），预测值 < {threshold} 为低风险（可能没问题）
+  Ridge-RF surface hyperspectral non-invasive screening output:
+  - Predicted value: {prediction:.6f}
+  - Risk level: {risk_label_en}
+  - Threshold rule: predicted value >= {threshold} is High Risk (possible concern); predicted value < {threshold} is Low Risk (likely no concern)
 
   {guideline_context}
 
-  请用 3–5 段话说明：①当前风险含义；②建议完善的检查项目；③本结果不能替代冠状动脉造影等金标准。
-  可使用「### 风险等级」「### 综合判断」两个标题分段，不强制更多章节。
+  In 3–5 short paragraphs, explain: (1) what the current risk level means; (2) recommended additional testing; (3) that this result cannot replace coronary angiography or other gold-standard tests.
+  You may use "### Risk Level" and "### Clinical Assessment" as section headers; additional sections are optional.
 
 fallback_no_snippets: |
-  预测值 {prediction:.6f}；风险分级 {risk_label_zh} / {risk_label_en}。
-  未检索到本地参考资料。请仅根据上述筛查数值，用简易提示词要求的三段结构简要回答（研究用途，非诊断）。
+  Predicted value {prediction:.6f}; Risk level: {risk_label_en}.
+  No local reference materials were retrieved. Answer using only the screening values above in the simple three-part structure (research use only, not diagnosis).
 
 sections:
-  - 风险等级
-  - 综合判断
+  - Risk Level
+  - Clinical Assessment

@@ -1,7 +1,7 @@
 version: zero
 name: clinical_assistant_zero_prompt
 judgment_mode: zero_prompt
-judgment_label: 0提示词模式
+judgment_label: Zero-Shot Prompt
 description: Minimal prompts for baseline comparison — raw model output with screening values and RAG text only
 use_system_prompt: false
 
@@ -12,13 +12,13 @@ generation:
 system: ""
 
 user_template: |
-  预测值：{prediction:.6f}
-  风险分级：{risk_label_zh} / {risk_label_en}
+  Predicted value: {prediction:.6f}
+  Risk level: {risk_label_en}
 
   {guideline_context}
 
 fallback_no_snippets: |
-  预测值：{prediction:.6f}；风险分级：{risk_label_zh} / {risk_label_en}。
-  未提供参考资料。
+  Predicted value: {prediction:.6f}; Risk level: {risk_label_en}.
+  No reference materials provided.
 
 sections: []

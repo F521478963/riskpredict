@@ -20,44 +20,44 @@ class JudgmentModeTest(unittest.TestCase):
 
     def test_load_zero_prompt_mode(self):
         config = load_prompt_config("zero_prompt")
-        self.assertEqual(config["judgment_label"], "0提示词模式")
+        self.assertEqual(config["judgment_label"], "Zero-Shot Prompt")
         self.assertFalse(config.get("use_system_prompt", True))
-        self.assertIn("预测值", config["user_template"])
+        self.assertIn("Predicted value", config["user_template"])
 
     def test_load_simple_prompt_mode(self):
         config = load_prompt_config("simple_prompt")
-        self.assertEqual(config["judgment_label"], "简易提示词")
-        self.assertIn("3–5 段话", config["user_template"])
+        self.assertEqual(config["judgment_label"], "Simple Prompt")
+        self.assertIn("3–5 short paragraphs", config["user_template"])
 
     def test_load_rag_only_prompt_disallows_web_style_supplement(self):
         config = load_prompt_config("rag_only")
-        self.assertEqual(config["judgment_label"], "仅RAG判断")
-        self.assertIn("不要联网查询", config["system"])
-        self.assertIn("### 综合判断", config["user_template"])
-        self.assertIn("### RAG 要点", config["user_template"])
-        self.assertIn("体表高光谱无创筛查模型（Ridge-RF）", config["user_template"])
-        self.assertIn("本次评估仅提示潜在冠脉病变可能性", config["user_template"])
-        self.assertNotIn("建议评估与管理措施", config["user_template"])
-        self.assertIn("全文不要写分诊场景", config["user_template"])
-        self.assertIn("不得出现 [片段#]", config["user_template"])
-        self.assertNotIn("不确定性、局限性", config["user_template"])
-        self.assertIn("分诊场景、监护级别", config["system"])
+        self.assertEqual(config["judgment_label"], "RAG-Only")
+        self.assertIn("Do not search the web", config["system"])
+        self.assertIn("### Clinical Assessment", config["user_template"])
+        self.assertIn("### RAG Key Points", config["user_template"])
+        self.assertIn("Ridge-RF", config["user_template"])
+        self.assertIn("This assessment only suggests", config["user_template"])
+        self.assertNotIn("Assessment & Management Recommendations", config["user_template"])
+        self.assertIn("Do not discuss triage", config["user_template"])
+        self.assertIn("do not use [Snippet #]", config["user_template"])
+        self.assertIn("uncertainty or limitation lists", config["user_template"])
+        self.assertIn("triage settings", config["system"])
 
     def test_load_combined_prompt_allows_model_supplement(self):
         config = load_prompt_config("combined")
-        self.assertEqual(config["judgment_label"], "综合判断")
-        self.assertIn("[模型]", config["user_template"])
-        self.assertNotIn("不要联网查询", config["system"])
-        self.assertIn("### 综合判断", config["user_template"])
-        self.assertIn("### RAG 要点与模型补充", config["user_template"])
-        self.assertIn("体表高光谱无创筛查模型（Ridge-RF）", config["user_template"])
-        self.assertIn("本次评估仅提示潜在冠脉病变可能性", config["user_template"])
-        self.assertNotIn("推荐分诊与处置路径", config["user_template"])
-        self.assertNotIn("### RAG 要点摘要", config["user_template"])
-        self.assertIn("全文不要写分诊场景", config["user_template"])
-        self.assertIn("不得出现 [片段#]", config["user_template"])
-        self.assertNotIn("不确定性、局限性", config["user_template"])
-        self.assertIn("分诊场景、监护级别", config["system"])
+        self.assertEqual(config["judgment_label"], "Combined Analysis")
+        self.assertIn("[Model]", config["user_template"])
+        self.assertNotIn("Do not search the web", config["system"])
+        self.assertIn("### Clinical Assessment", config["user_template"])
+        self.assertIn("### RAG Key Points & Model Supplement", config["user_template"])
+        self.assertIn("Ridge-RF", config["user_template"])
+        self.assertIn("This assessment only suggests", config["user_template"])
+        self.assertNotIn("triage and disposition", config["user_template"])
+        self.assertNotIn("### RAG Summary", config["user_template"])
+        self.assertIn("Do not discuss triage", config["user_template"])
+        self.assertIn("do not use [Snippet #]", config["user_template"])
+        self.assertIn("uncertainty or limitation lists", config["user_template"])
+        self.assertIn("triage settings", config["system"])
         self.assertGreaterEqual(int(config["generation"]["max_tokens"]), 8192)
 
     def test_format_guideline_context_for_benchmark_modes(self):
@@ -75,16 +75,16 @@ class JudgmentModeTest(unittest.TestCase):
         simple_ctx = ClinicalAssistantPipeline._format_guideline_context(
             snippets, "simple_prompt"
         )
-        self.assertIn("参考资料", zero_ctx)
+        self.assertIn("Reference materials:", zero_ctx)
         self.assertIn("1. Test Guideline", zero_ctx)
-        self.assertNotIn("[片段1]", zero_ctx)
-        self.assertIn("参考资料", simple_ctx)
+        self.assertNotIn("[Snippet1]", zero_ctx)
+        self.assertIn("Reference materials:", simple_ctx)
 
     def test_judgment_labels_cover_all_modes(self):
-        self.assertEqual(JUDGMENT_LABELS["zero_prompt"], "0提示词模式")
-        self.assertEqual(JUDGMENT_LABELS["simple_prompt"], "简易提示词")
-        self.assertEqual(JUDGMENT_LABELS["rag_only"], "仅RAG判断")
-        self.assertEqual(JUDGMENT_LABELS["combined"], "综合判断")
+        self.assertEqual(JUDGMENT_LABELS["zero_prompt"], "Zero-Shot Prompt")
+        self.assertEqual(JUDGMENT_LABELS["simple_prompt"], "Simple Prompt")
+        self.assertEqual(JUDGMENT_LABELS["rag_only"], "RAG-Only")
+        self.assertEqual(JUDGMENT_LABELS["combined"], "Combined Analysis")
 
 
 if __name__ == "__main__":

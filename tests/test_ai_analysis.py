@@ -70,7 +70,7 @@ class DeepSeekAnalyzerTest(unittest.TestCase):
         )
 
         self.assertIsNone(result["content"])
-        self.assertIn("未配置", result["error"])
+        self.assertIn("DEEPSEEK_API_KEY", result["error"])
 
     def test_analyzer_calls_deepseek_with_openai_sdk_contract(self):
         captured = {}
@@ -112,12 +112,12 @@ class DeepSeekAnalyzerTest(unittest.TestCase):
         self.assertEqual(captured["completion_kwargs"]["model"], "deepseek-v4-pro")
         self.assertFalse(captured["completion_kwargs"]["stream"])
         prompt = captured["completion_kwargs"]["messages"][1]["content"]
-        self.assertIn("无创筛查", prompt)
-        self.assertIn("【本地指南检索片段】", prompt)
-        self.assertIn("[片段1]", prompt)
-        self.assertIn("### RAG 要点", prompt)
-        self.assertIn("### 综合判断", prompt)
-        self.assertIn("### 依据来源", prompt)
+        self.assertIn("Ridge-RF", prompt)
+        self.assertIn("[Local Guideline Snippets]", prompt)
+        self.assertIn("[Snippet1]", prompt)
+        self.assertIn("### RAG Key Points", prompt)
+        self.assertIn("### Clinical Assessment", prompt)
+        self.assertIn("### Sources", prompt)
 
     def test_analyzer_includes_local_guideline_context_for_risk(self):
         captured = {}
@@ -152,7 +152,7 @@ class DeepSeekAnalyzerTest(unittest.TestCase):
         )
 
         self.assertIsNone(result["error"])
-        self.assertEqual(result["judgment_label"], "仅RAG判断")
+        self.assertEqual(result["judgment_label"], "RAG-Only")
         self.assertEqual(len(store.calls), 1)
         prompt = captured["completion_kwargs"]["messages"][1]["content"]
         self.assertIn("Page 12", prompt)
@@ -190,9 +190,9 @@ class DeepSeekAnalyzerTest(unittest.TestCase):
         messages = captured["completion_kwargs"]["messages"]
         system_prompt = messages[0]["content"]
         user_prompt = messages[1]["content"]
-        self.assertIn("【本地 RAG 检索片段】", system_prompt)
-        self.assertIn("不能替代冠状动脉造影", user_prompt)
-        self.assertNotIn("面部光谱", user_prompt)
+        self.assertIn("Local RAG Snippets", system_prompt)
+        self.assertIn("cannot replace coronary angiography", user_prompt)
+        self.assertNotIn("Face spectrum", user_prompt)
 
     def test_analyzer_returns_fallback_when_no_snippets(self):
         analyzer = DeepSeekAnalyzer(
@@ -209,7 +209,7 @@ class DeepSeekAnalyzerTest(unittest.TestCase):
         )
 
         self.assertIsNone(result["error"])
-        self.assertIn("未检索到", result["content"])
+        self.assertIn("No guideline snippets", result["content"])
 
 
 if __name__ == "__main__":

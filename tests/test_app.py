@@ -102,7 +102,7 @@ class AppTest(unittest.TestCase):
         self.assertIn(b"AI-Assisted Analysis", response.data)
         self.assertIn(b"analysis-report-data", response.data)
         self.assertNotIn(b'data-action="export-md"', response.data)
-        self.assertIn(b"Research use only", response.data)
+        self.assertIn(b"Diagnostic Assessment", response.data)
 
     def test_homepage_contains_combined_submit_button(self):
         response = app.test_client().get("/")

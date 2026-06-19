@@ -23,10 +23,10 @@ PROMPT_FILES = {
     "combined": PROMPTS_DIR / "clinical_assistant_v2_combined.yaml",
 }
 JUDGMENT_LABELS = {
-    "zero_prompt": "0提示词模式",
-    "simple_prompt": "简易提示词",
-    "rag_only": "仅RAG判断",
-    "combined": "综合判断",
+    "zero_prompt": "Zero-Shot Prompt",
+    "simple_prompt": "Simple Prompt",
+    "rag_only": "RAG-Only",
+    "combined": "Combined Analysis",
 }
 RAG_ONLY_FALLBACK_MODES = frozenset({"rag_only"})
 
@@ -93,7 +93,7 @@ class ClinicalAssistantPipeline:
         if not self.api_key:
             return {
                 "content": None,
-                "error": "未配置 DEEPSEEK_API_KEY，已跳过 AI 风险分析。",
+                "error": "DEEPSEEK_API_KEY is not configured; AI risk analysis was skipped.",
                 "snippets": [],
                 "mode": self.rag_mode,
                 "judgment_mode": mode,
@@ -111,7 +111,7 @@ class ClinicalAssistantPipeline:
             except Exception as exc:
                 return {
                     "content": None,
-                    "error": f"RAG 检索失败：{exc}",
+                    "error": f"RAG retrieval failed: {exc}",
                     "snippets": [],
                     "mode": self.rag_mode,
                     "judgment_mode": mode,
@@ -186,26 +186,37 @@ class ClinicalAssistantPipeline:
     def _format_guideline_context(snippets, judgment_mode):
         if not snippets:
             if judgment_mode == "combined":
-                return "【本地 RAG 检索片段】\n未检索到可用的本地指南片段（可主要依据 [模型] 补充）。"
+                return (
+                    "[Local RAG Snippets]\n"
+                    "No usable local guideline snippets were retrieved "
+                    "(you may rely primarily on [Model] supplement)."
+                )
             if judgment_mode in ("zero_prompt", "simple_prompt"):
-                return "参考资料：无"
-            return "【本地指南检索片段】\n未检索到可用的本地指南片段。"
+                return "Reference materials: none"
+            return (
+                "[Local Guideline Snippets]\n"
+                "No usable local guideline snippets were retrieved."
+            )
 
         if judgment_mode in ("zero_prompt", "simple_prompt"):
-            lines = ["参考资料："]
+            lines = ["Reference materials:"]
         elif judgment_mode == "combined":
-            header = "【本地 RAG 检索片段】\n请先阅读下列片段，再结合 [模型] 知识综合判断；引用标注 [片段#]。"
+            header = (
+                "[Local RAG Snippets]\n"
+                "Read the snippets below first, then combine with [Model] knowledge; "
+                "cite using [Snippet #]."
+            )
             lines = [header]
         else:
             header = (
-                "【本地指南检索片段】\n"
-                "只允许依据下列片段提出建议；引用时用 [片段#] 标注序号。"
+                "[Local Guideline Snippets]\n"
+                "Base recommendations only on the snippets below; cite with [Snippet #]."
             )
             lines = [header]
 
         for index, snippet in enumerate(snippets, start=1):
-            source = snippet.get("source", "本地资料")
-            page = snippet.get("page", "未知")
+            source = snippet.get("source", "Local corpus")
+            page = snippet.get("page", "n/a")
             category = snippet.get("category", "")
             text = " ".join(str(snippet.get("text", "")).split())
             if not text:
@@ -216,7 +227,7 @@ class ClinicalAssistantPipeline:
             if judgment_mode in ("zero_prompt", "simple_prompt"):
                 lines.append(f"{index}. {prefix} p.{page}: {text}")
             else:
-                lines.append(f"[片段{index}] {prefix} Page {page}: {text}")
+                lines.append(f"[Snippet{index}] {prefix} Page {page}: {text}")
         return "\n".join(lines)
 
     def _create_client(self):

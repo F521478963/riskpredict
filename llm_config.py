@@ -27,11 +27,11 @@ def build_openai_timeout(timeout_seconds=None):
 
 
 def format_llm_error(exc):
-    message = f"AI 风险分析暂不可用：{exc}"
+    message = f"AI risk analysis is temporarily unavailable: {exc}"
     lowered = str(exc).lower()
     if "timed out" in lowered or "timeout" in lowered:
         message += (
-            f"（当前 API 读取超时为 {get_deepseek_timeout_seconds():.0f} 秒；"
-            "综合判断 + V4-Pro 生成较慢，可执行 export DEEPSEEK_TIMEOUT=600 后重启应用）"
+            f" (current API read timeout is {get_deepseek_timeout_seconds():.0f}s; "
+            "combined analysis with V4-Pro can be slow—try export DEEPSEEK_TIMEOUT=600 and restart)"
         )
     return message
