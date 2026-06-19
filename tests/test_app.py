@@ -209,6 +209,21 @@ class AppTest(unittest.TestCase):
         self.assertIn(b"200.980134", response.data)
         self.assertIn(b"0.529676", response.data)
 
+    def test_homepage_contains_case16_and_case81_parameter_buttons(self):
+        response = app.test_client().get("/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'id="fill-case16-data-button"', response.data)
+        self.assertIn(b'id="fill-case81-data-button"', response.data)
+        self.assertIn("填入16号数据".encode("utf-8"), response.data)
+        self.assertIn("填入81号数据".encode("utf-8"), response.data)
+        self.assertIn(b"CASE_16_FEATURE_VALUES", response.data)
+        self.assertIn(b"CASE_81_FEATURE_VALUES", response.data)
+        self.assertIn(b"fillCase16Data", response.data)
+        self.assertIn(b"fillCase81Data", response.data)
+        self.assertIn(b"197.9429", response.data)
+        self.assertIn(b"205.294422", response.data)
+
     def test_app_wires_rag_corpus_store(self):
         self.assertTrue(RAG_CORPUS_DIR.endswith("rag_corpus"))
         status = rag_corpus_store.status()

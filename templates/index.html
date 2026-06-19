@@ -663,6 +663,24 @@
       background: linear-gradient(135deg, #475569 0%, #1e293b 100%);
     }
 
+    .floating-case16-button {
+      background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+      box-shadow: 0 16px 38px rgba(8, 145, 178, 0.26);
+    }
+
+    .floating-case16-button:hover {
+      background: linear-gradient(135deg, #0e7490 0%, #0891b2 100%);
+    }
+
+    .floating-case81-button {
+      background: linear-gradient(135deg, #db2777 0%, #f472b6 100%);
+      box-shadow: 0 16px 38px rgba(219, 39, 119, 0.24);
+    }
+
+    .floating-case81-button:hover {
+      background: linear-gradient(135deg, #be185d 0%, #db2777 100%);
+    }
+
     @media (max-width: 1320px) {
       .card {
         width: min(1320px, calc(100vw - 20px));
@@ -1051,6 +1069,12 @@
 </head>
 <body>
   <div class="floating-actions" aria-label="测试参数快捷操作">
+    <button class="floating-action-button floating-case16-button" id="fill-case16-data-button" type="button">
+      填入16号数据 / Fill Case 16
+    </button>
+    <button class="floating-action-button floating-case81-button" id="fill-case81-data-button" type="button">
+      填入81号数据 / Fill Case 81
+    </button>
     <button class="floating-action-button floating-high-risk-button" id="fill-high-risk-data-button" type="button">
       填入高风险参数 / Fill High-Risk Data
     </button>
@@ -1329,6 +1353,22 @@
         0.316013, 0.565925, 0.36837, 0.313633, 0.317033
       ];
 
+      const CASE_16_FEATURE_VALUES = [
+        197.9429, 0.028739, 0.028739, 0.028739, 0.028739, 0.028739, 0.181309,
+        226.259412, 0.246758, 0.099088, 0.31197, 0.305094, 0.124136, 0.246758,
+        0.656689, 0.284607, 0.302198, 0.492194, 30.076172, 0.862801, 0.532424,
+        0.113907, 0.537233, 0.298194, 0.484074, 0.465038, 0.286057, 0.500451,
+        0.303312, 0.454541, 0.148242, 0.30344, 0.301603
+      ];
+
+      const CASE_81_FEATURE_VALUES = [
+        205.294422, 0.039016, 0.039016, 0.039016, 0.039016, 0.039016, 0.520358,
+        78.763928, 0.326292, 0.106685, 0.336417, 0.307831, 0.499817, 0.473413,
+        0.593291, 0.307561, 0.311398, 0.589642, 38.730256, 0.560012, 0.511016,
+        0.5063, 0.395359, 0.312203, 0.512346, 0.51384, 0.306959, 0.509164,
+        0.30344, 0.475554, 0.227074, 0.302437, 0.306883
+      ];
+
       function fillFeatureValues(values) {
         values.forEach((value, index) => {
           const input = document.getElementById(`feature_${index}`);
@@ -1351,6 +1391,14 @@
 
       function fillHighRiskData() {
         fillFeatureValues(HIGH_RISK_FEATURE_VALUES);
+      }
+
+      function fillCase16Data() {
+        fillFeatureValues(CASE_16_FEATURE_VALUES);
+      }
+
+      function fillCase81Data() {
+        fillFeatureValues(CASE_81_FEATURE_VALUES);
       }
 
       function resetTestData() {
@@ -1407,6 +1455,14 @@
       document
         .getElementById("manual-prediction-form")
         .addEventListener("submit", showAnalysisLoading);
+
+      document
+        .getElementById("fill-case16-data-button")
+        .addEventListener("click", fillCase16Data);
+
+      document
+        .getElementById("fill-case81-data-button")
+        .addEventListener("click", fillCase81Data);
 
       document
         .getElementById("fill-test-data-button")
