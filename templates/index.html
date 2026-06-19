@@ -2186,8 +2186,9 @@
         aside?.classList.toggle("is-input-locked", busy);
 
         if (form) {
-          form.querySelectorAll("input, button").forEach((element) => {
-            element.disabled = busy;
+          form.querySelectorAll('input[type="number"]').forEach((element) => {
+            element.readOnly = busy;
+            element.setAttribute("aria-readonly", busy ? "true" : "false");
           });
         }
 
@@ -2258,6 +2259,8 @@
 
         form.querySelectorAll('input[type="number"][id^="feature_"]').forEach((input) => {
           input.value = "";
+          input.readOnly = false;
+          input.removeAttribute("aria-readonly");
           input.dispatchEvent(new Event("input", { bubbles: true }));
           input.dispatchEvent(new Event("change", { bubbles: true }));
         });
