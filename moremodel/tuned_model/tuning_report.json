@@ -1,0 +1,24 @@
+{
+  "verify_auc": 0.6414027149321266,
+  "train_insample_auc": 0.6771641082449755,
+  "train_cv_auc": 0.6160784934325052,
+  "previous_verify_auc_rf": 0.4876,
+  "max_ks": 0.18,
+  "top_k": 10,
+  "C": 3,
+  "scaler": "RobustScaler",
+  "model": "L2_LogisticRegression",
+  "feature_names": [
+    "right ear wenli variance223",
+    "right ear wenli variance183",
+    "right ear wenli variance215",
+    "face wenli mean753",
+    "face wenli mean729",
+    "face wenli mean745",
+    "face wenli variance896",
+    "face wenli mean721",
+    "face wenli mean777",
+    "face wenli mean697"
+  ],
+  "strategy": "单变量相关预筛 + 剔除train/verify分布漂移(KS)过大的特征 + L2逻辑回归"
+}

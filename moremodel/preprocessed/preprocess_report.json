@@ -1,0 +1,62 @@
+{
+  "input": "/Users/samuels/riskpredict/moremodel/test_data.xlsx",
+  "n_samples": 160,
+  "n_features_raw": 11016,
+  "outcome_class_counts": {
+    "0": 89,
+    "1": 71
+  },
+  "qc": {
+    "steps": [
+      "剔除缺失率>30% 的特征: 0",
+      "剔除近零方差特征: 0",
+      "剔除完全重复列: 79"
+    ],
+    "n_features_raw": 11016,
+    "n_features_after_qc": 10937
+  },
+  "prefilter_k": 2000,
+  "n_after_corr_dedup": 490,
+  "n_final_selected": 30,
+  "final_features": [
+    "face wenli variance904",
+    "face wenli variance544",
+    "face wenli variance686",
+    "right ear wenli variance398",
+    "left ear wenli mean480",
+    "left ear wenli variance358",
+    "face wenli variance648",
+    "face wenli variance179",
+    "face wenli variance896",
+    "left ear wenli variance512",
+    "face wenli variance1163",
+    "face wenli variance479",
+    "right ear wenli variance1303",
+    "left ear wenli variance1400",
+    "face wenli variance895",
+    "face wenli mean464",
+    "right ear wenli variance1182",
+    "left ear wenli mean1280",
+    "left ear wenli variance472",
+    "left ear wenli mean222",
+    "left ear wenli variance214",
+    "right ear wenli variance1294",
+    "face wenli variance1024",
+    "face wenli variance128",
+    "right ear wenli variance1464",
+    "right ear wenli variance1351",
+    "left ear wenli variance496",
+    "face wenli variance526",
+    "left ear wenli variance1184",
+    "left ear wenli variance488"
+  ],
+  "corr_threshold": 0.95,
+  "fdr_alpha": 0.05,
+  "top_k_cap": 30,
+  "epv_rule_of_thumb_max_features": 7,
+  "notes": [
+    "p>>n：不宜在未正则化的逻辑回归中同时使用大量特征；阳性事件 n1=71，粗估 EPV≈10 时同时建模变量宜 ≤7。",
+    "不必先对 1 万维做全量两两相关；应在 QC + 与结局相关预筛后，再处理共线性。",
+    "建模评估请用 StratifiedKFold + Pipeline，在折内重复筛选/训练。"
+  ]
+}

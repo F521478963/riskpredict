@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SVR 本地预测工具</title>
+  <title>Ridge 本地预测工具</title>
   <style>
     body {
       margin: 0;
@@ -310,6 +310,93 @@
       margin-top: 6px;
       font-size: 32px;
       letter-spacing: -0.03em;
+    }
+
+    .risk-badge.low-risk {
+      color: #166534;
+      background: #dcfce7;
+      border: 1px solid #86efac;
+    }
+
+    .risk-badge.high-risk {
+      color: #991b1b;
+      background: #fee2e2;
+      border: 1px solid #fca5a5;
+    }
+
+    .branch-qfr-panel {
+      margin: 0 0 18px;
+      padding: 18px;
+      border-radius: 16px;
+      background: #f8fbff;
+      border: 1px solid #c7ddff;
+    }
+
+    .branch-qfr-panel h2 {
+      margin: 0 0 8px;
+      font-size: 1.15rem;
+      color: #1e3a8a;
+    }
+
+    .branch-qfr-panel .panel-desc {
+      margin: 0 0 14px;
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .branch-qfr-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .branch-qfr-card {
+      padding: 14px;
+      border-radius: 14px;
+      background: #ffffff;
+      border: 1px solid #dbeafe;
+    }
+
+    .branch-qfr-card h3 {
+      margin: 0 0 6px;
+      font-size: 15px;
+      color: #1e40af;
+    }
+
+    .branch-qfr-card .branch-name-en {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .branch-qfr-card strong {
+      display: block;
+      font-size: 28px;
+      letter-spacing: -0.03em;
+      color: #0f172a;
+    }
+
+    .branch-status {
+      display: inline-flex;
+      margin-top: 10px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .branch-status.branch-normal {
+      color: #166534;
+      background: #dcfce7;
+      border: 1px solid #86efac;
+    }
+
+    .branch-status.branch-attention {
+      color: #92400e;
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
     }
 
     .risk-badge {
@@ -732,12 +819,12 @@
   </div>
 
   <main class="card">
-    <h1>SVR 本地预测工具 / Local SVR Prediction Tool</h1>
+    <h1>Ridge 本地预测工具 / Local Ridge Prediction Tool</h1>
     <p class="desc">
-      输入 23 个模型指标值后，系统会在本机加载 SVR 模型并显示预测结果；AI 报告通过
+      输入 33 个模型指标值后，系统会在本机加载 Ridge 模型并显示整体风险与三分支 QFR 预测；AI 报告通过
       <code>rag_corpus/</code> 资料库检索指南后生成（新材料放入目录后请运行
       <code>python scripts/rebuild_rag_index.py</code>）。
-      Enter 23 feature values for local SVR prediction; AI reports use the local RAG corpus.
+      Enter 33 feature values for local Ridge prediction with LAD/LCX/RCA QFR panel; AI reports use the local RAG corpus.
     </p>
     {% if rag_status %}
       <p class="hint">
@@ -757,8 +844,31 @@
         <strong>Predicted Value: {{ "%.6f"|format(result) }}</strong>
         <div class="risk-badge {{ risk.class_name }}">
           风险分级 / Risk Level: {{ risk.label_zh }} / {{ risk.label_en }}
+          （阈值 / Threshold: {{ risk_threshold }}）
         </div>
       </div>
+
+      {% if branch_predictions %}
+        <section class="branch-qfr-panel" aria-label="Branch QFR predictions">
+          <h2>三分支 QFR 预测 / Branch QFR Panel</h2>
+          <p class="panel-desc">
+            展示值为模型输出的绝对值；QFR ≥ {{ branch_qfr_threshold }} 标记为正常，低于该值标记为关注。
+            Displayed values use absolute model output; QFR ≥ {{ branch_qfr_threshold }} is labeled Normal.
+          </p>
+          <div class="branch-qfr-grid">
+            {% for branch in branch_predictions %}
+              <article class="branch-qfr-card">
+                <h3>{{ branch.label_zh }}</h3>
+                <span class="branch-name-en">{{ branch.label_en }}</span>
+                <strong>{{ "%.4f"|format(branch.qfr) }}</strong>
+                <div class="branch-status {{ branch.status.class_name }}">
+                  {{ branch.status.label_zh }} / {{ branch.status.label_en }}
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
     {% endif %}
 
     <section class="ai-analysis" id="analysis-status">
@@ -772,7 +882,7 @@
       </div>
       <div class="research-disclaimer" role="note">
         <strong>研究用途声明：</strong>
-        体表高光谱无创筛查模型（SVR）的输出旨在为<strong>医学研究</strong>提供<strong>更详细的检查建议</strong>参考，
+        体表高光谱无创筛查模型（Ridge）的输出旨在为<strong>医学研究</strong>提供<strong>更详细的检查建议</strong>参考，
         不用于实际临床治疗决策，亦不能替代临床诊断。本系统不会在临床场景中直接指导用药或处置。
       </div>
       <div class="analysis-loading" id="analysis-loading" aria-live="polite">
@@ -928,17 +1038,19 @@
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js"></script>
     <script>
       const HIGH_RISK_FEATURE_VALUES = [
-        177.508639, 0.037621, 0.037621, 0.037621, 0.037621, 0.037621,
-        0.171066, 219.381653, 0.249554, 0.099184, 0.32212, 0.569326,
-        0.423279, 0.504386, 0.272308, 0.037621, 0.037621, 0.037621,
-        0.037621, 0.209795, 0.209399, 0.207437, 0.847371
+        176.595376, 0.04141, 0.04141, 0.04141, 0.04141, 0.176055, 0.43754,
+        212.488623, 0.225312, 0.099534, 0.32852, 0.310793, 0.431343, 0.353491,
+        0.63686, 0.306493, 0.307098, 0.517591, 28.944141, 0.848891, 0.597072,
+        0.393, 0.533153, 0.313625, 0.53354, 0.442709, 0.290043, 0.469353,
+        0.316013, 0.565925, 0.36837, 0.313633, 0.317033
       ];
 
       const LOW_RISK_FEATURE_VALUES = [
-        183.912743, 0.031297, 0.031297, 0.031297, 0.031297, 0.031297,
-        0.031297, 224.114795, 0.256986, 0.079967, 0.306688, 0.616521,
-        0.395528, 0.496073, 0.274379, 0.031297, 0.031297, 0.031297,
-        0.031297, 0.199246, 0.191938, 0.198293, 0.864854
+        200.980134, 0.03493, 0.03493, 0.03493, 0.03493, 0.03493, 0.171107,
+        234.165675, 0.423818, 0.108148, 0.331675, 0.307722, 0.387569, 0.345428,
+        0.529676, 0.289488, 0.301815, 0.71811, 28.141889, 0.843074, 0.469601,
+        0.459751, 0.540415, 0.305404, 0.283941, 0.27279, 0.302898, 0.508155,
+        0.307305, 0.333401, 0.210635, 0.306253, 0.303029
       ];
 
       function fillFeatureValues(values) {
@@ -1228,10 +1340,11 @@ ${safeBody}
       <input type="file" name="file" accept=".xlsx,.xls" required>
       <button type="submit">开始预测并下载结果 / Predict and Download</button>
       <div class="hint">
-        支持两种输入：只包含模型筛选后的 {{ feature_count }} 列特征；
-        或包含完整特征表，至少 {{ full_feature_count }} 列，系统会自动按模型特征索引取列。
-        Supports either {{ feature_count }} selected feature columns, or a full feature table with at least
-        {{ full_feature_count }} columns.
+        支持两种输入：包含全部 {{ full_feature_count }} 列特征（按顺序排列）；
+        或 Excel 表头包含模型特征列名（英文列名，如 face guangpu mean1）。
+        输出含整体 Predicted 及 LAD_QFR、LCX_QFR、RCA_QFR（取绝对值）。
+        Supports either {{ full_feature_count }} feature columns in model order, or matching English column headers.
+        Output includes overall Predicted plus absolute LAD/LCX/RCA QFR values.
       </div>
     </form>
   </main>

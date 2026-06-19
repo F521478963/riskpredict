@@ -1,0 +1,29 @@
+{
+  "baseline_15_stable": {
+    "n_features": 15,
+    "train_cv_auc": 0.6147,
+    "verify_auc": 0.7206
+  },
+  "audit_n_selected": 4,
+  "best_sensitivity": {
+    "use_ks": true,
+    "max_ks": 0.17,
+    "top_k": 15,
+    "n_selected": 15,
+    "n_features": 15,
+    "train_cv_auc": 0.6147,
+    "verify_auc": 0.7206
+  },
+  "nested": {
+    "nested_oof_auc_on_train": 0.5083,
+    "verify_auc_same_pipeline_on_full_train": 0.7206,
+    "train_cv_auc_full_train": 0.6147,
+    "fold_feature_counts": [
+      15,
+      15,
+      15,
+      15,
+      15
+    ]
+  }
+}

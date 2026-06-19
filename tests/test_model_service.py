@@ -15,6 +15,8 @@ class FakeScaler:
 
 
 class FakeModel:
+    n_features_in_ = 2
+
     def __init__(self):
         self.seen = None
 
@@ -66,7 +68,37 @@ class PredictionServiceTest(unittest.TestCase):
         with self.assertRaises(FeatureShapeError) as context:
             service.predict_frame(frame)
 
-        self.assertIn("至少需要 3 列", str(context.exception))
+        self.assertIn("需要 2 列", str(context.exception))
+
+    def test_from_shelve_without_comb_x_uses_sequential_feature_indexes(self):
+        import shelve
+        import tempfile
+        import os
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            base = os.path.join(tmpdir, "ridge_model")
+            with shelve.open(base) as save:
+                save["clf"] = FakeModel()
+                save["ss"] = FakeScaler()
+
+            service = PredictionService.from_shelve(base + ".dat")
+            self.assertEqual(service.feature_indexes, [0, 1])
+
+    def test_predict_selects_columns_by_feature_names(self):
+        scaler = FakeScaler()
+        model = FakeModel()
+        service = PredictionService(
+            model=model,
+            scaler=scaler,
+            feature_indexes=[0, 1],
+            feature_names=["alpha", "beta"],
+        )
+        frame = pd.DataFrame([[10, 20, 30]], columns=["beta", "alpha", "gamma"])
+
+        result = service.predict_frame(frame)
+
+        self.assertEqual(scaler.seen.tolist(), [[20, 10]])
+        self.assertEqual(result["Predicted"].tolist(), [32.0])
 
 
 if __name__ == "__main__":

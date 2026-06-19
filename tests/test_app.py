@@ -5,6 +5,7 @@ from app import (
     RAG_CORPUS_DIR,
     app,
     ai_analyzer,
+    classify_branch_qfr,
     classify_risk,
     FEATURE_FIELDS,
     FEATURE_GROUPS,
@@ -12,11 +13,35 @@ from app import (
 )
 
 
+from risk_config import RISK_THRESHOLD
+
+
 class AppTest(unittest.TestCase):
-    def test_classify_risk_uses_point_eight_threshold(self):
-        self.assertEqual(classify_risk(0.81)["label_en"], "Low Risk")
-        self.assertEqual(classify_risk(0.8)["label_en"], "Low Risk")
-        self.assertEqual(classify_risk(0.2)["label_en"], "High Risk")
+    def test_classify_risk_uses_ridge_threshold(self):
+        self.assertEqual(classify_risk(RISK_THRESHOLD + 0.01)["label_en"], "Low Risk")
+        self.assertEqual(classify_risk(RISK_THRESHOLD)["label_en"], "Low Risk")
+        self.assertEqual(classify_risk(RISK_THRESHOLD - 0.01)["label_en"], "High Risk")
+
+    def test_classify_branch_qfr_uses_point_eight_threshold(self):
+        self.assertEqual(classify_branch_qfr(0.85)["label_en"], "Normal")
+        self.assertEqual(classify_branch_qfr(0.79)["label_en"], "Attention")
+
+    def test_feature_fields_include_branch_features(self):
+        self.assertEqual(len(FEATURE_FIELDS), 33)
+
+    def test_manual_form_prediction_displays_branch_qfr_panel(self):
+        client = app.test_client()
+        data = {"mode": "manual"}
+        for field in FEATURE_FIELDS:
+            data[field["name"]] = "1.0"
+
+        response = client.post("/", data=data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("三分支 QFR 预测".encode("utf-8"), response.data)
+        self.assertIn("左前降支".encode("utf-8"), response.data)
+        self.assertIn("左回旋支".encode("utf-8"), response.data)
+        self.assertIn("右冠状动脉".encode("utf-8"), response.data)
 
     def test_manual_form_prediction_displays_result(self):
         client = app.test_client()
@@ -177,8 +202,8 @@ class AppTest(unittest.TestCase):
         self.assertIn("填入高风险参数".encode("utf-8"), response.data)
         self.assertIn(b"HIGH_RISK_FEATURE_VALUES", response.data)
         self.assertIn(b"fillHighRiskData", response.data)
-        self.assertIn(b"177.508639", response.data)
-        self.assertIn(b"0.847371", response.data)
+        self.assertIn(b"176.595376", response.data)
+        self.assertIn(b"0.63686", response.data)
 
     def test_app_wires_rag_corpus_store(self):
         self.assertTrue(RAG_CORPUS_DIR.endswith("rag_corpus"))

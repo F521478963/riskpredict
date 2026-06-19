@@ -1,6 +1,6 @@
-"""Build retrieval queries from SVR output and risk tier."""
+"""Build retrieval queries from model output and risk tier."""
 
-RISK_THRESHOLD = 0.8
+from risk_config import RISK_THRESHOLD
 
 
 def build_clinical_query(prediction, risk, patient_context=None):

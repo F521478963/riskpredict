@@ -6,77 +6,37 @@ from flask import Flask, render_template, request, send_file
 from werkzeug.utils import secure_filename
 
 from ai_analysis import DeepSeekAnalyzer
+from model_registry import (
+    BRANCH_MODEL_SPECS,
+    FEATURE_SPECS,
+    OVERALL_FEATURE_NAMES,
+    build_feature_fields,
+    build_feature_groups,
+    load_branch_services,
+    predict_branch_qfr,
+)
 from model_service import FeatureShapeError, PredictionService
 from llm_pipeline import JUDGMENT_LABELS, normalize_judgment_mode
 from rag_store import get_default_corpus_store
 from report_export import build_analysis_report
+from risk_config import BRANCH_QFR_THRESHOLD, RISK_THRESHOLD
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(
-    BASE_DIR,
-    "SVR_StandardScaler_RRMSE_2026-05-17_23-17-32.666985.dat",
-)
+MODEL_PATH = os.path.join(BASE_DIR, "20260610_most_powerful", "y_Ridge.dat")
 RAG_CORPUS_DIR = os.path.join(BASE_DIR, "rag_corpus")
-FEATURE_LABELS = [
-    ("面部光谱均值1", "Face spectrum mean 1"),
-    ("面部纹理均值30", "Face texture mean 30"),
-    ("面部纹理均值78", "Face texture mean 78"),
-    ("面部纹理均值94", "Face texture mean 94"),
-    ("面部纹理均值102", "Face texture mean 102"),
-    ("面部纹理均值126", "Face texture mean 126"),
-    ("面部纹理均值166", "Face texture mean 166"),
-    ("左耳纹理均值218", "Left ear texture mean 218"),
-    ("左耳纹理均值1438", "Left ear texture mean 1438"),
-    ("右耳纹理均值1574", "Right ear texture mean 1574"),
-    ("右耳纹理方差1608", "Right ear texture variance 1608"),
-    ("右耳纹理均值1200", "Right ear texture mean 1200"),
-    ("面部纹理方差1326", "Face texture variance 1326"),
-    ("面部纹理方差846", "Face texture variance 846"),
-    ("左耳纹理均值739", "Left ear texture mean 739"),
-    ("面部纹理均值6", "Face texture mean 6"),
-    ("面部纹理均值14", "Face texture mean 14"),
-    ("面部纹理均值54", "Face texture mean 54"),
-    ("面部纹理均值46", "Face texture mean 46"),
-    ("面部纹理方差611", "Face texture variance 611"),
-    ("面部纹理方差1559", "Face texture variance 1559"),
-    ("面部纹理方差875", "Face texture variance 875"),
-    ("右耳纹理均值71", "Right ear texture mean 71"),
-]
-FEATURE_FIELDS = [
-    {
-        "name": f"feature_{index}",
-        "index": index + 1,
-        "label_zh": label_zh,
-        "label_en": label_en,
-    }
-    for index, (label_zh, label_en) in enumerate(FEATURE_LABELS)
-]
-FEATURE_GROUP_DEFINITIONS = [
-    ("face_spectrum", "面部光谱指标", "Face Spectrum Features", [0]),
-    (
-        "face_texture",
-        "面部纹理指标（均值与方差）",
-        "Face Texture Features (Mean & Variance)",
-        [1, 2, 3, 4, 5, 6, 12, 13, 15, 16, 17, 18, 19, 20, 21],
-    ),
-    ("left_ear_texture", "左耳纹理指标", "Left Ear Texture Features", [7, 8, 14]),
-    ("right_ear_texture", "右耳纹理指标", "Right Ear Texture Features", [9, 10, 11, 22]),
-]
-FEATURE_GROUPS = [
-    {
-        "id": group_id,
-        "title_zh": title_zh,
-        "title_en": title_en,
-        "fields": [FEATURE_FIELDS[index] for index in indexes],
-    }
-    for group_id, title_zh, title_en, indexes in FEATURE_GROUP_DEFINITIONS
-]
+
+FEATURE_FIELDS = build_feature_fields()
+FEATURE_GROUPS = build_feature_groups(FEATURE_FIELDS)
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
 
-prediction_service = PredictionService.from_shelve(MODEL_PATH)
+prediction_service = PredictionService.from_shelve(
+    MODEL_PATH,
+    feature_names=OVERALL_FEATURE_NAMES,
+)
+branch_services = load_branch_services()
 rag_corpus_store = get_default_corpus_store()
 try:
     rag_corpus_store.ensure_index(auto_build=True)
@@ -113,7 +73,11 @@ def index():
     uploaded_file.seek(0)
 
     try:
-        output = prediction_service.predict_excel(uploaded_file)
+        output = prediction_service.predict_excel(
+            uploaded_file,
+            branch_specs=BRANCH_MODEL_SPECS,
+            branch_services=branch_services,
+        )
     except FeatureShapeError as exc:
         return _render_error(str(exc))
     except Exception as exc:
@@ -130,33 +94,20 @@ def index():
 
 
 def _handle_manual_prediction():
-    values = []
-    form_values = {}
-    for field in FEATURE_FIELDS:
-        raw_value = request.form.get(field["name"], "").strip()
-        form_values[field["name"]] = raw_value
-        if raw_value == "":
-            return _render_error(
-                f"请填写 {field['label_zh']} / {field['label_en']}。",
-                values=form_values,
-            )
-
-        try:
-            values.append(float(raw_value))
-        except ValueError:
-            return _render_error(
-                f"{field['label_zh']} / {field['label_en']} 必须是数字。",
-                values=form_values,
-            )
+    feature_map, form_values, error = _parse_manual_feature_map()
+    if error:
+        return _render_error(error, values=form_values)
 
     try:
-        prediction = prediction_service.predict_values(values)
+        prediction = prediction_service.predict_values_by_names(feature_map)
+        branch_predictions = _predict_all_branches(feature_map)
     except FeatureShapeError as exc:
         return _render_error(str(exc), values=form_values)
     except Exception as exc:
         return _render_error(f"预测失败：{exc}", values=form_values)
 
     risk = classify_risk(prediction)
+    values = [feature_map[field["column"]] for field in FEATURE_FIELDS]
     judgment_mode = normalize_judgment_mode(request.form.get("ai_judgment_mode"))
     ai_analysis = ai_analyzer.analyze(
         fields=FEATURE_FIELDS,
@@ -180,11 +131,54 @@ def _handle_manual_prediction():
     return _render_index(
         result=prediction,
         risk=risk,
+        branch_predictions=branch_predictions,
         ai_analysis=ai_analysis,
         analysis_report=analysis_report,
         values=form_values,
         judgment_mode=judgment_mode,
     )
+
+
+def _parse_manual_feature_map():
+    feature_map = {}
+    form_values = {}
+    for field in FEATURE_FIELDS:
+        raw_value = request.form.get(field["name"], "").strip()
+        form_values[field["name"]] = raw_value
+        if raw_value == "":
+            return (
+                None,
+                form_values,
+                f"请填写 {field['label_zh']} / {field['label_en']}。",
+            )
+
+        try:
+            feature_map[field["column"]] = float(raw_value)
+        except ValueError:
+            return (
+                None,
+                form_values,
+                f"{field['label_zh']} / {field['label_en']} 必须是数字。",
+            )
+
+    return feature_map, form_values, None
+
+
+def _predict_all_branches(feature_map):
+    results = []
+    for spec in BRANCH_MODEL_SPECS:
+        service = branch_services[spec["id"]]
+        qfr = predict_branch_qfr(service, feature_map)
+        results.append(
+            {
+                "id": spec["id"],
+                "label_zh": spec["label_zh"],
+                "label_en": spec["label_en"],
+                "qfr": qfr,
+                "status": classify_branch_qfr(qfr),
+            }
+        )
+    return results
 
 
 def _attach_judgment_metadata(ai_analysis, judgment_mode):
@@ -198,7 +192,7 @@ def _attach_judgment_metadata(ai_analysis, judgment_mode):
 
 
 def classify_risk(value):
-    if value >= 0.8:
+    if value >= RISK_THRESHOLD:
         return {
             "label_zh": "低风险",
             "label_en": "Low Risk",
@@ -212,10 +206,26 @@ def classify_risk(value):
     }
 
 
+def classify_branch_qfr(value):
+    if value >= BRANCH_QFR_THRESHOLD:
+        return {
+            "label_zh": "正常",
+            "label_en": "Normal",
+            "class_name": "branch-normal",
+        }
+
+    return {
+        "label_zh": "关注",
+        "label_en": "Attention",
+        "class_name": "branch-attention",
+    }
+
+
 def _render_index(
     error=None,
     result=None,
     risk=None,
+    branch_predictions=None,
     ai_analysis=None,
     analysis_report=None,
     values=None,
@@ -228,13 +238,16 @@ def _render_index(
             error=error,
             result=result,
             risk=risk,
+            branch_predictions=branch_predictions or [],
             ai_analysis=ai_analysis,
             analysis_report=analysis_report,
             values=values or {},
             feature_fields=FEATURE_FIELDS,
             feature_groups=FEATURE_GROUPS,
             feature_count=len(prediction_service.feature_indexes),
-            full_feature_count=max(prediction_service.feature_indexes) + 1,
+            full_feature_count=len(FEATURE_SPECS),
+            risk_threshold=RISK_THRESHOLD,
+            branch_qfr_threshold=BRANCH_QFR_THRESHOLD,
             rag_status=rag_corpus_store.status(),
             judgment_mode=judgment_mode,
             judgment_labels=JUDGMENT_LABELS,

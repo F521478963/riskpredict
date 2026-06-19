@@ -1,0 +1,29 @@
+{
+  "test_file": "/Users/samuels/riskpredict/moremodel/verify.xlsx",
+  "model_file": "/Users/samuels/riskpredict/moremodel/tuned_model/best_tuned_model.joblib",
+  "n_test_samples": 60,
+  "n_features_used": 10,
+  "train_insample_auc_from_meta": 0.6771641082449755,
+  "baseline_train_auc_from_meta": null,
+  "model_type": "L2_LogisticRegression",
+  "outcome_distribution": {
+    "0": 34,
+    "1": 26
+  },
+  "external_test_auc": 0.6414,
+  "average_precision": 0.5413,
+  "brier_score": 0.2481,
+  "threshold_youden": 0.4472,
+  "accuracy_at_youden": 0.6333,
+  "balanced_accuracy_at_youden": 0.6629,
+  "sensitivity_at_youden": 0.8846,
+  "specificity_at_youden": 0.4412,
+  "confusion_matrix_youden": {
+    "TN": 15,
+    "FP": 19,
+    "FN": 3,
+    "TP": 23
+  },
+  "accuracy_at_0.5": 0.6333,
+  "interpretation": "AUC<0.5 表示判别方向可能弱于随机；训练集 AUC 高而测试集 AUC 低常见于过拟合或人群/测量差异。"
+}

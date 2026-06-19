@@ -1,0 +1,6 @@
+{
+  "test_file": "verify.xlsx",
+  "n_rows": 60,
+  "model": "/Users/samuels/riskpredict/moremodel/trained_model/best_model.joblib",
+  "test_auc": 0.4875565610859729
+}

@@ -1,0 +1,91 @@
+{
+  "n_samples": 160,
+  "n_features_raw": 11016,
+  "outcome_class_counts": {
+    "0": 89,
+    "1": 71
+  },
+  "parameters": {
+    "prefilter_k": 2000,
+    "corr_threshold": 0.95,
+    "top_k": 30,
+    "cv_folds": 5
+  },
+  "cv_auc": 0.5148,
+  "cv_folds_detail": [
+    {
+      "fold": 1,
+      "n_train": 128,
+      "n_val": 32,
+      "n_features_selected": 30,
+      "n_lasso_nonzero_coef": 18,
+      "fold_auc": 0.6151
+    },
+    {
+      "fold": 2,
+      "n_train": 128,
+      "n_val": 32,
+      "n_features_selected": 30,
+      "n_lasso_nonzero_coef": 22,
+      "fold_auc": 0.3849
+    },
+    {
+      "fold": 3,
+      "n_train": 128,
+      "n_val": 32,
+      "n_features_selected": 30,
+      "n_lasso_nonzero_coef": 24,
+      "fold_auc": 0.4643
+    },
+    {
+      "fold": 4,
+      "n_train": 128,
+      "n_val": 32,
+      "n_features_selected": 30,
+      "n_lasso_nonzero_coef": 14,
+      "fold_auc": 0.5437
+    },
+    {
+      "fold": 5,
+      "n_train": 128,
+      "n_val": 32,
+      "n_features_selected": 30,
+      "n_lasso_nonzero_coef": 27,
+      "fold_auc": 0.5843
+    }
+  ],
+  "final_model_n_selected": 30,
+  "final_model_n_nonzero_coef": 28,
+  "final_selected_features": [
+    "face wenli variance904",
+    "face wenli variance544",
+    "face wenli variance686",
+    "right ear wenli variance398",
+    "left ear wenli mean480",
+    "left ear wenli variance358",
+    "face wenli variance648",
+    "face wenli variance179",
+    "face wenli variance896",
+    "left ear wenli variance512",
+    "face wenli variance1163",
+    "face wenli variance479",
+    "right ear wenli variance1303",
+    "left ear wenli variance1400",
+    "face wenli variance895",
+    "face wenli mean464",
+    "right ear wenli variance1182",
+    "left ear wenli mean1280",
+    "left ear wenli variance472",
+    "left ear wenli mean222",
+    "left ear wenli variance214",
+    "right ear wenli variance1294",
+    "face wenli variance1024",
+    "face wenli variance128",
+    "right ear wenli variance1464",
+    "right ear wenli variance1351",
+    "left ear wenli variance496",
+    "face wenli variance526",
+    "left ear wenli variance1184",
+    "left ear wenli variance488"
+  ]
+}

@@ -1,0 +1,51 @@
+rank_by_abs_r,feature,abs_r,r,p_value,ks_train_vs_verify,ks_pass,in_final_15,status
+1,right ear wenli variance223,0.2236,-0.2236,0.004482125156050345,0.1771,False,False,因 KS 超阈值未入选
+2,right ear wenli variance350,0.2079,0.2079,0.008347463779508875,0.2271,False,False,因 KS 超阈值未入选
+3,right ear wenli variance183,0.2073,-0.2073,0.00853128900461243,0.1542,True,True,入选最终模型
+4,face wenli mean865,0.2037,0.2037,0.00978194210898678,0.1938,False,False,因 KS 超阈值未入选
+5,face wenli mean889,0.2033,0.2033,0.009913912820171294,0.1833,False,False,因 KS 超阈值未入选
+6,face wenli mean825,0.2031,0.2031,0.010013994764029501,0.1833,False,False,因 KS 超阈值未入选
+7,face wenli mean985,0.203,0.203,0.010022125243727134,0.2146,False,False,因 KS 超阈值未入选
+8,right ear wenli variance215,0.203,-0.203,0.010023372813076048,0.1542,True,True,入选最终模型
+9,face wenli mean809,0.2022,0.2022,0.010342087667120903,0.1896,False,False,因 KS 超阈值未入选
+10,face wenli mean857,0.2017,0.2017,0.010529094831274587,0.1979,False,False,因 KS 超阈值未入选
+11,face wenli mean753,0.2012,0.2012,0.010722576592862434,0.1771,False,False,因 KS 超阈值未入选
+12,face wenli mean729,0.2012,0.2012,0.010730754853617717,0.175,False,False,因 KS 超阈值未入选
+13,face wenli mean681,0.2011,0.2011,0.010770016934876699,0.1812,False,False,因 KS 超阈值未入选
+14,face wenli mean801,0.2009,0.2009,0.01086691543878401,0.1854,False,False,因 KS 超阈值未入选
+15,right ear wenli variance199,0.2005,-0.2005,0.011030859975945845,0.2208,False,False,因 KS 超阈值未入选
+16,face wenli mean1033,0.2001,0.2001,0.011179289488145689,0.2125,False,False,因 KS 超阈值未入选
+17,face wenli mean745,0.1999,0.1999,0.011276600110293645,0.1792,False,False,因 KS 超阈值未入选
+18,face wenli variance896,0.1994,0.1994,0.01145765369841823,0.1604,True,True,入选最终模型
+19,face wenli mean953,0.1994,0.1994,0.011469188281923826,0.1958,False,False,因 KS 超阈值未入选
+20,face wenli mean721,0.1993,0.1993,0.01152280306340159,0.1625,True,True,入选最终模型
+21,face wenli mean1001,0.1988,0.1988,0.011715662778324568,0.2021,False,False,因 KS 超阈值未入选
+22,face wenli mean777,0.1987,0.1987,0.01178908036527831,0.175,False,False,因 KS 超阈值未入选
+23,face wenli mean833,0.1984,0.1984,0.011920279002076595,0.1833,False,False,因 KS 超阈值未入选
+24,face wenli mean1009,0.1983,0.1983,0.011965078505882881,0.2083,False,False,因 KS 超阈值未入选
+25,face wenli mean977,0.1982,0.1982,0.01199361528308489,0.2125,False,False,因 KS 超阈值未入选
+26,face wenli mean697,0.1981,0.1981,0.0120249104644985,0.1792,False,False,因 KS 超阈值未入选
+27,face wenli mean769,0.198,0.198,0.012059991580091738,0.1875,False,False,因 KS 超阈值未入选
+28,face wenli mean873,0.198,0.198,0.012093537043175496,0.2125,False,False,因 KS 超阈值未入选
+29,face wenli mean1017,0.1979,0.1979,0.012126612871984877,0.1917,False,False,因 KS 超阈值未入选
+30,face wenli mean737,0.1974,0.1974,0.012339621508500648,0.1875,False,False,因 KS 超阈值未入选
+31,face wenli mean1089,0.1971,0.1971,0.012483558458233025,0.2062,False,False,因 KS 超阈值未入选
+32,face wenli mean929,0.1971,0.1971,0.012490075455390553,0.1917,False,False,因 KS 超阈值未入选
+33,face wenli mean905,0.197,0.197,0.012545126734547607,0.1958,False,False,因 KS 超阈值未入选
+34,face wenli mean937,0.1969,0.1969,0.012597308816035198,0.1875,False,False,因 KS 超阈值未入选
+35,face wenli mean617,0.1968,0.1968,0.012604803306932718,0.1854,False,False,因 KS 超阈值未入选
+36,face wenli mean841,0.1967,0.1967,0.012676512734975935,0.1833,False,False,因 KS 超阈值未入选
+37,face wenli mean689,0.1966,0.1966,0.012722337721642411,0.2,False,False,因 KS 超阈值未入选
+38,face wenli mean785,0.1966,0.1966,0.012727978376388229,0.1833,False,False,因 KS 超阈值未入选
+39,face wenli mean921,0.1961,0.1961,0.012968153609897951,0.2062,False,False,因 KS 超阈值未入选
+40,face wenli mean529,0.196,0.196,0.01300897553159897,0.1708,False,False,因 KS 超阈值未入选
+41,face wenli mean673,0.196,0.196,0.013011563833344434,0.1854,False,False,因 KS 超阈值未入选
+42,face wenli mean649,0.196,0.196,0.013017389689332536,0.1792,False,False,因 KS 超阈值未入选
+43,face wenli mean657,0.1959,0.1959,0.013025521820731786,0.1896,False,False,因 KS 超阈值未入选
+44,face wenli mean289,0.1959,0.1959,0.013026391915420096,0.2,False,False,因 KS 超阈值未入选
+45,face wenli mean913,0.1959,0.1959,0.013045962526063269,0.1917,False,False,因 KS 超阈值未入选
+46,face wenli mean641,0.1959,0.1959,0.013060105529492909,0.175,False,False,因 KS 超阈值未入选
+47,face wenli mean881,0.1958,0.1958,0.01309603053204433,0.1729,False,False,因 KS 超阈值未入选
+48,face wenli mean457,0.1958,0.1958,0.01309692888498373,0.2062,False,False,因 KS 超阈值未入选
+49,face wenli mean817,0.1958,0.1958,0.013108672437965388,0.1792,False,False,因 KS 超阈值未入选
+50,face wenli mean793,0.1956,0.1956,0.013164208061970191,0.1708,False,False,因 KS 超阈值未入选

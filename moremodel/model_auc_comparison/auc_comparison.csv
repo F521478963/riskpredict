@@ -1,0 +1,11 @@
+﻿model,n_features,train_insample_auc,train_cv_auc,test_verify_auc,best_params
+SVM_RBF_stable15,15,0.7553,0.6147,0.7206,{}
+LASSO_30feat,30,0.8171,0.6085,0.5882,{}
+L2_stable15_C10,15,0.6707,0.6116,0.569,{}
+RF_MI_120_GridSearch,10937,0.984,0.5754,0.5328,"{'clf__max_depth': 4, 'clf__min_samples_leaf': 2, 'clf__n_estimators': 300}"
+GBDT_MI_120_GridSearch,10937,1.0,0.4812,0.5215,"{'clf__learning_rate': 0.08, 'clf__max_depth': 2, 'clf__n_estimators': 200}"
+RF_80feat,80,1.0,0.5893,0.4921,{}
+RF_MI_80_GridSearch,10937,0.9979,0.5684,0.4774,"{'clf__max_depth': 6, 'clf__min_samples_leaf': 2, 'clf__n_estimators': 300}"
+HistGB_MI_120_GridSearch,10937,1.0,0.4829,0.4774,"{'clf__learning_rate': 0.05, 'clf__max_depth': 3}"
+GBDT_MI_80_GridSearch,10937,1.0,0.461,0.4118,"{'clf__learning_rate': 0.08, 'clf__max_depth': 3, 'clf__n_estimators': 200}"
+HistGB_MI_80_GridSearch,10937,1.0,0.4751,0.3982,"{'clf__learning_rate': 0.1, 'clf__max_depth': 5}"

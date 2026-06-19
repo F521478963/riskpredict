@@ -1,0 +1,33 @@
+{
+  "model": "SVM_RBF + RobustScaler",
+  "verify_auc": 0.7205882352941176,
+  "train_cv_auc": 0.6146542174394682,
+  "train_insample_auc": 0.7553410349738883,
+  "params": {
+    "max_ks": 0.17,
+    "top_k": 15,
+    "C": 0.65,
+    "gamma": 0.1
+  },
+  "feature_names": [
+    "right ear wenli variance183",
+    "right ear wenli variance215",
+    "face wenli variance896",
+    "face wenli mean721",
+    "right ear wenli variance1367",
+    "face wenli variance792",
+    "face guangpu variance106",
+    "face guangpu variance107",
+    "face guangpu variance108",
+    "face guangpu variance109",
+    "face wenli variance928",
+    "face guangpu variance86",
+    "face guangpu variance110",
+    "face guangpu variance85",
+    "face guangpu variance84"
+  ],
+  "history": {
+    "rf": 0.4876,
+    "lr": 0.6414
+  }
+}

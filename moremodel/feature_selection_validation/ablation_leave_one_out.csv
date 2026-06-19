@@ -1,0 +1,17 @@
+dropped_feature,n_features,train_cv_auc,verify_auc,verify_auc_drop
+"(none, full model)",15,0.6147,0.7206,0.0
+right ear wenli variance183,14,0.6253,0.6991,0.0215
+right ear wenli variance215,14,0.6044,0.6725,0.0481
+face wenli variance896,14,0.5929,0.6923,0.0283
+face wenli mean721,14,0.6144,0.7121,0.0085
+right ear wenli variance1367,14,0.604,0.707,0.0136
+face wenli variance792,14,0.621,0.724,-0.0034
+face guangpu variance106,14,0.6162,0.7149,0.0057
+face guangpu variance107,14,0.6161,0.7149,0.0057
+face guangpu variance108,14,0.6162,0.7149,0.0057
+face guangpu variance109,14,0.6161,0.7149,0.0057
+face wenli variance928,14,0.6128,0.7104,0.0102
+face guangpu variance86,14,0.6159,0.7149,0.0057
+face guangpu variance110,14,0.6162,0.7149,0.0057
+face guangpu variance85,14,0.6161,0.7149,0.0057
+face guangpu variance84,14,0.6159,0.7149,0.0057

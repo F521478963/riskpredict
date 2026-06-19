@@ -1,0 +1,80 @@
+face wenli variance544
+face wenli variance686
+right ear wenli variance398
+left ear wenli mean480
+left ear wenli variance358
+face wenli variance896
+left ear wenli variance512
+right ear wenli mean1144
+right ear wenli variance1303
+face wenli variance895
+face wenli mean464
+right ear wenli variance1182
+left ear wenli mean1280
+right ear wenli mean1379
+left ear wenli variance472
+left ear wenli variance1400
+left ear wenli mean222
+left ear wenli variance214
+right ear wenli variance1294
+face wenli mean1051
+right ear wenli variance1464
+right ear wenli variance1351
+left ear wenli variance1184
+face wenli variance243
+left ear wenli variance488
+right ear wenli mean1230
+right ear wenli variance191
+left ear wenli variance456
+right ear wenli variance1408
+right ear wenli variance1287
+left ear wenli variance222
+face wenli mean376
+left ear wenli mean256
+right ear wenli variance1190
+left ear wenli mean248
+face wenli variance323
+face wenli variance560
+right ear wenli mean334
+right ear wenli variance215
+right ear wenli variance1230
+face wenli variance583
+face wenli variance552
+face wenli mean1395
+right ear wenli variance1423
+face wenli variance567
+right ear wenli variance223
+left ear wenli mean488
+face wenli variance536
+left ear wenli variance254
+right ear wenli mean224
+right ear wenli mean1182
+left ear wenli mean1312
+right ear wenli mean350
+left ear wenli variance974
+left ear wenli mean782
+face wenli mean173
+right ear wenli mean560
+face wenli mean1091
+left ear wenli variance1264
+left ear wenli variance310
+right ear wenli mean1419
+face wenli mean261
+right ear wenli variance1239
+face wenli variance400
+face wenli variance259
+left ear wenli variance1288
+right ear wenli mean456
+face wenli mean1511
+left ear wenli variance1072
+face wenli variance360
+right ear wenli variance1158
+left ear wenli variance272
+left ear wenli variance518
+left ear wenli variance1168
+right ear wenli variance184
+right ear wenli variance384
+right ear wenli variance1278
+right ear wenli variance374
+right ear wenli variance1279
+face wenli variance528
