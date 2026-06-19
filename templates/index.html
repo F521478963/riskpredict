@@ -803,6 +803,173 @@
       margin: 0 0 14px;
       font-size: 20px;
     }
+
+    .shap-panel {
+      margin: 0 0 18px;
+      padding: 18px;
+      border-radius: 16px;
+      background: #f5f3ff;
+      border: 1px solid #ddd6fe;
+    }
+
+    .shap-panel h2 {
+      margin: 0 0 8px;
+      color: #5b21b6;
+    }
+
+    .shap-panel .panel-desc {
+      margin: 0 0 16px;
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .shap-model-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .shap-tab-button {
+      margin: 0;
+      width: auto;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: #ede9fe;
+      color: #5b21b6;
+      font-size: 14px;
+      font-weight: 700;
+      border: 1px solid #c4b5fd;
+    }
+
+    .shap-tab-button.is-active {
+      background: #7c3aed;
+      color: #ffffff;
+      border-color: #7c3aed;
+    }
+
+    .shap-model-panel {
+      display: none;
+      padding: 16px;
+      border-radius: 14px;
+      background: #ffffff;
+      border: 1px solid #e9d5ff;
+    }
+
+    .shap-model-panel.is-active {
+      display: block;
+    }
+
+    .shap-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .shap-meta-card {
+      padding: 12px;
+      border-radius: 12px;
+      background: #faf5ff;
+      border: 1px solid #ede9fe;
+    }
+
+    .shap-meta-card span {
+      display: block;
+      color: #64748b;
+      font-size: 12px;
+    }
+
+    .shap-meta-card strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 18px;
+      color: #312e81;
+    }
+
+    .shap-table-wrap {
+      overflow-x: auto;
+    }
+
+    .shap-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .shap-table th,
+    .shap-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #ede9fe;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    .shap-table th {
+      color: #5b21b6;
+      background: #faf5ff;
+      font-weight: 700;
+    }
+
+    .shap-feature-name {
+      min-width: 180px;
+    }
+
+    .shap-feature-name small {
+      display: block;
+      margin-top: 2px;
+      color: #64748b;
+      font-size: 11px;
+    }
+
+    .shap-value-positive {
+      color: #b91c1c;
+      font-weight: 700;
+    }
+
+    .shap-value-negative {
+      color: #1d4ed8;
+      font-weight: 700;
+    }
+
+    .shap-bar-cell {
+      min-width: 220px;
+    }
+
+    .shap-bar-track {
+      position: relative;
+      height: 12px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      overflow: hidden;
+    }
+
+    .shap-bar-center {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 1px;
+      background: #94a3b8;
+    }
+
+    .shap-bar-fill {
+      position: absolute;
+      top: 1px;
+      bottom: 1px;
+      border-radius: 999px;
+    }
+
+    .shap-bar-fill.positive {
+      left: 50%;
+      background: linear-gradient(90deg, #fca5a5 0%, #ef4444 100%);
+    }
+
+    .shap-bar-fill.negative {
+      right: 50%;
+      background: linear-gradient(270deg, #93c5fd 0%, #3b82f6 100%);
+    }
   </style>
 </head>
 <body>
@@ -867,6 +1034,106 @@
               </article>
             {% endfor %}
           </div>
+        </section>
+      {% endif %}
+
+      {% if shap_explanations %}
+        <section class="shap-panel" id="shap-panel" aria-label="SHAP interpretability">
+          <h2>SHAP 可解释性分析 / SHAP Interpretability</h2>
+          <p class="panel-desc">
+            展示各模型最终入选的全部特征输入值及其 SHAP 贡献（Shapley 值）。
+            红色表示推高预测值，蓝色表示拉低预测值；绝对值越大，影响越强。
+            All selected features with input values and SHAP contributions are shown below.
+          </p>
+
+          <div class="shap-model-tabs" role="tablist" aria-label="SHAP model tabs">
+            {% for explanation in shap_explanations %}
+              <button
+                type="button"
+                class="shap-tab-button{% if loop.first %} is-active{% endif %}"
+                data-shap-tab="{{ explanation.model_id }}"
+                role="tab"
+                aria-selected="{% if loop.first %}true{% else %}false{% endif %}"
+              >
+                {{ explanation.title_zh }} / {{ explanation.title_en }}
+              </button>
+            {% endfor %}
+          </div>
+
+          {% for explanation in shap_explanations %}
+            <article
+              class="shap-model-panel{% if loop.first %} is-active{% endif %}"
+              id="shap-panel-{{ explanation.model_id }}"
+              data-shap-panel="{{ explanation.model_id }}"
+              role="tabpanel"
+            >
+              <div class="shap-meta-grid">
+                <div class="shap-meta-card">
+                  <span>基准值 / Base Value</span>
+                  <strong>{{ "%.6f"|format(explanation.base_value) }}</strong>
+                </div>
+                <div class="shap-meta-card">
+                  <span>模型输出 / Model Output</span>
+                  <strong>{{ "%.6f"|format(explanation.prediction) }}</strong>
+                </div>
+                <div class="shap-meta-card">
+                  <span>入选特征数 / Selected Features</span>
+                  <strong>{{ explanation.feature_count }}</strong>
+                </div>
+                <div class="shap-meta-card">
+                  <span>最大 |SHAP| / Max |SHAP|</span>
+                  <strong>{{ "%.6f"|format(explanation.max_abs_shap) }}</strong>
+                </div>
+              </div>
+
+              <div class="shap-table-wrap">
+                <table class="shap-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>特征 / Feature</th>
+                      <th>输入值 / Input</th>
+                      <th>SHAP 值</th>
+                      <th>方向 / Direction</th>
+                      <th>贡献可视化 / Contribution</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for feature in explanation.features %}
+                      {% set width_pct = (feature.abs_shap / explanation.max_abs_shap * 50) if explanation.max_abs_shap > 0 else 0 %}
+                      <tr>
+                        <td>{{ loop.index }}</td>
+                        <td class="shap-feature-name">
+                          {{ feature.label_zh }}
+                          <small>{{ feature.label_en }}</small>
+                        </td>
+                        <td>{{ "%.6f"|format(feature.value) }}</td>
+                        <td class="{% if feature.direction == 'positive' %}shap-value-positive{% else %}shap-value-negative{% endif %}">
+                          {{ "%+.6f"|format(feature.shap_value) }}
+                        </td>
+                        <td>
+                          {% if feature.direction == 'positive' %}
+                            推高 / Push Up
+                          {% else %}
+                            拉低 / Push Down
+                          {% endif %}
+                        </td>
+                        <td class="shap-bar-cell">
+                          <div class="shap-bar-track" aria-hidden="true">
+                            <div class="shap-bar-center"></div>
+                            <div
+                              class="shap-bar-fill {{ feature.direction }}"
+                              style="width: {{ '%.2f'|format(width_pct) }}%;"
+                            ></div>
+                          </div>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </article>
+          {% endfor %}
         </section>
       {% endif %}
     {% endif %}
@@ -1333,6 +1600,33 @@ ${safeBody}
       }
 
       initAnalysisModules();
+
+      function initShapTabs() {
+        const buttons = document.querySelectorAll("[data-shap-tab]");
+        const panels = document.querySelectorAll("[data-shap-panel]");
+        if (!buttons.length || !panels.length) {
+          return;
+        }
+
+        buttons.forEach((button) => {
+          button.addEventListener("click", () => {
+            const target = button.getAttribute("data-shap-tab");
+            buttons.forEach((item) => {
+              const active = item.getAttribute("data-shap-tab") === target;
+              item.classList.toggle("is-active", active);
+              item.setAttribute("aria-selected", active ? "true" : "false");
+            });
+            panels.forEach((panel) => {
+              panel.classList.toggle(
+                "is-active",
+                panel.getAttribute("data-shap-panel") === target
+              );
+            });
+          });
+        });
+      }
+
+      initShapTabs();
     </script>
 
     <form class="panel" method="post" enctype="multipart/form-data">

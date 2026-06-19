@@ -1,0 +1,53 @@
+{
+  "model_id": "rca",
+  "task": "regression",
+  "title_zh": "右冠状动脉",
+  "n_samples": 240,
+  "n_features": 17,
+  "expected_value": 0.8967925308111663,
+  "representative_cases": {
+    "abnormal": {
+      "index": 96,
+      "label": 0.11,
+      "prediction": 0.8639046553811814
+    },
+    "control": {
+      "index": 12,
+      "label": 0.99,
+      "prediction": 0.863477064951997
+    }
+  },
+  "outputs": {
+    "summary_plot": "/Users/samuels/riskpredict/20260610_most_powerful/shap_results/rca/supplementary_rca_summary.png",
+    "importance_plot": "/Users/samuels/riskpredict/20260610_most_powerful/shap_results/rca/supplementary_rca_importance.png",
+    "composite_plot": "/Users/samuels/riskpredict/20260610_most_powerful/shap_results/rca/supplementary_rca_composite.png",
+    "shap_values_csv": "/Users/samuels/riskpredict/20260610_most_powerful/shap_results/rca/supplementary_rca_shap_values.csv"
+  },
+  "top_features": [
+    {
+      "feature": "right ear wenli mean928",
+      "feature_label_zh": "right ear wenli mean928",
+      "mean_abs_shap": 0.023472168680768412
+    },
+    {
+      "feature": "face wenli variance863",
+      "feature_label_zh": "face wenli variance863",
+      "mean_abs_shap": 0.017799898276543432
+    },
+    {
+      "feature": "left ear wenli mean1438",
+      "feature_label_zh": "left ear wenli mean1438",
+      "mean_abs_shap": 0.011661500533017762
+    },
+    {
+      "feature": "face wenli mean166",
+      "feature_label_zh": "face wenli mean166",
+      "mean_abs_shap": 0.009323360579413088
+    },
+    {
+      "feature": "face wenli variance559",
+      "feature_label_zh": "face wenli variance559",
+      "mean_abs_shap": 0.00913425479565635
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "model_id": "lcx",
+  "task": "regression",
+  "title_zh": "左回旋支",
+  "n_samples": 240,
+  "n_features": 18,
+  "expected_value": 0.9051261547967215,
+  "representative_cases": {
+    "abnormal": {
+      "index": 170,
+      "label": 0.12,
+      "prediction": 0.8779666813034332
+    },
+    "control": {
+      "index": 5,
+      "label": 0.99,
+      "prediction": 0.9361706467496209
+    }
+  },
+  "outputs": {
+    "summary_plot": "/Users/samuels/riskpredict/20260610_most_powerful/shap_results/lcx/supplementary_lcx_summary.png",
+    "importance_plot": "/Users/samuels/riskpredict/20260610_most_powerful/shap_results/lcx/supplementary_lcx_importance.png",
+    "composite_plot": "/Users/samuels/riskpredict/20260610_most_powerful/shap_results/lcx/supplementary_lcx_composite.png",
+    "shap_values_csv": "/Users/samuels/riskpredict/20260610_most_powerful/shap_results/lcx/supplementary_lcx_shap_values.csv"
+  },
+  "top_features": [
+    {
+      "feature": "left ear wenli variance872",
+      "feature_label_zh": "left ear wenli variance872",
+      "mean_abs_shap": 0.03721565954188092
+    },
+    {
+      "feature": "face wenli variance1167",
+      "feature_label_zh": "face wenli variance1167",
+      "mean_abs_shap": 0.02769773106093162
+    },
+    {
+      "feature": "left ear wenli mean218",
+      "feature_label_zh": "left ear wenli mean218",
+      "mean_abs_shap": 0.018581295091997893
+    },
+    {
+      "feature": "left ear wenli variance262",
+      "feature_label_zh": "left ear wenli variance262",
+      "mean_abs_shap": 0.017783723062181657
+    },
+    {
+      "feature": "face wenli variance535",
+      "feature_label_zh": "face wenli variance535",
+      "mean_abs_shap": 0.01466760667084067
+    }
+  ]
+}

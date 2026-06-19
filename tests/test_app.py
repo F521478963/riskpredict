@@ -56,6 +56,21 @@ class AppTest(unittest.TestCase):
         self.assertIn("Predicted Value".encode("utf-8"), response.data)
         self.assertIn("风险分级 / Risk Level".encode("utf-8"), response.data)
 
+    def test_manual_form_prediction_displays_shap_panel(self):
+        client = app.test_client()
+        data = {"mode": "manual"}
+        for field in FEATURE_FIELDS:
+            data[field["name"]] = "0.5"
+
+        response = client.post("/", data=data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("SHAP 可解释性分析".encode("utf-8"), response.data)
+        self.assertIn(b'id="shap-panel"', response.data)
+        self.assertIn("整体筛查".encode("utf-8"), response.data)
+        self.assertIn(b"shap-table", response.data)
+        self.assertIn(b"Push Up", response.data)
+
     def test_manual_form_prediction_displays_ai_analysis_when_available(self):
         client = app.test_client()
         data = {"mode": "manual", "ai_judgment_mode": "rag_only"}

@@ -20,6 +20,7 @@ from llm_pipeline import JUDGMENT_LABELS, normalize_judgment_mode
 from rag_store import get_default_corpus_store
 from report_export import build_analysis_report
 from risk_config import BRANCH_QFR_THRESHOLD, RISK_THRESHOLD
+from shap_service import build_shap_runtime
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -37,6 +38,7 @@ prediction_service = PredictionService.from_shelve(
     feature_names=OVERALL_FEATURE_NAMES,
 )
 branch_services = load_branch_services()
+shap_runtime = build_shap_runtime()
 rag_corpus_store = get_default_corpus_store()
 try:
     rag_corpus_store.ensure_index(auto_build=True)
@@ -101,7 +103,12 @@ def _handle_manual_prediction():
     try:
         prediction = prediction_service.predict_values_by_names(feature_map)
         branch_predictions = _predict_all_branches(feature_map)
+        shap_explanations = [
+            item.to_dict() for item in shap_runtime.explain_all(feature_map)
+        ]
     except FeatureShapeError as exc:
+        return _render_error(str(exc), values=form_values)
+    except KeyError as exc:
         return _render_error(str(exc), values=form_values)
     except Exception as exc:
         return _render_error(f"预测失败：{exc}", values=form_values)
@@ -132,6 +139,7 @@ def _handle_manual_prediction():
         result=prediction,
         risk=risk,
         branch_predictions=branch_predictions,
+        shap_explanations=shap_explanations,
         ai_analysis=ai_analysis,
         analysis_report=analysis_report,
         values=form_values,
@@ -226,6 +234,7 @@ def _render_index(
     result=None,
     risk=None,
     branch_predictions=None,
+    shap_explanations=None,
     ai_analysis=None,
     analysis_report=None,
     values=None,
@@ -239,6 +248,7 @@ def _render_index(
             result=result,
             risk=risk,
             branch_predictions=branch_predictions or [],
+            shap_explanations=shap_explanations or [],
             ai_analysis=ai_analysis,
             analysis_report=analysis_report,
             values=values or {},

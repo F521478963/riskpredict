@@ -1,0 +1,53 @@
+{
+  "model_id": "overall",
+  "task": "classification",
+  "title_zh": "整体筛查（Ridge）",
+  "n_samples": 240,
+  "n_features": 15,
+  "expected_value": 0.4415245132095615,
+  "representative_cases": {
+    "abnormal": {
+      "index": 52,
+      "label": 1.0,
+      "prediction": 1.249671731866357
+    },
+    "control": {
+      "index": 210,
+      "label": 0.0,
+      "prediction": -0.46297555054776857
+    }
+  },
+  "outputs": {
+    "summary_plot": "/Users/samuels/riskpredict/20260610_most_powerful/shap_results/overall/figure5_summary.png",
+    "importance_plot": "/Users/samuels/riskpredict/20260610_most_powerful/shap_results/overall/figure5_importance.png",
+    "composite_plot": "/Users/samuels/riskpredict/20260610_most_powerful/shap_results/overall/figure5_composite.png",
+    "shap_values_csv": "/Users/samuels/riskpredict/20260610_most_powerful/shap_results/overall/figure5_shap_values.csv"
+  },
+  "top_features": [
+    {
+      "feature": "right ear wenli variance1608",
+      "feature_label_zh": "right ear wenli variance1608",
+      "mean_abs_shap": 0.06536904808965666
+    },
+    {
+      "feature": "left ear wenli mean218",
+      "feature_label_zh": "left ear wenli mean218",
+      "mean_abs_shap": 0.06158589455158358
+    },
+    {
+      "feature": "face guangpu mean1",
+      "feature_label_zh": "face guangpu mean1",
+      "mean_abs_shap": 0.05786503179263039
+    },
+    {
+      "feature": "left ear wenli mean214",
+      "feature_label_zh": "left ear wenli mean214",
+      "mean_abs_shap": 0.05230657688952605
+    },
+    {
+      "feature": "face wenli variance951",
+      "feature_label_zh": "face wenli variance951",
+      "mean_abs_shap": 0.050202107321834194
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+feature,feature_label_zh,mean_abs_shap
+right ear wenli mean928,right ear wenli mean928,0.023472168680768412
+face wenli variance863,face wenli variance863,0.017799898276543432
+left ear wenli mean1438,left ear wenli mean1438,0.011661500533017762
+face wenli mean166,face wenli mean166,0.009323360579413088
+face wenli variance559,face wenli variance559,0.00913425479565635
+right ear wenli variance998,right ear wenli variance998,0.008463702493094706
+face wenli variance1454,face wenli variance1454,0.007490347450533253
+face wenli variance935,face wenli variance935,0.005801900043376064
+face guangpu mean1,face guangpu mean1,0.005456239912344581
+right ear wenli variance1608,right ear wenli variance1608,0.00486034285461713
+face wenli mean94,face wenli mean94,0.0036172354942858734
+face wenli mean102,face wenli mean102,0.0033317565160065205
+face wenli mean126,face wenli mean126,0.002776099417981867
+left ear wenli mean218,left ear wenli mean218,0.001179885470063552
+face wenli mean78,face wenli mean78,0.00117009547170459
+face wenli mean30,face wenli mean30,0.0006157310504629648
+right ear wenli mean1574,right ear wenli mean1574,0.00034488474846135057
