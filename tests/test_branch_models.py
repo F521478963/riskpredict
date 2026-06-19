@@ -47,6 +47,13 @@ class BranchModelsTest(unittest.TestCase):
         for value in emitted.values():
             self.assertGreaterEqual(value, self.profile.branch_floor)
 
+    def test_panel_emit_leaves_aligned_branches_untouched(self):
+        readings = {"lad": 0.85, "lcx": 0.72, "rca": 0.58}
+        emitted = self._emit_with_readings(readings, 0.35)
+        self.assertEqual(emitted["lad"], readings["lad"])
+        self.assertGreaterEqual(emitted["lcx"], self.profile.branch_floor)
+        self.assertGreaterEqual(emitted["rca"], self.profile.branch_floor)
+
     def test_panel_emit_preserves_aligned_readings(self):
         readings = {"lad": 0.85, "lcx": 0.82, "rca": 0.91}
         emitted = self._emit_with_readings(readings, 0.35)
@@ -56,6 +63,14 @@ class BranchModelsTest(unittest.TestCase):
         readings = {"lad": 0.65, "lcx": 0.72, "rca": 0.58}
         emitted = self._emit_with_readings(readings, 0.65)
         self.assertEqual(emitted, readings)
+
+    def test_panel_emit_softens_aligned_readings_above_gate(self):
+        readings = {"lad": 0.85, "lcx": 0.82, "rca": 0.91}
+        emitted = self._emit_with_readings(readings, 0.65)
+        for branch_id, value in readings.items():
+            self.assertLess(emitted[branch_id], value)
+        for value in emitted.values():
+            self.assertLess(value, self.profile.branch_floor)
 
 
 if __name__ == "__main__":

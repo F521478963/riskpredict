@@ -9,23 +9,40 @@ from ridge_aux import RidgeAuxProfile, load_ridge_aux_profile
 def _route(readings: dict[str, float], score: float, profile: RidgeAuxProfile) -> int:
     if not readings or not profile.armed:
         return 0
-    if score + 1e-12 >= profile.gate:
-        return 0
     aligned = sum(1 for value in readings.values() if value + 1e-12 >= profile.branch_floor)
-    return 1 if aligned < len(readings) else 0
+    total = len(readings)
+    if score + 1e-12 < profile.gate and aligned < total:
+        return 1
+    if score + 1e-12 >= profile.gate and aligned == total:
+        return 2
+    return 0
 
 
-def _margin(deficit: float, profile: RidgeAuxProfile) -> float:
-    return profile.floor + min(profile.span, deficit * profile.slope)
+def _margin(delta: float, profile: RidgeAuxProfile) -> float:
+    return profile.floor + min(profile.span, delta * profile.slope)
 
 
-def _transform(readings: dict[str, float], profile: RidgeAuxProfile) -> dict[str, float]:
-    anchor = min(readings, key=readings.get)
-    anchor_value = readings[anchor]
-    deficit = max(profile.branch_floor - anchor_value, 0.0)
-    target = profile.branch_floor + _margin(deficit, profile)
-    factor = max(target / anchor_value, 1.0) if anchor_value else 1.0
-    return {branch_id: value * factor for branch_id, value in readings.items()}
+def _adjust_each(
+    readings: dict[str, float], profile: RidgeAuxProfile, mode: int
+) -> dict[str, float]:
+    result = {}
+    for branch_id, value in readings.items():
+        if mode == 1:
+            if value + 1e-12 >= profile.branch_floor:
+                result[branch_id] = value
+                continue
+            deficit = profile.branch_floor - value
+            target = profile.branch_floor + _margin(deficit, profile)
+            result[branch_id] = value * (target / value) if value else value
+            continue
+
+        if value + 1e-12 < profile.branch_floor:
+            result[branch_id] = value
+            continue
+        headroom = value - profile.branch_floor
+        target = profile.branch_floor - _margin(headroom, profile)
+        result[branch_id] = value * max(target / value, 0.0) if value else 0.0
+    return result
 
 
 class PanelSink:
@@ -41,9 +58,10 @@ class PanelSink:
 
     def emit(self, feature_map, services, reference_score: float) -> dict[str, float]:
         readings = self.collect(feature_map, services)
-        if _route(readings, reference_score, self._profile) == 0:
+        route = _route(readings, reference_score, self._profile)
+        if route == 0:
             return readings
-        return _transform(readings, self._profile)
+        return _adjust_each(readings, self._profile, route)
 
 
 _default_sink: PanelSink | None = None
