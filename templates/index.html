@@ -91,10 +91,72 @@
     }
 
     .primary-actions.is-floating-animate {
-      animation: primaryDockPop 0.48s cubic-bezier(0.34, 1.56, 0.64, 1);
+      animation: none;
     }
 
-  @keyframes primaryDockPop {
+    .primary-actions.is-flip-animating {
+      transition: none !important;
+      will-change: transform;
+    }
+
+    .primary-actions.is-flip-animating .primary-action-btn {
+      transition: none !important;
+    }
+
+    .primary-actions-flight-layer {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 98;
+      overflow: visible;
+    }
+
+    .primary-actions-flight-path {
+      fill: none;
+      stroke: rgba(15, 118, 110, 0.42);
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      filter: drop-shadow(0 0 6px rgba(15, 118, 110, 0.28));
+    }
+
+    .primary-actions-flight-path.to-dock {
+      stroke: rgba(51, 65, 85, 0.38);
+      filter: drop-shadow(0 0 6px rgba(51, 65, 85, 0.22));
+    }
+
+    .primary-actions-flight-orb {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, rgba(15, 118, 110, 0.88) 58%, rgba(15, 118, 110, 0) 100%);
+      box-shadow: 0 0 18px rgba(15, 118, 110, 0.55);
+      pointer-events: none;
+      z-index: 99;
+      opacity: 0;
+    }
+
+    .primary-actions-flight-orb.to-dock {
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, rgba(71, 85, 105, 0.88) 58%, rgba(71, 85, 105, 0) 100%);
+      box-shadow: 0 0 18px rgba(71, 85, 105, 0.45);
+    }
+
+    .primary-actions-flight-svg {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
+    }
+
+    @keyframes primaryDockPop {
       0% {
         transform: scale(0.82) translateY(8px);
         opacity: 0.55;
@@ -114,14 +176,37 @@
         transform: scale(1);
         border-radius: 999px;
       }
-      45% {
-        transform: scale(0.88);
-        border-radius: 28%;
+      42% {
+        transform: scale(0.9);
+        border-radius: 36%;
       }
       100% {
         transform: scale(1);
         border-radius: 50%;
       }
+    }
+
+    @keyframes primaryBallMorphReverse {
+      0% {
+        transform: scale(1);
+        border-radius: 50%;
+      }
+      42% {
+        transform: scale(0.9);
+        border-radius: 36%;
+      }
+      100% {
+        transform: scale(1);
+        border-radius: 999px;
+      }
+    }
+
+    .primary-actions.is-floating-animate.to-float .primary-action-btn {
+      animation: primaryBallMorph 0.52s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+    }
+
+    .primary-actions.is-floating-animate.to-dock .primary-action-btn {
+      animation: primaryBallMorphReverse 0.52s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
     }
 
     .primary-action-btn {
@@ -161,11 +246,12 @@
     }
 
     .primary-actions.is-floating-animate .primary-action-btn {
-      animation: primaryBallMorph 0.48s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+      animation: none;
     }
 
-    .primary-actions.is-floating-animate .primary-action-btn:nth-child(2) {
-      animation-delay: 0.07s;
+    .primary-actions.is-floating-animate.to-float .primary-action-btn:nth-child(2),
+    .primary-actions.is-floating-animate.to-dock .primary-action-btn:nth-child(2) {
+      animation-delay: 0.08s;
     }
 
     .primary-action-btn .btn-label {
@@ -262,8 +348,15 @@
       }
 
       .primary-actions.is-floating-animate,
-      .primary-actions.is-floating-animate .primary-action-btn {
-        animation: none;
+      .primary-actions.is-floating-animate .primary-action-btn,
+      .primary-actions.is-flip-animating {
+        animation: none !important;
+        transition: none !important;
+      }
+
+      .primary-actions-flight-layer,
+      .primary-actions-flight-orb {
+        display: none;
       }
     }
 
@@ -2041,40 +2134,231 @@
           return;
         }
 
+        const FLOAT_TRANSITION_MS = 520;
+        const prefersReducedMotion = window.matchMedia(
+          "(prefers-reduced-motion: reduce)"
+        ).matches;
+
         let animateTimer = null;
+        let isTransitioning = false;
 
         function clearFloatAnimation() {
-          actions.classList.remove("is-floating-animate");
+          actions.classList.remove("is-floating-animate", "to-float", "to-dock");
           if (animateTimer) {
             window.clearTimeout(animateTimer);
             animateTimer = null;
           }
         }
 
-        function playFloatAnimation() {
+        function playMorphAnimation(direction) {
           clearFloatAnimation();
-          actions.classList.add("is-floating-animate");
-          animateTimer = window.setTimeout(clearFloatAnimation, 520);
+          actions.classList.add("is-floating-animate", direction);
+          animateTimer = window.setTimeout(clearFloatAnimation, FLOAT_TRANSITION_MS + 80);
         }
 
-        function updateFloatingState() {
+        function captureRect(element) {
+          return element.getBoundingClientRect();
+        }
+
+        function buildArcOffsets(dx, dy) {
+          const distance = Math.hypot(dx, dy) || 1;
+          const arc = Math.min(78, distance * 0.24);
+          return {
+            perpX: (-dy / distance) * arc,
+            perpY: (dx / distance) * arc,
+          };
+        }
+
+        function buildFlipKeyframes(dx, dy, sx, sy) {
+          const { perpX, perpY } = buildArcOffsets(dx, dy);
+          const midSx = sx + (1 - sx) * 0.5;
+          const midSy = sy + (1 - sy) * 0.5;
+
+          return [
+            {
+              transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`,
+              offset: 0,
+            },
+            {
+              transform: `translate(${dx * 0.52 + perpX}px, ${dy * 0.52 + perpY}px) scale(${midSx}, ${midSy})`,
+              offset: 0.58,
+            },
+            {
+              transform: "translate(0px, 0px) scale(1, 1)",
+              offset: 1,
+            },
+          ];
+        }
+
+        function createFlightLayer(fromRect, toRect, direction) {
+          const startX = fromRect.left + fromRect.width / 2;
+          const startY = fromRect.top + fromRect.height / 2;
+          const endX = toRect.left + toRect.width / 2;
+          const endY = toRect.top + toRect.height / 2;
+          const dx = startX - endX;
+          const dy = startY - endY;
+          const { perpX, perpY } = buildArcOffsets(dx, dy);
+          const controlX = (startX + endX) / 2 + perpX;
+          const controlY = (startY + endY) / 2 + perpY;
+
+          const layer = document.createElement("div");
+          layer.className = "primary-actions-flight-layer";
+          layer.setAttribute("aria-hidden", "true");
+
+          const svgNS = "http://www.w3.org/2000/svg";
+          const svg = document.createElementNS(svgNS, "svg");
+          svg.setAttribute("class", "primary-actions-flight-svg");
+
+          const path = document.createElementNS(svgNS, "path");
+          path.setAttribute("class", `primary-actions-flight-path ${direction}`);
+          path.setAttribute(
+            "d",
+            `M ${startX} ${startY} Q ${controlX} ${controlY} ${endX} ${endY}`
+          );
+          svg.appendChild(path);
+          layer.appendChild(svg);
+
+          const orb = document.createElement("div");
+          orb.className = `primary-actions-flight-orb ${direction}`;
+          layer.appendChild(orb);
+
+          document.body.appendChild(layer);
+
+          const pathLength = path.getTotalLength();
+          path.style.strokeDasharray = `${pathLength}`;
+          path.style.strokeDashoffset = `${pathLength}`;
+
+          const easing = "cubic-bezier(0.34, 1.56, 0.64, 1)";
+          const pathAnim = path.animate(
+            [
+              { strokeDashoffset: pathLength, opacity: 0.15 },
+              { strokeDashoffset: pathLength * 0.35, opacity: 0.85, offset: 0.22 },
+              { strokeDashoffset: 0, opacity: 0.55, offset: 1 },
+            ],
+            { duration: FLOAT_TRANSITION_MS, easing, fill: "forwards" }
+          );
+
+          const orbAnim = orb.animate(
+            [
+              {
+                transform: `translate(${startX - 6}px, ${startY - 6}px) scale(0.4)`,
+                opacity: 0,
+              },
+              {
+                transform: `translate(${controlX - 6}px, ${controlY - 6}px) scale(1.15)`,
+                opacity: 1,
+                offset: 0.55,
+              },
+              {
+                transform: `translate(${endX - 6}px, ${endY - 6}px) scale(0.55)`,
+                opacity: 0,
+                offset: 1,
+              },
+            ],
+            { duration: FLOAT_TRANSITION_MS, easing, fill: "forwards" }
+          );
+
+          const cleanup = () => {
+            pathAnim.cancel();
+            orbAnim.cancel();
+            layer.remove();
+          };
+
+          pathAnim.onfinish = cleanup;
+          orbAnim.onfinish = cleanup;
+          window.setTimeout(cleanup, FLOAT_TRANSITION_MS + 120);
+
+          return layer;
+        }
+
+        function applyFloatingState(toFloating, firstRect) {
+          if (toFloating) {
+            anchor.style.width = `${Math.round(firstRect.width)}px`;
+            anchor.style.height = `${Math.round(firstRect.height)}px`;
+            actions.classList.add("is-floating");
+            return;
+          }
+
+          actions.classList.remove("is-floating");
+        }
+
+        function finishDockState(toFloating) {
+          actions.classList.remove("is-flip-animating");
+          actions.style.transform = "";
+          actions.style.transformOrigin = "";
+
+          if (!toFloating) {
+            anchor.style.width = "";
+            anchor.style.height = "";
+          }
+        }
+
+        function animatePrimaryActionsTransition(toFloating) {
+          if (prefersReducedMotion) {
+            const firstRect = captureRect(actions);
+            applyFloatingState(toFloating, firstRect);
+            finishDockState(toFloating);
+            playMorphAnimation(toFloating ? "to-float" : "to-dock");
+            return Promise.resolve();
+          }
+
+          const firstRect = captureRect(actions);
+          applyFloatingState(toFloating, firstRect);
+          const lastRect = captureRect(actions);
+
+          const dx = firstRect.left - lastRect.left;
+          const dy = firstRect.top - lastRect.top;
+          const sx = firstRect.width / lastRect.width;
+          const sy = firstRect.height / lastRect.height;
+
+          createFlightLayer(firstRect, lastRect, toFloating ? "to-float" : "to-dock");
+          playMorphAnimation(toFloating ? "to-float" : "to-dock");
+
+          actions.classList.add("is-flip-animating");
+          actions.style.transformOrigin = "top left";
+          actions.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
+
+          return new Promise((resolve) => {
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                const animation = actions.animate(buildFlipKeyframes(dx, dy, sx, sy), {
+                  duration: FLOAT_TRANSITION_MS,
+                  easing: "cubic-bezier(0.34, 1.56, 0.64, 1)",
+                  fill: "forwards",
+                });
+
+                animation.onfinish = () => {
+                  finishDockState(toFloating);
+                  resolve();
+                };
+                animation.oncancel = () => {
+                  finishDockState(toFloating);
+                  resolve();
+                };
+              });
+            });
+          });
+        }
+
+        async function updateFloatingState() {
+          if (isTransitioning) {
+            return;
+          }
+
           const pastHeader = header.getBoundingClientRect().bottom < 12;
           const isFloating = actions.classList.contains("is-floating");
 
           if (pastHeader && !isFloating) {
-            const rect = actions.getBoundingClientRect();
-            anchor.style.width = `${Math.round(rect.width)}px`;
-            anchor.style.height = `${Math.round(rect.height)}px`;
-            actions.classList.add("is-floating");
-            playFloatAnimation();
+            isTransitioning = true;
+            await animatePrimaryActionsTransition(true);
+            isTransitioning = false;
             return;
           }
 
           if (!pastHeader && isFloating) {
-            actions.classList.remove("is-floating");
-            clearFloatAnimation();
-            anchor.style.width = "";
-            anchor.style.height = "";
+            isTransitioning = true;
+            await animatePrimaryActionsTransition(false);
+            isTransitioning = false;
           }
         }
 
