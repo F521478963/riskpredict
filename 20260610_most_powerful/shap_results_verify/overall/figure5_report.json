@@ -1,0 +1,48 @@
+{
+  "model_id": "overall",
+  "task": "classification",
+  "title_en": "Overall Screening (Ridge-RF)",
+  "n_samples": 240,
+  "n_features": 15,
+  "expected_value": 0.4460912546564352,
+  "representative_cases": {
+    "abnormal": {
+      "index": 52,
+      "label": 1.0,
+      "prediction": 1.249671731866357
+    },
+    "control": {
+      "index": 210,
+      "label": 0.0,
+      "prediction": -0.46297555054776857
+    }
+  },
+  "outputs": {
+    "summary_plot": "20260610_most_powerful/shap_results_verify/overall/figure5_summary.png",
+    "importance_plot": "20260610_most_powerful/shap_results_verify/overall/figure5_importance.png",
+    "composite_plot": "20260610_most_powerful/shap_results_verify/overall/figure5_composite.png",
+    "shap_values_csv": "20260610_most_powerful/shap_results_verify/overall/figure5_shap_values.csv"
+  },
+  "top_features": [
+    {
+      "feature": "right ear wenli variance1608",
+      "mean_abs_shap": 0.0648743092621813
+    },
+    {
+      "feature": "left ear wenli mean218",
+      "mean_abs_shap": 0.0628103281875445
+    },
+    {
+      "feature": "face guangpu mean1",
+      "mean_abs_shap": 0.05438804077373803
+    },
+    {
+      "feature": "left ear wenli mean214",
+      "mean_abs_shap": 0.053634584920172916
+    },
+    {
+      "feature": "face wenli variance951",
+      "mean_abs_shap": 0.0488913485442094
+    }
+  ]
+}

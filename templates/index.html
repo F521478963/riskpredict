@@ -910,6 +910,142 @@
       right: 50%;
       background: linear-gradient(270deg, #93c5fd 0%, #3b82f6 100%);
     }
+
+    .shap-force-wrap {
+      margin-bottom: 18px;
+      padding: 14px 12px 8px;
+      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid #e9d5ff;
+    }
+
+    .shap-force-title {
+      margin: 0 0 10px;
+      color: #5b21b6;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .shap-force-plot {
+      position: relative;
+      min-height: 118px;
+      padding: 34px 8px 52px;
+    }
+
+    .shap-force-axis {
+      position: relative;
+      height: 4px;
+      border-radius: 999px;
+      background: #e2e8f0;
+    }
+
+    .shap-force-marker {
+      position: absolute;
+      top: -24px;
+      transform: translateX(-50%);
+      color: #334155;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .shap-force-marker::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 18px;
+      width: 1px;
+      height: 14px;
+      background: #64748b;
+      transform: translateX(-50%);
+    }
+
+    .shap-force-marker.prediction {
+      top: -30px;
+      font-size: 13px;
+      color: #111827;
+    }
+
+    .shap-force-segment {
+      position: absolute;
+      top: 0;
+      height: 4px;
+      border-radius: 999px;
+    }
+
+    .shap-force-segment.positive {
+      background: #ef4444;
+    }
+
+    .shap-force-segment.negative {
+      background: #3b82f6;
+    }
+
+    .shap-force-labels {
+      position: relative;
+      margin-top: 14px;
+      min-height: 42px;
+    }
+
+    .shap-force-label {
+      position: absolute;
+      transform: translateX(-50%);
+      max-width: 180px;
+      font-size: 11px;
+      line-height: 1.35;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .shap-force-label.positive {
+      color: #b91c1c;
+    }
+
+    .shap-force-label.negative {
+      color: #1d4ed8;
+    }
+
+    .shap-force-label::before {
+      content: "";
+      display: block;
+      width: 1px;
+      height: 10px;
+      margin: 0 auto 3px;
+      background: currentColor;
+      opacity: 0.45;
+    }
+
+    .shap-force-legend {
+      display: flex;
+      justify-content: flex-end;
+      gap: 14px;
+      margin-bottom: 8px;
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    .shap-force-legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .shap-force-legend i {
+      display: inline-block;
+      width: 18px;
+      height: 4px;
+      border-radius: 999px;
+    }
+
+    .shap-force-legend i.positive {
+      background: #ef4444;
+    }
+
+    .shap-force-legend i.negative {
+      background: #3b82f6;
+    }
   </style>
 </head>
 <body>
@@ -981,9 +1117,9 @@
         <section class="shap-panel" id="shap-panel" aria-label="SHAP interpretability">
           <h2>SHAP 可解释性分析 / SHAP Interpretability</h2>
           <p class="panel-desc">
-            展示各模型最终入选的全部特征输入值及其 SHAP 贡献（Shapley 值）。
-            红色表示推高预测值，蓝色表示拉低预测值；绝对值越大，影响越强。
-            All selected features with input values and SHAP contributions are shown below.
+            各模型贡献值在同一横轴上叠加展示（Force Plot），并标注影响较大的特征；下方表格列出全部特征明细。
+            红色表示推高预测值，蓝色表示拉低预测值。
+            Contributions are stacked on one axis with top features labeled; the table lists all feature details.
           </p>
 
           <div class="shap-model-tabs" role="tablist" aria-label="SHAP model tabs">
@@ -1026,6 +1162,19 @@
                 </div>
               </div>
 
+              <div class="shap-force-wrap">
+                <p class="shap-force-title">单样本 Force Plot / Single-instance Force Plot</p>
+                <div class="shap-force-legend" aria-hidden="true">
+                  <span><i class="positive"></i>推高 / Push Up</span>
+                  <span><i class="negative"></i>拉低 / Push Down</span>
+                </div>
+                <div
+                  class="shap-force-plot"
+                  data-shap-force-plot="{{ explanation.model_id }}"
+                  aria-label="SHAP force plot for {{ explanation.title_en }}"
+                ></div>
+              </div>
+
               <div class="shap-table-wrap">
                 <table class="shap-table">
                   <thead>
@@ -1035,12 +1184,10 @@
                       <th>输入值 / Input</th>
                       <th>SHAP 值</th>
                       <th>方向 / Direction</th>
-                      <th>贡献可视化 / Contribution</th>
                     </tr>
                   </thead>
                   <tbody>
                     {% for feature in explanation.features %}
-                      {% set width_pct = (feature.abs_shap / explanation.max_abs_shap * 50) if explanation.max_abs_shap > 0 else 0 %}
                       <tr>
                         <td>{{ loop.index }}</td>
                         <td class="shap-feature-name">
@@ -1058,15 +1205,6 @@
                             拉低 / Push Down
                           {% endif %}
                         </td>
-                        <td class="shap-bar-cell">
-                          <div class="shap-bar-track" aria-hidden="true">
-                            <div class="shap-bar-center"></div>
-                            <div
-                              class="shap-bar-fill {{ feature.direction }}"
-                              style="width: {{ '%.2f'|format(width_pct) }}%;"
-                            ></div>
-                          </div>
-                        </td>
                       </tr>
                     {% endfor %}
                   </tbody>
@@ -1080,6 +1218,12 @@
           SHAP 可解释性分析未加载（请确认已安装 <code>shap</code>，且未设置 <code>SHAP_ENABLED=0</code>）。
           SHAP interpretability is unavailable — install <code>shap</code> or check SHAP_ENABLED.
         </p>
+      {% endif %}
+
+      {% if shap_explanations %}
+        <script id="shap-explanations-data" type="application/json">
+          {{ shap_explanations | tojson }}
+        </script>
       {% endif %}
     {% endif %}
 
@@ -1399,7 +1543,152 @@
         });
       }
 
+      function formatShapNumber(value) {
+        const abs = Math.abs(value);
+        if (abs >= 100) {
+          return value.toFixed(4);
+        }
+        if (abs >= 1) {
+          return value.toFixed(6);
+        }
+        return value.toFixed(6);
+      }
+
+      function shouldLabelForceFeature(feature, index, totalAbs, thresholdRatio) {
+        return feature.abs_shap >= totalAbs * thresholdRatio || index < 6;
+      }
+
+      function renderShapForcePlot(container, explanation) {
+        const base = Number(explanation.base_value);
+        const prediction = Number(explanation.prediction);
+        const features = Array.isArray(explanation.features) ? explanation.features : [];
+        const positive = features
+          .filter((item) => item.shap_value >= 0)
+          .sort((a, b) => b.abs_shap - a.abs_shap);
+        const negative = features
+          .filter((item) => item.shap_value < 0)
+          .sort((a, b) => b.abs_shap - a.abs_shap);
+
+        let cursor = base;
+        const positiveSegments = positive.map((feature) => {
+          const segment = {
+            ...feature,
+            start: cursor,
+            end: cursor + Number(feature.shap_value),
+          };
+          cursor = segment.end;
+          return segment;
+        });
+
+        cursor = prediction;
+        const negativeSegments = negative.map((feature) => {
+          const segment = {
+            ...feature,
+            start: cursor,
+            end: cursor + Number(feature.shap_value),
+          };
+          cursor = segment.end;
+          return segment;
+        });
+
+        const axisValues = [base, prediction, cursor];
+        positiveSegments.forEach((segment) => {
+          axisValues.push(segment.start, segment.end);
+        });
+        negativeSegments.forEach((segment) => {
+          axisValues.push(segment.start, segment.end);
+        });
+
+        const axisMin = Math.min(...axisValues);
+        const axisMax = Math.max(...axisValues);
+        const padding = (axisMax - axisMin) * 0.08 || 0.1;
+        const minValue = axisMin - padding;
+        const maxValue = axisMax + padding;
+        const range = maxValue - minValue || 1;
+        const toPercent = (value) => ((value - minValue) / range) * 100;
+
+        const totalAbs = features.reduce(
+          (sum, feature) => sum + Number(feature.abs_shap || 0),
+          0
+        );
+        const thresholdRatio = 0.05;
+
+        const axis = document.createElement("div");
+        axis.className = "shap-force-axis";
+
+        const baseMarker = document.createElement("div");
+        baseMarker.className = "shap-force-marker";
+        baseMarker.style.left = `${toPercent(base)}%`;
+        baseMarker.textContent = `base = ${formatShapNumber(base)}`;
+        axis.appendChild(baseMarker);
+
+        const predictionMarker = document.createElement("div");
+        predictionMarker.className = "shap-force-marker prediction";
+        predictionMarker.style.left = `${toPercent(prediction)}%`;
+        predictionMarker.textContent = `f(x) = ${formatShapNumber(prediction)}`;
+        axis.appendChild(predictionMarker);
+
+        [...positiveSegments, ...negativeSegments].forEach((segment) => {
+          const bar = document.createElement("div");
+          bar.className = `shap-force-segment ${segment.direction}`;
+          const left = Math.min(segment.start, segment.end);
+          const right = Math.max(segment.start, segment.end);
+          bar.style.left = `${toPercent(left)}%`;
+          bar.style.width = `${Math.max(toPercent(right) - toPercent(left), 0.35)}%`;
+          axis.appendChild(bar);
+        });
+
+        const labels = document.createElement("div");
+        labels.className = "shap-force-labels";
+
+        const labeledSegments = [
+          ...positiveSegments.map((segment, index) => ({ segment, index })),
+          ...negativeSegments.map((segment, index) => ({ segment, index })),
+        ].filter(({ segment, index }) =>
+          shouldLabelForceFeature(segment, index, totalAbs, thresholdRatio)
+        );
+
+        labeledSegments.forEach(({ segment }) => {
+          const label = document.createElement("div");
+          label.className = `shap-force-label ${segment.direction}`;
+          const center = (segment.start + segment.end) / 2;
+          label.style.left = `${toPercent(center)}%`;
+          const featureName = segment.label_en || segment.feature;
+          label.title = `${featureName} = ${formatShapNumber(Number(segment.value))}`;
+          label.textContent = `${featureName} = ${formatShapNumber(Number(segment.value))}`;
+          labels.appendChild(label);
+        });
+
+        container.replaceChildren(axis, labels);
+      }
+
+      function initShapForcePlots() {
+        const dataNode = document.getElementById("shap-explanations-data");
+        if (!dataNode) {
+          return;
+        }
+
+        let explanations = [];
+        try {
+          explanations = JSON.parse(dataNode.textContent || "[]");
+        } catch (error) {
+          console.warn("Failed to parse SHAP explanations", error);
+          return;
+        }
+
+        explanations.forEach((explanation) => {
+          const container = document.querySelector(
+            `[data-shap-force-plot="${explanation.model_id}"]`
+          );
+          if (!container) {
+            return;
+          }
+          renderShapForcePlot(container, explanation);
+        });
+      }
+
       initShapTabs();
+      initShapForcePlots();
     </script>
   </main>
 </body>

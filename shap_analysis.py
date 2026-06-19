@@ -186,6 +186,25 @@ def _make_explanation(
     )
 
 
+def save_force_plot(
+    explanation: shap.Explanation,
+    output_path: Path,
+    title: str,
+    contribution_threshold: float = 0.05,
+) -> None:
+    plt.figure(figsize=(12, 2.8))
+    shap.plots.force(
+        explanation,
+        matplotlib=True,
+        show=False,
+        contribution_threshold=contribution_threshold,
+    )
+    plt.title(title)
+    plt.tight_layout()
+    plt.savefig(output_path, bbox_inches="tight")
+    plt.close()
+
+
 def save_local_plots(
     shap_values: np.ndarray,
     features: np.ndarray,
@@ -210,7 +229,7 @@ def save_local_plots(
             index,
         )
         waterfall_path = output_dir / f"{prefix}_waterfall_{case_name}.png"
-        bar_path = output_dir / f"{prefix}_bar_{case_name}.png"
+        force_path = output_dir / f"{prefix}_force_{case_name}.png"
 
         plt.figure(figsize=(8, 6))
         shap.plots.waterfall(explanation, max_display=15, show=False)
@@ -219,12 +238,11 @@ def save_local_plots(
         plt.savefig(waterfall_path, bbox_inches="tight")
         plt.close()
 
-        plt.figure(figsize=(8, 6))
-        shap.plots.bar(explanation, max_display=15, show=False)
-        plt.title(f"{case_name.title()} case")
-        plt.tight_layout()
-        plt.savefig(bar_path, bbox_inches="tight")
-        plt.close()
+        save_force_plot(
+            explanation,
+            force_path,
+            title=f"{case_name.title()} case",
+        )
 
         saved[case_name] = int(index)
     return saved
@@ -235,8 +253,8 @@ def save_composite_figure(
     importance_path: Path,
     waterfall_abnormal_path: Path,
     waterfall_control_path: Path,
-    bar_abnormal_path: Path,
-    bar_control_path: Path,
+    force_abnormal_path: Path,
+    force_control_path: Path,
     output_path: Path,
     title: str,
 ) -> None:
@@ -245,8 +263,8 @@ def save_composite_figure(
         importance_path,
         waterfall_abnormal_path,
         waterfall_control_path,
-        bar_abnormal_path,
-        bar_control_path,
+        force_abnormal_path,
+        force_control_path,
     ]
     labels = ["A", "B", "C", "D", "E", "F"]
     fig, axes = plt.subplots(3, 2, figsize=(14, 18))
@@ -323,8 +341,8 @@ def analyze_model(
         importance_path,
         model_output_dir / f"{spec.figure_prefix}_waterfall_abnormal.png",
         model_output_dir / f"{spec.figure_prefix}_waterfall_control.png",
-        model_output_dir / f"{spec.figure_prefix}_bar_abnormal.png",
-        model_output_dir / f"{spec.figure_prefix}_bar_control.png",
+        model_output_dir / f"{spec.figure_prefix}_force_abnormal.png",
+        model_output_dir / f"{spec.figure_prefix}_force_control.png",
         composite_path,
         title=f"SHAP Interpretability - {spec.title_en}",
     )
