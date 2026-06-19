@@ -21,14 +21,14 @@ class FakeRetriever:
 
 class GuidelineRAGRetrieverTest(unittest.TestCase):
     def test_build_risk_query_adds_high_risk_acs_terms(self):
-        query = build_risk_query({"label_zh": "高风险", "label_en": "High Risk"})
+        query = build_risk_query({"label_en": "High Risk"})
 
         self.assertIn("high risk", query)
         self.assertIn("acute coronary syndrome", query)
         self.assertIn("invasive", query)
 
     def test_build_risk_query_adds_low_risk_follow_up_terms(self):
-        query = build_risk_query({"label_zh": "低风险", "label_en": "Low Risk"})
+        query = build_risk_query({"label_en": "Low Risk"})
 
         self.assertIn("low risk", query)
         self.assertIn("discharge", query)
@@ -49,7 +49,7 @@ class GuidelineRAGRetrieverTest(unittest.TestCase):
             top_k=1,
         )
 
-        results = retriever.search_for_risk({"label_zh": "高风险", "label_en": "High Risk"})
+        results = retriever.search_for_risk({"label_en": "High Risk"})
 
         self.assertEqual(results[0]["page"], 8)
         self.assertIn("early invasive evaluation", results[0]["text"])
@@ -70,7 +70,7 @@ class GuidelineRAGRetrieverTest(unittest.TestCase):
             top_k=1,
         )
 
-        results = retriever.search_for_risk({"label_zh": "低风险", "label_en": "Low Risk"})
+        results = retriever.search_for_risk({"label_en": "Low Risk"})
 
         self.assertEqual(results[0]["page"], 15)
         self.assertIn("outpatient follow-up", results[0]["text"])
@@ -83,7 +83,7 @@ class GuidelineRAGRetrieverTest(unittest.TestCase):
             self.assertTrue(str(retriever.cache_path).endswith("guideline.rag_cache.json"))
 
     def test_combined_retriever_merges_and_sorts_multiple_guidelines(self):
-        risk = {"label_zh": "高风险", "label_en": "High Risk"}
+        risk = {"label_en": "High Risk"}
         first = FakeRetriever(
             [{"page": 3, "text": "ACC high-risk acute coronary syndrome guidance", "score": 2.0}]
         )
@@ -110,7 +110,7 @@ class GuidelineRAGRetrieverTest(unittest.TestCase):
             top_k=2,
         )
 
-        results = combined.search_for_risk({"label_zh": "高风险", "label_en": "High Risk"})
+        results = combined.search_for_risk({"label_en": "High Risk"})
 
         self.assertEqual(results[0]["source"], "2024 ESC CCS Guideline")
         self.assertEqual(results[1]["source"], "2025 ACC/AHA ACS Guideline")
@@ -132,7 +132,7 @@ class GuidelineRAGRetrieverTest(unittest.TestCase):
             top_k=3,
         )
 
-        results = combined.search_for_risk({"label_zh": "高风险", "label_en": "High Risk"})
+        results = combined.search_for_risk({"label_en": "High Risk"})
 
         self.assertEqual(len(results), 3)
         self.assertIn("2024 ESC CCS Guideline", [result["source"] for result in results])

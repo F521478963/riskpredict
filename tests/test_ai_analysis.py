@@ -24,7 +24,7 @@ class FakeCompletions:
 
     def create(self, **kwargs):
         self.captured["completion_kwargs"] = kwargs
-        return FakeCompletion("AI 风险分析报告 / AI Risk Analysis Report")
+        return FakeCompletion("AI Risk Analysis Report")
 
 
 class FakeChat:
@@ -50,14 +50,14 @@ class FakeCorpusStore:
 class DeepSeekAnalyzerTest(unittest.TestCase):
     def test_build_feature_summary_pairs_labels_with_values(self):
         fields = [
-            {"label_zh": "面部光谱均值1", "label_en": "Face spectrum mean 1"},
-            {"label_zh": "右耳纹理均值71", "label_en": "Right ear texture mean 71"},
+            {"label_en": "Face spectrum mean 1"},
+            {"label_en": "Right ear texture mean 71"},
         ]
 
         summary = build_feature_summary(fields, [0.12, 0.34])
 
-        self.assertIn("面部光谱均值1 / Face spectrum mean 1: 0.12", summary)
-        self.assertIn("右耳纹理均值71 / Right ear texture mean 71: 0.34", summary)
+        self.assertIn("Face spectrum mean 1: 0.12", summary)
+        self.assertIn("Right ear texture mean 71: 0.34", summary)
 
     def test_analyzer_skips_api_when_key_is_missing(self):
         analyzer = DeepSeekAnalyzer(api_key=None, corpus_store=FakeCorpusStore([]))
@@ -66,7 +66,7 @@ class DeepSeekAnalyzerTest(unittest.TestCase):
             fields=[],
             values=[],
             prediction=0.9,
-            risk={"label_zh": "高风险", "label_en": "High Risk"},
+            risk={"label_en": "High Risk"},
         )
 
         self.assertIsNone(result["content"])
@@ -98,13 +98,13 @@ class DeepSeekAnalyzerTest(unittest.TestCase):
             ),
         )
         result = analyzer.analyze(
-            fields=[{"label_zh": "面部光谱均值1", "label_en": "Face spectrum mean 1"}],
+            fields=[{"label_en": "Face spectrum mean 1"}],
             values=[0.1],
             prediction=0.9,
-            risk={"label_zh": "高风险", "label_en": "High Risk"},
+            risk={"label_en": "High Risk"},
         )
 
-        self.assertEqual(result["content"], "AI 风险分析报告 / AI Risk Analysis Report")
+        self.assertEqual(result["content"], "AI Risk Analysis Report")
         self.assertIsNone(result["error"])
         self.assertEqual(captured["api_key"], "test-key")
         self.assertEqual(captured["base_url"], DEEPSEEK_BASE_URL)
@@ -125,7 +125,7 @@ class DeepSeekAnalyzerTest(unittest.TestCase):
         def fake_client_factory(api_key, base_url, timeout, verify_ssl):
             return FakeClient(captured)
 
-        risk = {"label_zh": "高风险", "label_en": "High Risk"}
+        risk = {"label_en": "High Risk"}
         store = FakeCorpusStore(
             [
                 {
@@ -184,7 +184,7 @@ class DeepSeekAnalyzerTest(unittest.TestCase):
             fields=[],
             values=[],
             prediction=0.42,
-            risk={"label_zh": "低风险", "label_en": "Low Risk"},
+            risk={"label_en": "Low Risk"},
         )
 
         messages = captured["completion_kwargs"]["messages"]
@@ -205,7 +205,7 @@ class DeepSeekAnalyzerTest(unittest.TestCase):
             fields=[],
             values=[],
             prediction=0.5,
-            risk={"label_zh": "高风险", "label_en": "High Risk"},
+            risk={"label_en": "High Risk"},
         )
 
         self.assertIsNone(result["error"])

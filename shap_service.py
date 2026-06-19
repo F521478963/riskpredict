@@ -21,11 +21,8 @@ MAX_BACKGROUND = 100
 BACKGROUND_SEED = 42
 
 FEATURE_LABELS = {
-    column: {
-        "label_zh": feature_alias(column),
-        "label_en": feature_alias(column),
-    }
-    for column, _label_zh, _label_en, _group in FEATURE_SPECS
+    column: feature_alias(column)
+    for column, _label_en, _group in FEATURE_SPECS
 }
 
 
@@ -36,7 +33,6 @@ class RuntimeModelSpec:
     data_file: str
     feature_names: list[str]
     task: str
-    title_zh: str
     title_en: str
 
 
@@ -47,7 +43,6 @@ RUNTIME_MODEL_SPECS = [
         data_file="y_Ridge.xlsx",
         feature_names=OVERALL_FEATURE_NAMES,
         task="classification",
-        title_zh="整体筛查（Ridge-RF）",
         title_en="Overall Screening (Ridge-RF)",
     ),
 ]
@@ -56,7 +51,6 @@ RUNTIME_MODEL_SPECS = [
 @dataclass
 class ShapFeatureContribution:
     feature: str
-    label_zh: str
     label_en: str
     value: float
     shap_value: float
@@ -70,7 +64,6 @@ class ShapFeatureContribution:
 @dataclass
 class ShapExplanationResult:
     model_id: str
-    title_zh: str
     title_en: str
     task: str
     base_value: float
@@ -106,7 +99,7 @@ class _ModelExplainer:
     def explain(self, feature_map: dict[str, float]) -> ShapExplanationResult:
         missing = [name for name in self.spec.feature_names if name not in feature_map]
         if missing:
-            raise KeyError(f"缺少 SHAP 所需特征: {missing[:3]}")
+            raise KeyError(f"Missing SHAP features, e.g.: {missing[:3]}")
 
         raw = np.array(
             [float(feature_map[name]) for name in self.spec.feature_names],
@@ -118,16 +111,12 @@ class _ModelExplainer:
 
         contributions: list[ShapFeatureContribution] = []
         for index, feature_name in enumerate(self.spec.feature_names):
-            labels = FEATURE_LABELS.get(
-                feature_name,
-                {"label_zh": feature_name, "label_en": feature_name},
-            )
+            label_en = FEATURE_LABELS.get(feature_name, feature_name)
             shap_value = float(shap_values[index])
             contributions.append(
                 ShapFeatureContribution(
                     feature=feature_name,
-                    label_zh=labels["label_zh"],
-                    label_en=labels["label_en"],
+                    label_en=label_en,
                     value=float(raw[0, index]),
                     shap_value=shap_value,
                     abs_shap=abs(shap_value),
@@ -139,7 +128,6 @@ class _ModelExplainer:
         max_abs = max((item.abs_shap for item in contributions), default=0.0)
         return ShapExplanationResult(
             model_id=self.spec.model_id,
-            title_zh=self.spec.title_zh,
             title_en=self.spec.title_en,
             task=self.spec.task,
             base_value=float(self.explainer.expected_value),
@@ -167,7 +155,7 @@ class ShapRuntime:
 
     def explain_model(self, model_id: str, feature_map: dict[str, float]) -> ShapExplanationResult:
         if model_id not in self._explainers:
-            raise KeyError(f"未知 SHAP 模型: {model_id}")
+            raise KeyError(f"Unknown SHAP model: {model_id}")
         return self._explainers[model_id].explain(feature_map)
 
 

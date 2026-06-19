@@ -178,7 +178,6 @@ def _predict_all_branches(feature_map, screening_score):
         results.append(
             {
                 "id": spec["id"],
-                "label_zh": spec["label_zh"],
                 "label_en": spec["label_en"],
                 "qfr": qfr,
                 "status": classify_branch_qfr(qfr, BRANCH_QFR_THRESHOLDS[spec["id"]]),
@@ -198,13 +197,11 @@ def _attach_judgment_metadata(ai_analysis, judgment_mode="combined"):
 def classify_risk(value):
     if value >= RISK_THRESHOLD:
         return {
-            "label_zh": "高风险",
             "label_en": "High Risk",
             "class_name": "high-risk",
         }
 
     return {
-        "label_zh": "低风险",
         "label_en": "Low Risk",
         "class_name": "low-risk",
     }
@@ -213,13 +210,11 @@ def classify_risk(value):
 def classify_branch_qfr(value, threshold):
     if value >= threshold:
         return {
-            "label_zh": "正常",
             "label_en": "Normal",
             "class_name": "branch-normal",
         }
 
     return {
-        "label_zh": "关注",
         "label_en": "Attention",
         "class_name": "branch-attention",
     }

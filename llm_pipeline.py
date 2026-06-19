@@ -41,7 +41,9 @@ def load_prompt_config(judgment_mode=DEFAULT_JUDGMENT_MODE, path=None):
     try:
         import yaml
     except ImportError as exc:
-        raise RuntimeError("缺少 PyYAML，请先安装 requirements.txt。") from exc
+        raise RuntimeError(
+            "PyYAML is required. Install dependencies from requirements.txt."
+        ) from exc
 
     data = yaml.safe_load(prompt_path.read_text(encoding="utf-8")) or {}
     data["path"] = str(prompt_path)
@@ -176,7 +178,6 @@ class ClinicalAssistantPipeline:
         template = prompt_config["user_template"]
         return template.format(
             prediction=prediction,
-            risk_label_zh=risk.get("label_zh", ""),
             risk_label_en=risk.get("label_en", ""),
             threshold=RISK_THRESHOLD,
             guideline_context=self._format_guideline_context(snippets, judgment_mode),
@@ -251,7 +252,6 @@ def _format_fallback(prompt_config, prediction, risk):
     template = prompt_config.get("fallback_no_snippets", "")
     return template.format(
         prediction=prediction,
-        risk_label_zh=risk.get("label_zh", ""),
         risk_label_en=risk.get("label_en", ""),
     ).strip()
 

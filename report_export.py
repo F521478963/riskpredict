@@ -23,7 +23,7 @@ ASSESSMENT_SECTION_TITLES = frozenset(
 
 
 def split_analysis_body(body):
-    """将 LLM 正文拆为「判断依据」与「诊断评估与检查建议」两段 Markdown。"""
+    """Split LLM body into evidence and assessment Markdown sections."""
     body = (body or "").strip()
     if not body:
         return "", ""
@@ -67,7 +67,6 @@ def build_analysis_report(result, risk, ai_analysis, judgment_mode, judgment_lab
     meta = {
         "generated_at": _format_timestamp(),
         "prediction": result,
-        "risk_zh": risk.get("label_zh"),
         "risk_en": risk.get("label_en"),
         "judgment_mode": mode,
         "judgment_label": label,
@@ -106,7 +105,6 @@ def _build_module_report(module_key, title, title_en, meta, body):
         "title_en": title_en,
         "generated_at": meta["generated_at"],
         "prediction": meta["prediction"],
-        "risk_zh": meta["risk_zh"],
         "risk_en": meta["risk_en"],
         "judgment_mode": meta["judgment_mode"],
         "judgment_label": meta["judgment_label"],
@@ -158,7 +156,7 @@ def _should_skip_assessment_section(title):
 
 
 def sanitize_assessment_markdown(text):
-    """诊断评估模块：去除来源标注，并剔除不确定性相关小节。"""
+    """Remove source tags and uncertainty sections from the assessment module."""
     text = (text or "").strip()
     if not text:
         return ""

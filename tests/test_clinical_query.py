@@ -10,7 +10,7 @@ class ClinicalQueryTest(unittest.TestCase):
     def test_build_clinical_query_includes_prediction_and_threshold(self):
         query = build_clinical_query(
             0.42,
-            {"label_zh": "高风险", "label_en": "High Risk"},
+            {"label_en": "High Risk"},
         )
 
         self.assertIn("0.420000", query)
@@ -19,7 +19,7 @@ class ClinicalQueryTest(unittest.TestCase):
         self.assertIn("early invasive", query)
 
     def test_build_risk_query_remains_compatible(self):
-        query = build_risk_query({"label_zh": "低风险", "label_en": "Low Risk"})
+        query = build_risk_query({"label_en": "Low Risk"})
         self.assertIn("low risk", query)
         self.assertIn("follow-up", query)
 

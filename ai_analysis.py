@@ -16,7 +16,7 @@ from rag_store import get_default_corpus_store
 def build_feature_summary(fields, values):
     lines = []
     for field, value in zip(fields, values):
-        lines.append(f"- {field['label_zh']} / {field['label_en']}: {value}")
+        lines.append(f"- {field['label_en']}: {value}")
     return "\n".join(lines)
 
 

@@ -48,7 +48,7 @@ This assessment only suggests a higher likelihood of underlying coronary artery 
     def test_build_analysis_report_includes_assessment_module(self):
         report = build_analysis_report(
             result=0.42,
-            risk={"label_zh": "高风险", "label_en": "High Risk"},
+            risk={"label_en": "High Risk"},
             ai_analysis={
                 "content": (
                     "### Risk Level\n\nHigh risk.\n\n"

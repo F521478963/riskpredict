@@ -61,7 +61,7 @@ class RagCorpusStoreTest(unittest.TestCase):
             store.rebuild_index()
             results = store.search_for_prediction(
                 0.4,
-                {"label_zh": "高风险", "label_en": "High Risk"},
+                {"label_en": "High Risk"},
             )
 
             self.assertTrue(any(item["category"] == "guidelines" for item in results))

@@ -3,9 +3,12 @@
 from risk_config import RISK_THRESHOLD
 
 
+def _is_high_risk(risk) -> bool:
+    return "high" in risk.get("label_en", "").lower()
+
+
 def build_clinical_query(prediction, risk, patient_context=None):
-    label = f"{risk.get('label_zh', '')} {risk.get('label_en', '')}".lower()
-    is_high_risk = "high" in label or "高" in label
+    is_high_risk = _is_high_risk(risk)
 
     if is_high_risk:
         management_terms = (
@@ -33,7 +36,7 @@ def build_clinical_query(prediction, risk, patient_context=None):
     parts = [
         "Acute coronary syndrome risk stratification after noninvasive hyperspectral screening.",
         f"Model predicted score {float(prediction):.6f}; threshold {RISK_THRESHOLD}; "
-        f"classified as {risk.get('label_en', '')} / {risk.get('label_zh', '')}.",
+        f"classified as {risk.get('label_en', '')}.",
         management_terms,
         screening_note,
     ]
@@ -46,13 +49,12 @@ def build_clinical_query(prediction, risk, patient_context=None):
 
 def build_risk_query(risk):
     """Backward-compatible query builder used by legacy retriever tests."""
-    label = f"{risk.get('label_zh', '')} {risk.get('label_en', '')}".lower()
     base_terms = (
         "acute coronary syndrome ACS guideline management chest pain "
         "risk stratification clinical evaluation"
     )
 
-    if "high" in label or "高" in label:
+    if _is_high_risk(risk):
         return (
             f"high risk {base_terms} invasive evaluation early invasive "
             "urgent emergency reperfusion antiplatelet anticoagulation "

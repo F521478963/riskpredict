@@ -68,7 +68,7 @@ class PredictionServiceTest(unittest.TestCase):
         with self.assertRaises(FeatureShapeError) as context:
             service.predict_frame(frame)
 
-        self.assertIn("需要 2 列", str(context.exception))
+        self.assertIn("2 columns are required", str(context.exception))
 
     def test_from_shelve_without_comb_x_uses_sequential_feature_indexes(self):
         import shelve

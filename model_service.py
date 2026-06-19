@@ -31,7 +31,10 @@ class PredictionService:
                 else:
                     feature_count = getattr(model, "n_features_in_", None)
                     if feature_count is None:
-                        raise FeatureShapeError("模型文件缺少 comb_x，且无法从 clf 推断特征数量。")
+                        raise FeatureShapeError(
+                            "Model file is missing comb_x and feature count "
+                            "cannot be inferred from clf."
+                        )
                     feature_indexes = list(range(feature_count))
                 names = feature_names or save.get("feature_names")
                 return cls(
@@ -43,12 +46,14 @@ class PredictionService:
 
     def predict_values_by_names(self, feature_map):
         if not self.feature_names:
-            raise FeatureShapeError("当前模型未配置 feature_names，无法按列名预测。")
+            raise FeatureShapeError(
+                "feature_names is not configured; cannot predict by column name."
+            )
 
         missing = [name for name in self.feature_names if name not in feature_map]
         if missing:
             raise FeatureShapeError(
-                f"缺少 {len(missing)} 个模型特征，例如: {missing[:3]}"
+                f"Missing {len(missing)} model features, e.g.: {missing[:3]}"
             )
 
         values = [feature_map[name] for name in self.feature_names]
@@ -56,7 +61,7 @@ class PredictionService:
 
     def predict_frame_with_branches(self, frame, branch_specs, branch_services):
         if frame.empty:
-            raise FeatureShapeError("上传的 Excel 没有可预测的数据。")
+            raise FeatureShapeError("Uploaded Excel has no rows to predict.")
 
         overall = self.predict_frame(frame)
         for spec in branch_specs:
@@ -91,7 +96,8 @@ class PredictionService:
     def predict_values(self, values):
         if len(values) != len(self.feature_indexes):
             raise FeatureShapeError(
-                f"指标数量不匹配：需要 {len(self.feature_indexes)} 个，当前 {len(values)} 个。"
+                f"Feature count mismatch: expected {len(self.feature_indexes)}, "
+                f"got {len(values)}."
             )
 
         frame = pd.DataFrame([values])
@@ -100,7 +106,7 @@ class PredictionService:
 
     def predict_frame(self, frame):
         if frame.empty:
-            raise FeatureShapeError("上传的 Excel 没有可预测的数据。")
+            raise FeatureShapeError("Uploaded Excel has no rows to predict.")
 
         feature_frame = self._select_feature_frame(frame)
         values = feature_frame.to_numpy(dtype=float)
@@ -127,9 +133,14 @@ class PredictionService:
         if column_count >= required_full_count:
             return frame.iloc[:, self.feature_indexes]
 
+        feature_names_hint = (
+            " (or include model feature column names)"
+            if self.feature_names
+            else ""
+        )
         raise FeatureShapeError(
-            f"上传的 Excel 列数不匹配：当前 {column_count} 列。"
-            f"如果上传完整特征表，至少需要 {required_full_count} 列；"
-            f"如果只上传模型筛选后的 {expected_count} 个特征，需要 {expected_count} 列"
-            f"{'（或包含模型特征列名）' if self.feature_names else ''}。"
+            f"Uploaded Excel column count mismatch: got {column_count} columns. "
+            f"For a full feature table, at least {required_full_count} columns are required; "
+            f"for the model's {expected_count} selected features, "
+            f"{expected_count} columns are required{feature_names_hint}."
         )
