@@ -1088,18 +1088,6 @@
 
   <main class="card">
     <h1>Local Ridge-RF Prediction Tool</h1>
-    <p class="desc">
-      Enter 33 feature values to run local Ridge-RF screening with LAD/LCX/RCA QFR outputs.
-      AI reports are generated from the <code>rag_corpus/</code> guideline index
-      (rebuild after adding documents with <code>python scripts/rebuild_rag_index.py</code>).
-    </p>
-    {% if rag_status %}
-      <p class="hint">
-        RAG corpus: {{ rag_status.document_count }} document(s),
-        index {% if rag_status.index_built %}ready{% else %}not built{% endif %}
-        (mode {{ rag_status.retrieval_mode }}, top-{{ rag_status.top_k }}).
-      </p>
-    {% endif %}
 
     {% if error %}
       <div class="error">{{ error }}</div>
@@ -1246,12 +1234,6 @@
       <div class="ai-analysis-header">
         <h2>AI-Assisted Analysis</h2>
       </div>
-      <div class="research-disclaimer" role="note">
-        <strong>Research use only:</strong>
-        Ridge-RF outputs are intended to support <strong>medical research</strong> with
-        <strong>additional evaluation suggestions</strong>. They must not be used for clinical
-        treatment decisions, diagnosis, prescribing, or care pathways.
-      </div>
       <div class="analysis-loading" id="analysis-loading" aria-live="polite">
         <span class="loading-spinner" aria-hidden="true"></span>
         <span>Generating AI-assisted analysis, please wait...</span>
@@ -1323,10 +1305,6 @@
       <button type="submit" id="submit-combined" class="submit-combined">
         Combined Analysis
       </button>
-      <div class="hint">
-        Uses local RAG retrieval plus model knowledge for combined analysis. Inputs stay on this machine;
-        configure <code>DEEPSEEK_API_KEY</code> for LLM calls.
-      </div>
     </form>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js"></script>
