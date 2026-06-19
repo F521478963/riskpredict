@@ -103,59 +103,6 @@
       transition: none !important;
     }
 
-    .primary-actions-flight-layer {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 98;
-      overflow: visible;
-    }
-
-    .primary-actions-flight-path {
-      fill: none;
-      stroke: rgba(15, 118, 110, 0.42);
-      stroke-width: 2.5;
-      stroke-linecap: round;
-      stroke-dasharray: 1;
-      stroke-dashoffset: 1;
-      filter: drop-shadow(0 0 6px rgba(15, 118, 110, 0.28));
-    }
-
-    .primary-actions-flight-path.to-dock {
-      stroke: rgba(51, 65, 85, 0.38);
-      filter: drop-shadow(0 0 6px rgba(51, 65, 85, 0.22));
-    }
-
-    .primary-actions-flight-orb {
-      position: fixed;
-      left: 0;
-      top: 0;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, rgba(15, 118, 110, 0.88) 58%, rgba(15, 118, 110, 0) 100%);
-      box-shadow: 0 0 18px rgba(15, 118, 110, 0.55);
-      pointer-events: none;
-      z-index: 99;
-      opacity: 0;
-    }
-
-    .primary-actions-flight-orb.to-dock {
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, rgba(71, 85, 105, 0.88) 58%, rgba(71, 85, 105, 0) 100%);
-      box-shadow: 0 0 18px rgba(71, 85, 105, 0.45);
-    }
-
-    .primary-actions-flight-svg {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      overflow: visible;
-      pointer-events: none;
-    }
-
     @keyframes primaryDockPop {
       0% {
         transform: scale(0.82) translateY(8px);
@@ -340,12 +287,6 @@
       .primary-actions.is-flip-animating {
         animation: none !important;
         transition: none !important;
-      }
-
-      .primary-actions-flight-layer,
-      .primary-actions-flight-orb,
-      .global-analysis-overlay {
-        display: none !important;
       }
     }
 
@@ -1194,6 +1135,144 @@
       background: #f8fafc;
     }
 
+    .workspace-aside.is-input-locked {
+      position: relative;
+    }
+
+    .workspace-aside.is-input-locked::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      background: rgba(241, 245, 249, 0.58);
+      pointer-events: all;
+      z-index: 2;
+    }
+
+    .workspace-aside.is-input-locked input,
+    .workspace-aside.is-input-locked button {
+      pointer-events: none;
+    }
+
+    body.is-analysis-loading .floating-actions {
+      pointer-events: none;
+      opacity: 0.55;
+    }
+
+    .analysis-progress-bar {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 230;
+      background: rgba(255, 255, 255, 0.97);
+      border-bottom: 1px solid #dbe6f6;
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
+    }
+
+    .analysis-progress-bar.is-visible {
+      display: block;
+    }
+
+    .analysis-progress-bar-track {
+      height: 4px;
+      overflow: hidden;
+      background: #e2e8f0;
+    }
+
+    .analysis-progress-bar-fill {
+      width: 38%;
+      height: 100%;
+      background: linear-gradient(90deg, #0f766e 0%, #14b8a6 50%, #5eead4 100%);
+      animation: analysisProgressSlide 1.35s ease-in-out infinite;
+    }
+
+    @keyframes analysisProgressSlide {
+      0% {
+        transform: translateX(-110%);
+      }
+      100% {
+        transform: translateX(320%);
+      }
+    }
+
+    .analysis-progress-bar-label {
+      display: block;
+      padding: 8px 16px 10px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #334155;
+      text-align: center;
+    }
+
+    .analysis-complete-toast {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      z-index: 240;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: min(520px, calc(100vw - 32px));
+      padding: 12px 14px 12px 16px;
+      border-radius: 14px;
+      background: #ecfdf5;
+      border: 1px solid #86efac;
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.16);
+      color: #14532d;
+      transform: translate(-50%, -160%);
+      opacity: 0;
+      pointer-events: none;
+      transition:
+        transform 0.34s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.28s ease;
+    }
+
+    .analysis-complete-toast.is-visible {
+      transform: translate(-50%, 0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .analysis-complete-toast-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #10b981;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 800;
+      flex: 0 0 auto;
+    }
+
+    .analysis-complete-toast-text {
+      flex: 1 1 auto;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .analysis-complete-toast-close {
+      margin: 0;
+      width: auto;
+      padding: 4px 8px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: #166534;
+      font-size: 18px;
+      line-height: 1;
+      box-shadow: none;
+    }
+
+    .analysis-complete-toast-close:hover {
+      background: rgba(16, 185, 129, 0.14);
+    }
+
     .analysis-loading {
       display: none;
       align-items: center;
@@ -1204,64 +1283,6 @@
 
     .analysis-loading.is-visible {
       display: flex;
-    }
-
-    .global-analysis-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 220;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      background: rgba(15, 23, 42, 0.46);
-      backdrop-filter: blur(3px);
-      pointer-events: all;
-    }
-
-    .global-analysis-overlay.is-visible {
-      display: flex;
-    }
-
-    body.is-analysis-loading {
-      overflow: hidden;
-    }
-
-    .global-analysis-overlay-panel {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 14px;
-      min-width: min(360px, calc(100vw - 48px));
-      padding: 28px 32px;
-      border-radius: 18px;
-      background: rgba(255, 255, 255, 0.96);
-      border: 1px solid #dbe6f6;
-      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
-      color: #1e293b;
-      text-align: center;
-    }
-
-    .global-analysis-overlay-panel .loading-spinner {
-      width: 34px;
-      height: 34px;
-      border-width: 4px;
-      border-color: #dbe6f6;
-      border-top-color: #0f766e;
-    }
-
-    .global-analysis-overlay-panel p {
-      margin: 0;
-      font-size: 15px;
-      font-weight: 700;
-      line-height: 1.5;
-      color: #334155;
-    }
-
-    .global-analysis-overlay-hint {
-      font-size: 13px !important;
-      font-weight: 500 !important;
-      color: #64748b !important;
     }
 
     .loading-spinner {
@@ -1774,21 +1795,30 @@
 </head>
 <body>
   <div
-    id="global-analysis-overlay"
-    class="global-analysis-overlay"
-    role="alertdialog"
-    aria-modal="true"
-    aria-labelledby="global-analysis-overlay-title"
-    aria-describedby="global-analysis-overlay-desc"
+    id="analysis-progress-bar"
+    class="analysis-progress-bar"
+    role="status"
+    aria-live="polite"
     aria-hidden="true"
   >
-    <div class="global-analysis-overlay-panel">
-      <span class="loading-spinner" aria-hidden="true"></span>
-      <p id="global-analysis-overlay-title">Running Combined Analysis</p>
-      <p id="global-analysis-overlay-desc" class="global-analysis-overlay-hint">
-        Please wait. Inputs and results are locked until the report is ready.
-      </p>
+    <div class="analysis-progress-bar-track" aria-hidden="true">
+      <div class="analysis-progress-bar-fill"></div>
     </div>
+    <span class="analysis-progress-bar-label">Running Combined Analysis...</span>
+  </div>
+
+  <div
+    id="analysis-complete-toast"
+    class="analysis-complete-toast"
+    role="status"
+    aria-live="polite"
+    aria-hidden="true"
+  >
+    <span class="analysis-complete-toast-icon" aria-hidden="true">✓</span>
+    <span class="analysis-complete-toast-text">Analysis complete. Updated results are shown below.</span>
+    <button type="button" class="analysis-complete-toast-close" id="analysis-complete-toast-close" aria-label="Dismiss notification">
+      ×
+    </button>
   </div>
 
   <div class="floating-actions" aria-label="Quick test parameter actions">
@@ -2032,7 +2062,7 @@
     </section>
       </div>
 
-      <aside class="workspace-aside" aria-label="Feature inputs sidebar">
+      <aside class="workspace-aside" id="workspace-aside" aria-label="Feature inputs sidebar">
         <form class="panel panel--inputs" method="post" id="manual-prediction-form">
           <input type="hidden" name="mode" value="manual">
           <div class="panel-header">
@@ -2140,14 +2170,84 @@
         fillFeatureValues(CASE_81_FEATURE_VALUES);
       }
 
-      function setGlobalAnalysisLoading(busy) {
-        const overlay = document.getElementById("global-analysis-overlay");
-        if (!overlay) {
+      function setAnalysisInProgress(busy) {
+        const progressBar = document.getElementById("analysis-progress-bar");
+        const aside = document.getElementById("workspace-aside");
+        const form = document.getElementById("manual-prediction-form");
+        const resetButton = document.getElementById("reset-test-data-button");
+        const fillButtons = document.querySelectorAll(".floating-action-button");
+
+        if (progressBar) {
+          progressBar.classList.toggle("is-visible", busy);
+          progressBar.setAttribute("aria-hidden", busy ? "false" : "true");
+        }
+
+        document.body.classList.toggle("is-analysis-loading", busy);
+        aside?.classList.toggle("is-input-locked", busy);
+
+        if (form) {
+          form.querySelectorAll("input, button").forEach((element) => {
+            element.disabled = busy;
+          });
+        }
+
+        if (resetButton) {
+          resetButton.disabled = busy;
+        }
+
+        fillButtons.forEach((button) => {
+          button.disabled = busy;
+        });
+
+        if (busy) {
+          sessionStorage.setItem("riskpredict:analysis-running", "1");
+        }
+      }
+
+      function hideAnalysisCompleteToast() {
+        const toast = document.getElementById("analysis-complete-toast");
+        if (!toast) {
           return;
         }
-        overlay.classList.toggle("is-visible", busy);
-        overlay.setAttribute("aria-hidden", busy ? "false" : "true");
-        document.body.classList.toggle("is-analysis-loading", busy);
+        toast.classList.remove("is-visible");
+        toast.setAttribute("aria-hidden", "true");
+      }
+
+      function showAnalysisCompleteToast() {
+        const toast = document.getElementById("analysis-complete-toast");
+        if (!toast) {
+          return;
+        }
+
+        toast.classList.add("is-visible");
+        toast.setAttribute("aria-hidden", "false");
+
+        window.clearTimeout(showAnalysisCompleteToast.dismissTimer);
+        showAnalysisCompleteToast.dismissTimer = window.setTimeout(() => {
+          hideAnalysisCompleteToast();
+        }, 5200);
+      }
+
+      function initAnalysisCompleteToast() {
+        const wasRunning = sessionStorage.getItem("riskpredict:analysis-running") === "1";
+        if (!wasRunning) {
+          return;
+        }
+
+        sessionStorage.removeItem("riskpredict:analysis-running");
+
+        const hasResult = document.querySelector(".workspace-main .result");
+        if (!hasResult) {
+          return;
+        }
+
+        window.requestAnimationFrame(() => {
+          showAnalysisCompleteToast();
+        });
+
+        document
+          .getElementById("analysis-complete-toast-close")
+          ?.addEventListener("click", hideAnalysisCompleteToast);
       }
 
       function resetTestData() {
@@ -2163,7 +2263,7 @@
         });
 
         form.classList.remove("is-submitting");
-        setGlobalAnalysisLoading(false);
+        setAnalysisInProgress(false);
 
         const loading = document.getElementById("analysis-loading");
         if (loading) {
@@ -2199,7 +2299,7 @@
         const submitButton = document.getElementById("submit-combined");
 
         form.classList.add("is-submitting");
-        setGlobalAnalysisLoading(true);
+        setAnalysisInProgress(true);
         setSubmitButtonBusy(submitButton, true);
       }
 
@@ -2238,115 +2338,17 @@
           return element.getBoundingClientRect();
         }
 
-        function buildArcOffsets(dx, dy) {
-          const distance = Math.hypot(dx, dy) || 1;
-          const arc = Math.min(42, distance * 0.12);
-          return {
-            perpX: (-dy / distance) * arc,
-            perpY: (dx / distance) * arc,
-          };
-        }
-
         function buildFlipKeyframes(dx, dy, sx, sy) {
-          const { perpX, perpY } = buildArcOffsets(dx, dy);
-          const midSx = sx + (1 - sx) * 0.5;
-          const midSy = sy + (1 - sy) * 0.5;
-
           return [
             {
               transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`,
               offset: 0,
             },
             {
-              transform: `translate(${dx * 0.5 + perpX}px, ${dy * 0.5 + perpY}px) scale(${midSx}, ${midSy})`,
-              offset: 0.5,
-            },
-            {
               transform: "translate(0px, 0px) scale(1, 1)",
               offset: 1,
             },
           ];
-        }
-
-        function createFlightLayer(fromRect, toRect, direction) {
-          const startX = fromRect.left + fromRect.width / 2;
-          const startY = fromRect.top + fromRect.height / 2;
-          const endX = toRect.left + toRect.width / 2;
-          const endY = toRect.top + toRect.height / 2;
-          const dx = startX - endX;
-          const dy = startY - endY;
-          const { perpX, perpY } = buildArcOffsets(dx, dy);
-          const controlX = (startX + endX) / 2 + perpX;
-          const controlY = (startY + endY) / 2 + perpY;
-
-          const layer = document.createElement("div");
-          layer.className = "primary-actions-flight-layer";
-          layer.setAttribute("aria-hidden", "true");
-
-          const svgNS = "http://www.w3.org/2000/svg";
-          const svg = document.createElementNS(svgNS, "svg");
-          svg.setAttribute("class", "primary-actions-flight-svg");
-
-          const path = document.createElementNS(svgNS, "path");
-          path.setAttribute("class", `primary-actions-flight-path ${direction}`);
-          path.setAttribute(
-            "d",
-            `M ${startX} ${startY} Q ${controlX} ${controlY} ${endX} ${endY}`
-          );
-          svg.appendChild(path);
-          layer.appendChild(svg);
-
-          const orb = document.createElement("div");
-          orb.className = `primary-actions-flight-orb ${direction}`;
-          layer.appendChild(orb);
-
-          document.body.appendChild(layer);
-
-          const pathLength = path.getTotalLength();
-          path.style.strokeDasharray = `${pathLength}`;
-          path.style.strokeDashoffset = `${pathLength}`;
-
-          const easing = MOTION_EASE;
-          const pathAnim = path.animate(
-            [
-              { strokeDashoffset: pathLength, opacity: 0.15 },
-              { strokeDashoffset: pathLength * 0.35, opacity: 0.85, offset: 0.22 },
-              { strokeDashoffset: 0, opacity: 0.55, offset: 1 },
-            ],
-            { duration: FLOAT_TRANSITION_MS, easing, fill: "forwards" }
-          );
-
-          const orbAnim = orb.animate(
-            [
-              {
-                transform: `translate(${startX - 6}px, ${startY - 6}px) scale(0.4)`,
-                opacity: 0,
-              },
-              {
-                transform: `translate(${controlX - 6}px, ${controlY - 6}px) scale(1)`,
-                opacity: 0.9,
-                offset: 0.5,
-              },
-              {
-                transform: `translate(${endX - 6}px, ${endY - 6}px) scale(0.55)`,
-                opacity: 0,
-                offset: 1,
-              },
-            ],
-            { duration: FLOAT_TRANSITION_MS, easing, fill: "forwards" }
-          );
-
-          const cleanup = () => {
-            pathAnim.cancel();
-            orbAnim.cancel();
-            layer.remove();
-          };
-
-          pathAnim.onfinish = cleanup;
-          orbAnim.onfinish = cleanup;
-          window.setTimeout(cleanup, FLOAT_TRANSITION_MS + 120);
-
-          return layer;
         }
 
         function applyFloatingState(toFloating, firstRect) {
@@ -2389,7 +2391,6 @@
           const sx = firstRect.width / lastRect.width;
           const sy = firstRect.height / lastRect.height;
 
-          createFlightLayer(firstRect, lastRect, toFloating ? "to-float" : "to-dock");
           playMorphAnimation(toFloating ? "to-float" : "to-dock");
 
           actions.classList.add("is-flip-animating");
@@ -2470,6 +2471,7 @@
         .addEventListener("click", resetTestData);
 
       initPrimaryActionsFloat();
+      initAnalysisCompleteToast();
 
       function loadAnalysisReport() {
         const node = document.getElementById("analysis-report-data");
