@@ -1569,29 +1569,95 @@
           .slice(0, SHAP_FORCE_MAX_LABELS);
       }
 
+      function buildSplitForceSegments(base, prediction, features) {
+        const positive = features
+          .filter((item) => item.shap_value >= 0)
+          .sort((a, b) => b.abs_shap - a.abs_shap);
+        const negative = features
+          .filter((item) => item.shap_value < 0)
+          .sort((a, b) => b.abs_shap - a.abs_shap);
+
+        let positiveSegments = [];
+        let negativeSegments = [];
+
+        if (prediction >= base) {
+          // f(x) on the right: red extends right from base, blue extends left from f(x).
+          let cursor = base;
+          positiveSegments = positive.map((feature) => {
+            const segment = {
+              ...feature,
+              start: cursor,
+              end: cursor + Number(feature.shap_value),
+            };
+            cursor = segment.end;
+            return segment;
+          });
+
+          cursor = prediction;
+          negativeSegments = negative.map((feature) => {
+            const segment = {
+              ...feature,
+              start: cursor,
+              end: cursor + Number(feature.shap_value),
+            };
+            cursor = segment.end;
+            return segment;
+          });
+        } else {
+          // f(x) on the left: blue extends left from base, red extends right from f(x).
+          let cursor = base;
+          negativeSegments = negative.map((feature) => {
+            const segment = {
+              ...feature,
+              start: cursor,
+              end: cursor + Number(feature.shap_value),
+            };
+            cursor = segment.end;
+            return segment;
+          });
+
+          cursor = prediction;
+          positiveSegments = positive.map((feature) => {
+            const segment = {
+              ...feature,
+              start: cursor,
+              end: cursor + Number(feature.shap_value),
+            };
+            cursor = segment.end;
+            return segment;
+          });
+        }
+
+        return [...positiveSegments, ...negativeSegments];
+      }
+
       function layoutForceLabels(labelNodes, toPercent) {
         const minGap = 9;
-        let lastCenter = -Infinity;
-        let row = 0;
 
-        labelNodes
-          .slice()
-          .sort(
-            (left, right) =>
-              toPercent((left.segment.start + left.segment.end) / 2) -
-              toPercent((right.segment.start + right.segment.end) / 2)
-          )
-          .forEach(({ segment, label }) => {
-            const center = toPercent((segment.start + segment.end) / 2);
-            if (center - lastCenter < minGap) {
-              row += 1;
-            } else {
-              row = 0;
-            }
-            label.style.left = `${center}%`;
-            label.style.top = `${row * 17}px`;
-            lastCenter = center;
-          });
+        ["positive", "negative"].forEach((direction) => {
+          let lastCenter = -Infinity;
+          let row = 0;
+
+          labelNodes
+            .filter(({ segment }) => segment.direction === direction)
+            .slice()
+            .sort(
+              (left, right) =>
+                toPercent((left.segment.start + left.segment.end) / 2) -
+                toPercent((right.segment.start + right.segment.end) / 2)
+            )
+            .forEach(({ segment, label }) => {
+              const center = toPercent((segment.start + segment.end) / 2);
+              if (center - lastCenter < minGap) {
+                row += 1;
+              } else {
+                row = 0;
+              }
+              label.style.left = `${center}%`;
+              label.style.top = `${row * 17}px`;
+              lastCenter = center;
+            });
+        });
       }
 
       function renderShapForcePlot(container, explanation) {
@@ -1599,19 +1665,7 @@
         const prediction = Number(explanation.prediction);
         const features = Array.isArray(explanation.features) ? explanation.features : [];
 
-        // Stack all features sequentially from base so segments always connect
-        // base -> ... -> f(x) with no gap (standard SHAP force plot layout).
-        const sorted = [...features].sort((a, b) => b.abs_shap - a.abs_shap);
-        let cursor = base;
-        const segments = sorted.map((feature) => {
-          const segment = {
-            ...feature,
-            start: cursor,
-            end: cursor + Number(feature.shap_value),
-          };
-          cursor = segment.end;
-          return segment;
-        });
+        const segments = buildSplitForceSegments(base, prediction, features);
 
         const axisValues = [base, prediction, cursor];
         segments.forEach((segment) => {
