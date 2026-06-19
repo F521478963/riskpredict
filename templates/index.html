@@ -1192,7 +1192,6 @@
                         <td>{{ loop.index }}</td>
                         <td class="shap-feature-name">
                           {{ feature.label_zh }}
-                          <small>{{ feature.label_en }}</small>
                         </td>
                         <td>{{ "%.6f"|format(feature.value) }}</td>
                         <td class="{% if feature.direction == 'positive' %}shap-value-positive{% else %}shap-value-negative{% endif %}">
@@ -1291,8 +1290,7 @@
                 <div class="field">
                   <label for="{{ field.name }}">
                     <span class="field-index">#{{ field.index }}</span>
-                    <span class="field-label-main">{{ field.label_zh }}</span>
-                    <span>{{ field.label_en }}</span>
+                    <span class="field-label-main">{{ field.alias }}</span>
                   </label>
                   <input
                     id="{{ field.name }}"
@@ -1360,20 +1358,31 @@
       }
 
       function resetTestData() {
-        TEST_FEATURE_VALUES.forEach((_, index) => {
-          const input = document.getElementById(`feature_${index}`);
-          if (input) {
-            input.value = "";
-            input.dispatchEvent(new Event("input", { bubbles: true }));
-            input.dispatchEvent(new Event("change", { bubbles: true }));
-          }
+        const form = document.getElementById("manual-prediction-form");
+        if (!form) {
+          return;
+        }
+
+        form.querySelectorAll('input[type="number"][id^="feature_"]').forEach((input) => {
+          input.value = "";
+          input.dispatchEvent(new Event("input", { bubbles: true }));
+          input.dispatchEvent(new Event("change", { bubbles: true }));
         });
 
-        const form = document.getElementById("manual-prediction-form");
-        if (form) {
-          form.classList.remove("is-submitting");
-          form.scrollIntoView({ behavior: "smooth", block: "start" });
+        form.classList.remove("is-submitting");
+
+        const loading = document.getElementById("analysis-loading");
+        if (loading) {
+          loading.classList.remove("is-visible");
         }
+
+        const submitButton = form.querySelector("#submit-combined");
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.textContent = "综合判断 / Combined Analysis";
+        }
+
+        form.scrollIntoView({ behavior: "smooth", block: "start" });
       }
 
       function showAnalysisLoading(event) {
@@ -1653,7 +1662,7 @@
           label.className = `shap-force-label ${segment.direction}`;
           const center = (segment.start + segment.end) / 2;
           label.style.left = `${toPercent(center)}%`;
-          const featureName = segment.label_en || segment.feature;
+          const featureName = segment.label_zh || segment.feature;
           label.title = `${featureName} = ${formatShapNumber(Number(segment.value))}`;
           label.textContent = `${featureName} = ${formatShapNumber(Number(segment.value))}`;
           labels.appendChild(label);

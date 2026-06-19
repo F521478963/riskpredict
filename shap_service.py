@@ -9,6 +9,7 @@ from pathlib import Path
 import numpy as np
 import shap
 
+from feature_name_map import feature_alias
 from model_registry import (
     BRANCH_MODEL_SPECS,
     FEATURE_SPECS,
@@ -21,8 +22,11 @@ MAX_BACKGROUND = 100
 BACKGROUND_SEED = 42
 
 FEATURE_LABELS = {
-    column: {"label_zh": label_zh, "label_en": label_en}
-    for column, label_zh, label_en, _group in FEATURE_SPECS
+    column: {
+        "label_zh": feature_alias(column),
+        "label_en": feature_alias(column),
+    }
+    for column, _label_zh, _label_en, _group in FEATURE_SPECS
 }
 
 

@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 import shap
 from model_io import load_model_dataset, load_shelve_model
+from feature_name_map import feature_alias
 from model_registry import BRANCH_MODEL_SPECS, OVERALL_FEATURE_NAMES
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -55,7 +56,7 @@ REGRESSION_SPECS = [
 
 
 def _display_name(feature_name: str) -> str:
-    return feature_name
+    return feature_alias(feature_name)
 
 
 def build_explainer(model, scaler, background_scaled: np.ndarray) -> shap.LinearExplainer:

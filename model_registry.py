@@ -1,5 +1,6 @@
 import os
 
+from feature_name_map import feature_alias
 from model_service import PredictionService
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -135,11 +136,12 @@ def build_feature_fields():
             "name": f"feature_{index}",
             "column": column,
             "index": index + 1,
-            "label_zh": label_zh,
-            "label_en": label_en,
+            "alias": feature_alias(column),
+            "label_zh": feature_alias(column),
+            "label_en": feature_alias(column),
             "group_id": group_id,
         }
-        for index, (column, label_zh, label_en, group_id) in enumerate(FEATURE_SPECS)
+        for index, (column, _label_zh, _label_en, group_id) in enumerate(FEATURE_SPECS)
     ]
 
 
