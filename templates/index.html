@@ -1667,7 +1667,7 @@
 
         const segments = buildSplitForceSegments(base, prediction, features);
 
-        const axisValues = [base, prediction, cursor];
+        const axisValues = [base, prediction];
         segments.forEach((segment) => {
           axisValues.push(segment.start, segment.end);
         });
