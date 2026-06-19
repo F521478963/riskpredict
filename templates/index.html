@@ -185,6 +185,170 @@
       border: 1px solid #bfdbfe;
     }
 
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .workspace-main {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .workspace-aside {
+      position: sticky;
+      top: 16px;
+    }
+
+    .workspace-aside .panel {
+      margin-top: 0;
+      max-height: calc(100vh - 32px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel--inputs {
+      border: 1px solid #e2e8f0;
+      background: #f1f5f9;
+      box-shadow: none;
+    }
+
+    .panel--inputs .panel-header {
+      padding: 12px 14px 10px;
+      background: transparent;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .panel--inputs .panel-header h2 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #64748b;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .panel--inputs .panel-header-desc {
+      margin-top: 4px;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .panel--inputs .panel-feature-count {
+      padding: 4px 10px;
+      font-size: 11px;
+      color: #94a3b8;
+      background: #e2e8f0;
+      border-color: #cbd5e1;
+    }
+
+    .panel--inputs .panel-body {
+      padding: 10px 12px 14px;
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .workspace-aside .feature-groups {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .workspace-aside .feature-group {
+      grid-area: unset;
+      padding: 8px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      border-left-width: 3px;
+      background: rgba(255, 255, 255, 0.55);
+      box-shadow: none;
+    }
+
+    .workspace-aside .feature-group h3 {
+      margin: 0 0 6px;
+      padding: 5px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 6px;
+      box-shadow: none;
+    }
+
+    .workspace-aside .feature-grid {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+
+    .workspace-aside .field {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 88px;
+      gap: 6px;
+      align-items: center;
+      padding: 4px 6px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .workspace-aside .field:focus-within {
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: none;
+    }
+
+    .workspace-aside .field label {
+      margin-bottom: 0;
+      min-width: 0;
+      font-size: 10px;
+    }
+
+    .workspace-aside .field-index {
+      min-width: 22px;
+      margin-right: 4px;
+      padding: 0 5px;
+      font-size: 9px;
+    }
+
+    .workspace-aside .field-label-main {
+      font-size: 10px;
+      color: #64748b;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .workspace-aside input[type="number"] {
+      height: 30px;
+      padding: 4px 8px;
+      font-size: 12px;
+      border-radius: 8px;
+      border-color: #e2e8f0;
+      background: #ffffff;
+    }
+
+    .workspace-aside #face_texture {
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .workspace-aside #face_texture .feature-grid {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+
+    .workspace-aside #face_texture .field {
+      border: none;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .workspace-main .ai-analysis {
+      margin: 0;
+    }
+
     .feature-groups {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -885,6 +1049,11 @@
         min-width: 980px;
       }
 
+      .workspace {
+        grid-template-columns: minmax(0, 1fr) 300px;
+        gap: 16px;
+      }
+
       .feature-groups {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         grid-template-areas:
@@ -895,6 +1064,20 @@
 
       #face_texture .feature-grid {
         grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 1100px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .workspace-aside {
+        position: static;
+      }
+
+      .workspace-aside .panel {
+        max-height: 420px;
       }
     }
 
@@ -963,6 +1146,10 @@
 
       .panel-header {
         flex-direction: column;
+      }
+
+      .workspace-aside .panel {
+        max-height: 360px;
       }
     }
 
@@ -1308,7 +1495,7 @@
     <header class="page-header" id="page-header">
       <div class="page-header-brand">
         <h1>Local Ridge-RF Prediction Tool</h1>
-        <p class="page-header-subtitle">Enter feature values below, then run combined prediction and AI-assisted analysis.</p>
+        <p class="page-header-subtitle">Review prediction and AI analysis on the left; enter feature values in the sidebar on the right.</p>
       </div>
       <div class="primary-actions" id="primary-actions" aria-label="Primary prediction actions">
         <button
@@ -1335,6 +1522,8 @@
       </div>
     </header>
 
+    <div class="workspace">
+      <div class="workspace-main">
     {% if error %}
       <div class="error">{{ error }}</div>
     {% endif %}
@@ -1524,45 +1713,49 @@
         {% endif %}
       </div>
     </section>
+      </div>
 
-    <form class="panel" method="post" id="manual-prediction-form">
-      <input type="hidden" name="mode" value="manual">
-      <div class="panel-header">
-        <div>
-          <h2>Feature Inputs</h2>
-          <p class="panel-header-desc">33 quantitative features grouped by face spectrum, texture, and ear regions.</p>
-        </div>
-        <span class="panel-feature-count">33 features</span>
-      </div>
-      <div class="panel-body">
-        <div class="feature-groups">
-          {% for group in feature_groups %}
-            <section class="feature-group" id="{{ group.id }}">
-              <h3>{{ group.title_en }}</h3>
-              <div class="feature-grid">
-                {% for field in group.fields %}
-                  <div class="field">
-                    <label for="{{ field.name }}">
-                      <span class="field-index">#{{ field.index }}</span>
-                      <span class="field-label-main">{{ field.alias }}</span>
-                    </label>
-                    <input
-                      id="{{ field.name }}"
-                      name="{{ field.name }}"
-                      type="number"
-                      step="any"
-                      required
-                      value="{{ values.get(field.name, '') }}"
-                      placeholder="Enter value"
-                    >
+      <aside class="workspace-aside" aria-label="Feature inputs sidebar">
+        <form class="panel panel--inputs" method="post" id="manual-prediction-form">
+          <input type="hidden" name="mode" value="manual">
+          <div class="panel-header">
+            <div>
+              <h2>Feature Inputs</h2>
+              <p class="panel-header-desc">33 features — face, texture, and ear regions.</p>
+            </div>
+            <span class="panel-feature-count">33</span>
+          </div>
+          <div class="panel-body">
+            <div class="feature-groups">
+              {% for group in feature_groups %}
+                <section class="feature-group" id="{{ group.id }}">
+                  <h3>{{ group.title_en }}</h3>
+                  <div class="feature-grid">
+                    {% for field in group.fields %}
+                      <div class="field">
+                        <label for="{{ field.name }}">
+                          <span class="field-index">#{{ field.index }}</span>
+                          <span class="field-label-main">{{ field.alias }}</span>
+                        </label>
+                        <input
+                          id="{{ field.name }}"
+                          name="{{ field.name }}"
+                          type="number"
+                          step="any"
+                          required
+                          value="{{ values.get(field.name, '') }}"
+                          placeholder="—"
+                        >
+                      </div>
+                    {% endfor %}
                   </div>
-                {% endfor %}
-              </div>
-            </section>
-          {% endfor %}
-        </div>
-      </div>
-    </form>
+                </section>
+              {% endfor %}
+            </div>
+          </div>
+        </form>
+      </aside>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js"></script>
     <script>
