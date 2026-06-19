@@ -1565,68 +1565,44 @@
       function selectForceLabelSegments(segments, totalAbs) {
         const minAbs = totalAbs * SHAP_FORCE_LABEL_MIN_RATIO;
         return segments
+          .slice()
+          .sort((a, b) => b.abs_shap - a.abs_shap)
           .filter((segment) => segment.abs_shap >= minAbs)
           .slice(0, SHAP_FORCE_MAX_LABELS);
       }
 
-      function buildSplitForceSegments(base, prediction, features) {
+      function buildSplitForceSegments(prediction, features) {
         const positive = features
           .filter((item) => item.shap_value >= 0)
-          .sort((a, b) => b.abs_shap - a.abs_shap);
+          .sort((a, b) => b.shap_value - a.shap_value);
         const negative = features
           .filter((item) => item.shap_value < 0)
-          .sort((a, b) => b.abs_shap - a.abs_shap);
+          .sort((a, b) => a.shap_value - b.shap_value);
 
-        let positiveSegments = [];
-        let negativeSegments = [];
+        // Standard SHAP force plot: anchor at f(x), red extends left, blue extends right.
+        let cursor = prediction;
+        const positiveSegments = positive.map((feature) => {
+          const shap = Number(feature.shap_value);
+          const segment = {
+            ...feature,
+            start: cursor - shap,
+            end: cursor,
+          };
+          cursor = segment.start;
+          return segment;
+        });
 
-        if (prediction >= base) {
-          // f(x) on the right: red extends right from base, blue extends left from f(x).
-          let cursor = base;
-          positiveSegments = positive.map((feature) => {
-            const segment = {
-              ...feature,
-              start: cursor,
-              end: cursor + Number(feature.shap_value),
-            };
-            cursor = segment.end;
-            return segment;
-          });
-
-          cursor = prediction;
-          negativeSegments = negative.map((feature) => {
-            const segment = {
-              ...feature,
-              start: cursor,
-              end: cursor + Number(feature.shap_value),
-            };
-            cursor = segment.end;
-            return segment;
-          });
-        } else {
-          // f(x) on the left: blue extends left from base, red extends right from f(x).
-          let cursor = base;
-          negativeSegments = negative.map((feature) => {
-            const segment = {
-              ...feature,
-              start: cursor,
-              end: cursor + Number(feature.shap_value),
-            };
-            cursor = segment.end;
-            return segment;
-          });
-
-          cursor = prediction;
-          positiveSegments = positive.map((feature) => {
-            const segment = {
-              ...feature,
-              start: cursor,
-              end: cursor + Number(feature.shap_value),
-            };
-            cursor = segment.end;
-            return segment;
-          });
-        }
+        cursor = prediction;
+        const negativeSegments = negative.map((feature) => {
+          const shap = Number(feature.shap_value);
+          const segment = {
+            ...feature,
+            start: cursor,
+            end: cursor - shap,
+          };
+          cursor = segment.end;
+          return segment;
+        });
 
         return [...positiveSegments, ...negativeSegments];
       }
@@ -1665,7 +1641,7 @@
         const prediction = Number(explanation.prediction);
         const features = Array.isArray(explanation.features) ? explanation.features : [];
 
-        const segments = buildSplitForceSegments(base, prediction, features);
+        const segments = buildSplitForceSegments(prediction, features);
 
         const axisValues = [base, prediction];
         segments.forEach((segment) => {
