@@ -1166,11 +1166,6 @@
       pointer-events: none;
     }
 
-    body.is-analysis-loading .floating-actions {
-      pointer-events: none;
-      opacity: 0.55;
-    }
-
     .analysis-progress-bar {
       display: none;
       position: fixed;
@@ -1319,60 +1314,6 @@
       opacity: 0.72;
     }
 
-    .floating-actions {
-      position: fixed;
-      right: 24px;
-      bottom: 24px;
-      z-index: 10;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      align-items: flex-end;
-    }
-
-    .floating-action-button {
-      width: auto;
-      margin: 0;
-      padding: 14px 18px;
-      border-radius: 999px;
-      box-shadow: 0 16px 38px rgba(37, 99, 235, 0.28);
-    }
-
-    .floating-test-button {
-      background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
-    }
-
-    .floating-test-button:hover {
-      background: linear-gradient(135deg, #6d28d9 0%, #1d4ed8 100%);
-    }
-
-    .floating-high-risk-button {
-      background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);
-      box-shadow: 0 16px 38px rgba(220, 38, 38, 0.26);
-    }
-
-    .floating-high-risk-button:hover {
-      background: linear-gradient(135deg, #b91c1c 0%, #ea580c 100%);
-    }
-
-    .floating-case16-button {
-      background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
-      box-shadow: 0 16px 38px rgba(8, 145, 178, 0.26);
-    }
-
-    .floating-case16-button:hover {
-      background: linear-gradient(135deg, #0e7490 0%, #0891b2 100%);
-    }
-
-    .floating-case81-button {
-      background: linear-gradient(135deg, #db2777 0%, #f472b6 100%);
-      box-shadow: 0 16px 38px rgba(219, 39, 119, 0.24);
-    }
-
-    .floating-case81-button:hover {
-      background: linear-gradient(135deg, #be185d 0%, #db2777 100%);
-    }
-
     @media (max-width: 1320px) {
       .card {
         width: min(1320px, calc(100vw - 20px));
@@ -1470,12 +1411,6 @@
 
       body.is-analysis-loading .primary-actions.is-floating {
         top: calc(12px + var(--analysis-progress-bar-height, 0px));
-      }
-
-      .floating-actions {
-        right: 16px;
-        bottom: 16px;
-        max-width: calc(100vw - 32px);
       }
 
       .panel-header {
@@ -1837,21 +1772,6 @@
     </button>
   </div>
 
-  <div class="floating-actions" aria-label="Quick test parameter actions">
-    <button class="floating-action-button floating-case16-button" id="fill-case16-data-button" type="button">
-      Fill Case 16
-    </button>
-    <button class="floating-action-button floating-case81-button" id="fill-case81-data-button" type="button">
-      Fill Case 81
-    </button>
-    <button class="floating-action-button floating-high-risk-button" id="fill-high-risk-data-button" type="button">
-      Fill High-Risk Data
-    </button>
-    <button class="floating-action-button floating-test-button" id="fill-test-data-button" type="button">
-      Fill Low-Risk Data
-    </button>
-  </div>
-
   <main class="card">
     <header class="page-header" id="page-header">
       <div class="page-header-brand">
@@ -2122,70 +2042,6 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js"></script>
     <script>
-      const HIGH_RISK_FEATURE_VALUES = [
-        200.980134, 0.03493, 0.03493, 0.03493, 0.03493, 0.03493, 0.171107,
-        234.165675, 0.423818, 0.108148, 0.331675, 0.307722, 0.387569, 0.345428,
-        0.529676, 0.289488, 0.301815, 0.71811, 28.141889, 0.843074, 0.469601,
-        0.459751, 0.540415, 0.305404, 0.283941, 0.27279, 0.302898, 0.508155,
-        0.307305, 0.333401, 0.210635, 0.306253, 0.303029
-      ];
-
-      const LOW_RISK_FEATURE_VALUES = [
-        176.595376, 0.04141, 0.04141, 0.04141, 0.04141, 0.176055, 0.43754,
-        212.488623, 0.225312, 0.099534, 0.32852, 0.310793, 0.431343, 0.353491,
-        0.63686, 0.306493, 0.307098, 0.517591, 28.944141, 0.848891, 0.597072,
-        0.393, 0.533153, 0.313625, 0.53354, 0.442709, 0.290043, 0.469353,
-        0.316013, 0.565925, 0.36837, 0.313633, 0.317033
-      ];
-
-      const CASE_16_FEATURE_VALUES = [
-        197.9429, 0.028739, 0.028739, 0.028739, 0.028739, 0.028739, 0.181309,
-        226.259412, 0.246758, 0.099088, 0.31197, 0.305094, 0.124136, 0.246758,
-        0.656689, 0.284607, 0.302198, 0.492194, 30.076172, 0.862801, 0.532424,
-        0.113907, 0.537233, 0.298194, 0.484074, 0.465038, 0.286057, 0.500451,
-        0.303312, 0.454541, 0.148242, 0.30344, 0.301603
-      ];
-
-      const CASE_81_FEATURE_VALUES = [
-        205.294422, 0.039016, 0.039016, 0.039016, 0.039016, 0.039016, 0.520358,
-        78.763928, 0.326292, 0.106685, 0.336417, 0.307831, 0.499817, 0.473413,
-        0.593291, 0.307561, 0.311398, 0.589642, 38.730256, 0.560012, 0.511016,
-        0.5063, 0.395359, 0.312203, 0.512346, 0.51384, 0.306959, 0.509164,
-        0.30344, 0.475554, 0.227074, 0.302437, 0.306883
-      ];
-
-      function fillFeatureValues(values) {
-        values.forEach((value, index) => {
-          const input = document.getElementById(`feature_${index}`);
-          if (input) {
-            input.value = value;
-            input.dispatchEvent(new Event("input", { bubbles: true }));
-            input.dispatchEvent(new Event("change", { bubbles: true }));
-          }
-        });
-
-        const form = document.getElementById("manual-prediction-form");
-        if (form) {
-          form.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      }
-
-      function fillLowRiskData() {
-        fillFeatureValues(LOW_RISK_FEATURE_VALUES);
-      }
-
-      function fillHighRiskData() {
-        fillFeatureValues(HIGH_RISK_FEATURE_VALUES);
-      }
-
-      function fillCase16Data() {
-        fillFeatureValues(CASE_16_FEATURE_VALUES);
-      }
-
-      function fillCase81Data() {
-        fillFeatureValues(CASE_81_FEATURE_VALUES);
-      }
-
       function updateAnalysisProgressBarOffset() {
         const progressBar = document.getElementById("analysis-progress-bar");
         if (!progressBar || !progressBar.classList.contains("is-visible")) {
@@ -2204,7 +2060,6 @@
         const aside = document.getElementById("workspace-aside");
         const form = document.getElementById("manual-prediction-form");
         const resetButton = document.getElementById("reset-test-data-button");
-        const fillButtons = document.querySelectorAll(".floating-action-button");
 
         if (progressBar) {
           progressBar.classList.toggle("is-visible", busy);
@@ -2230,10 +2085,6 @@
         if (resetButton) {
           resetButton.disabled = busy;
         }
-
-        fillButtons.forEach((button) => {
-          button.disabled = busy;
-        });
 
         if (busy) {
           sessionStorage.setItem("riskpredict:analysis-running", "1");
@@ -2487,22 +2338,6 @@
       document
         .getElementById("manual-prediction-form")
         .addEventListener("submit", showAnalysisLoading);
-
-      document
-        .getElementById("fill-case16-data-button")
-        .addEventListener("click", fillCase16Data);
-
-      document
-        .getElementById("fill-case81-data-button")
-        .addEventListener("click", fillCase81Data);
-
-      document
-        .getElementById("fill-test-data-button")
-        .addEventListener("click", fillLowRiskData);
-
-      document
-        .getElementById("fill-high-risk-data-button")
-        .addEventListener("click", fillHighRiskData);
 
       document
         .getElementById("reset-test-data-button")
