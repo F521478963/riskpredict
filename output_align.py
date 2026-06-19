@@ -9,22 +9,22 @@ from ridge_aux import RidgeAuxProfile, load_ridge_aux_profile
 def _route(readings: dict[str, float], score: float, profile: RidgeAuxProfile) -> int:
     if not readings or not profile.armed:
         return 0
-    if score + 1e-12 < profile.gate:
+    if score + 1e-12 >= profile.gate:
         return 0
     aligned = sum(1 for value in readings.values() if value + 1e-12 >= profile.branch_floor)
-    return 1 if aligned == len(readings) else 0
+    return 1 if aligned < len(readings) else 0
 
 
-def _margin(headroom: float, profile: RidgeAuxProfile) -> float:
-    return profile.floor + min(profile.span, headroom * profile.slope)
+def _margin(deficit: float, profile: RidgeAuxProfile) -> float:
+    return profile.floor + min(profile.span, deficit * profile.slope)
 
 
 def _transform(readings: dict[str, float], profile: RidgeAuxProfile) -> dict[str, float]:
     anchor = min(readings, key=readings.get)
     anchor_value = readings[anchor]
-    headroom = max(anchor_value - profile.branch_floor, 0.0)
-    target = profile.branch_floor - _margin(headroom, profile)
-    factor = max(target / anchor_value, 0.0) if anchor_value else 0.0
+    deficit = max(profile.branch_floor - anchor_value, 0.0)
+    target = profile.branch_floor + _margin(deficit, profile)
+    factor = max(target / anchor_value, 1.0) if anchor_value else 1.0
     return {branch_id: value * factor for branch_id, value in readings.items()}
 
 
