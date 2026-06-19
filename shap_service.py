@@ -15,7 +15,7 @@ from model_registry import (
     MODEL_DIR,
     OVERALL_FEATURE_NAMES,
 )
-from shap_analysis import load_model_dataset, load_shelve_model
+from model_io import load_model_dataset, load_shelve_model
 
 MAX_BACKGROUND = 100
 BACKGROUND_SEED = 42

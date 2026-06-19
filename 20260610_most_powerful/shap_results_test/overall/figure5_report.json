@@ -1,7 +1,7 @@
 {
   "model_id": "overall",
   "task": "classification",
-  "title_en": "Overall Screening (Ridge)",
+  "title_en": "Overall Screening (Ridge-RF)",
   "n_samples": 240,
   "n_features": 15,
   "expected_value": 0.4460912546564352,

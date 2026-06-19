@@ -26,6 +26,7 @@ class _NullShapRuntime:
 
 def _load_shap_runtime():
     if os.environ.get("SHAP_ENABLED", "1").strip().lower() in {"0", "false", "no", "off"}:
+        print("[riskpredict] SHAP disabled via SHAP_ENABLED")
         return _NullShapRuntime()
     try:
         from shap_service import build_shap_runtime
@@ -34,6 +35,13 @@ def _load_shap_runtime():
     except ImportError as exc:
         print(f"[riskpredict] SHAP unavailable, skipping explanations: {exc}")
         return _NullShapRuntime()
+    except Exception as exc:
+        print(f"[riskpredict] SHAP init failed: {exc}")
+        return _NullShapRuntime()
+
+
+def _shap_is_active(runtime) -> bool:
+    return not isinstance(runtime, _NullShapRuntime)
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -248,6 +256,7 @@ def _render_index(
             rag_status=rag_corpus_store.status(),
             judgment_mode=judgment_mode,
             judgment_labels=JUDGMENT_LABELS,
+            shap_enabled=_shap_is_active(shap_runtime),
         ),
         status,
     )

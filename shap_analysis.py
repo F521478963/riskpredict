@@ -11,8 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import shap
-import shelve
-
+from model_io import load_model_dataset, load_shelve_model
 from model_registry import BRANCH_MODEL_SPECS, OVERALL_FEATURE_NAMES
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -57,26 +56,6 @@ REGRESSION_SPECS = [
 
 def _display_name(feature_name: str) -> str:
     return feature_name
-
-
-def load_shelve_model(model_path: Path):
-    model_base = model_path.with_suffix("")
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        with shelve.open(str(model_base), flag="r") as store:
-            return store["clf"], store["ss"]
-
-
-def load_model_dataset(data_path: Path) -> tuple[pd.DataFrame, pd.Series, list[str]]:
-    train = pd.read_excel(data_path, sheet_name=0)
-    test = pd.read_excel(data_path, sheet_name=1)
-    outcome_col = train.columns[0]
-    feature_cols = [col for col in train.columns[1:] if col in test.columns]
-    frame = pd.concat([train, test], ignore_index=True)
-    x = frame[feature_cols].apply(pd.to_numeric, errors="coerce")
-    y = frame[outcome_col].apply(pd.to_numeric, errors="coerce")
-    valid = x.notna().all(axis=1) & y.notna()
-    return x.loc[valid].reset_index(drop=True), y.loc[valid].reset_index(drop=True), feature_cols
 
 
 def build_explainer(model, scaler, background_scaled: np.ndarray) -> shap.LinearExplainer:

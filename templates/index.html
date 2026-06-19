@@ -1075,6 +1075,11 @@
             </article>
           {% endfor %}
         </section>
+      {% elif not shap_enabled %}
+        <p class="hint">
+          SHAP 可解释性分析未加载（请确认已安装 <code>shap</code>，且未设置 <code>SHAP_ENABLED=0</code>）。
+          SHAP interpretability is unavailable — install <code>shap</code> or check SHAP_ENABLED.
+        </p>
       {% endif %}
     {% endif %}
 

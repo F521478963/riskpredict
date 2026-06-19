@@ -17,7 +17,6 @@
     "RAG_SKIP_EMBEDDINGS": "1",
     "RAG_AUTO_BUILD": "0",
     "LLM_RAG_MODE": "rag",
-    "DEEPSEEK_TIMEOUT": "180",
-    "SHAP_ENABLED": "0"
+    "DEEPSEEK_TIMEOUT": "180"
   }
 }
