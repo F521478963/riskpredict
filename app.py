@@ -17,7 +17,23 @@ from llm_pipeline import JUDGMENT_LABELS
 from rag_store import get_default_corpus_store
 from report_export import build_analysis_report
 from risk_config import BRANCH_QFR_THRESHOLD, RISK_THRESHOLD
-from shap_service import build_shap_runtime
+
+
+class _NullShapRuntime:
+    def explain_all(self, feature_map):
+        return []
+
+
+def _load_shap_runtime():
+    if os.environ.get("SHAP_ENABLED", "1").strip().lower() in {"0", "false", "no", "off"}:
+        return _NullShapRuntime()
+    try:
+        from shap_service import build_shap_runtime
+
+        return build_shap_runtime()
+    except ImportError as exc:
+        print(f"[riskpredict] SHAP unavailable, skipping explanations: {exc}")
+        return _NullShapRuntime()
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -35,10 +51,16 @@ prediction_service = PredictionService.from_shelve(
     feature_names=OVERALL_FEATURE_NAMES,
 )
 branch_services = load_branch_services()
-shap_runtime = build_shap_runtime()
+shap_runtime = _load_shap_runtime()
 rag_corpus_store = get_default_corpus_store()
 try:
-    rag_corpus_store.ensure_index(auto_build=True)
+    rag_auto_build = os.environ.get("RAG_AUTO_BUILD", "true").strip().lower() not in {
+        "0",
+        "false",
+        "no",
+        "off",
+    }
+    rag_corpus_store.ensure_index(auto_build=rag_auto_build)
 except Exception as exc:
     print(f"[riskpredict] RAG index not ready: {exc}")
 

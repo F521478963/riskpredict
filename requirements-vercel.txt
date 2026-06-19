@@ -1,0 +1,10 @@
+# Slim runtime deps for Vercel (no SHAP / matplotlib — saves ~100MB+).
+# Local full stack: pip install -r requirements-dev.txt
+Flask
+numpy
+pandas
+openpyxl
+scikit-learn
+openai
+PyYAML>=6.0
+httpx

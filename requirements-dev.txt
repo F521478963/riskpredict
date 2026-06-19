@@ -1,4 +1,6 @@
 -r requirements.txt
 
+matplotlib
+shap
 PyMuPDF
 sentence-transformers>=2.2.0

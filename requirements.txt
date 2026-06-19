@@ -5,5 +5,4 @@ openpyxl
 scikit-learn
 openai
 PyYAML>=6.0
-matplotlib
-shap
+httpx

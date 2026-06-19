@@ -16,16 +16,34 @@ eval/
 docs/
 scripts/
 
+# research / training artifacts — not used by the web app
+moremodel/
+Inversion.py
+20260610_most_powerful/Create.py
+20260610_most_powerful/shap_results/
+20260610_most_powerful/shap_results_test/
+20260610_most_powerful/*_inv.xlsx
+
+# SHAP batch analysis (needs matplotlib); optional at runtime via SHAP_ENABLED
+shap_analysis.py
+
 # data not needed in production
 y_test.xlsx
-Inversion.py
 uploads/
 outputs/
 
-# legacy duplicate PDFs at repo root (real copies already live in rag_corpus/)
+# legacy duplicate PDFs at repo root (copies live in rag_corpus/)
 2024 ESC(1).pdf
 2025 ACC AHA ACEP NAEMSP SCAI Guideline for the Management of Patients With Acute Coronary Syndromes A Report of the American College of Cardiology American Heart Association Joint Committee on Clinical Practice Guidelines.pdf
 冠状动脉功能学临床应用专家共识(1).pdf
+
+# RAG source PDFs — prebuilt lexical index is shipped via rag_corpus/.rag_index/
+rag_corpus/guidelines/
+rag_corpus/screening/
+rag_corpus/methods/
+rag_corpus/papers/
+rag_corpus/inbox/
+rag_corpus/README.md
 
 # old single-file RAG caches; not used by rag_corpus
 *.rag_cache.json
@@ -34,9 +52,10 @@ rag_corpus/**/*.rag_cache.json
 # Heavy embedding matrix; production runs lexical-only mode
 rag_corpus/.rag_index/embeddings.npy
 
-# dev-only deps file
+# dev-only deps file (local: pip install -r requirements-dev.txt)
 requirements-dev.txt
 
+# dev-only
 .pytest_cache/
 .coverage
 htmlcov/
