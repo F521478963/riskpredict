@@ -9,9 +9,8 @@ from model_registry import (
     OVERALL_FEATURE_NAMES,
     build_feature_fields,
     build_feature_groups,
+    finalize_branch_panel,
     load_branch_services,
-    predict_branch_qfr,
-    resolve_branch_qfr_panel,
 )
 from model_service import FeatureShapeError, PredictionService
 from llm_pipeline import JUDGMENT_LABELS
@@ -88,7 +87,7 @@ def index():
         return _render_index()
 
     if request.form.get("mode") != "manual":
-        return _render_error("无效的提交方式。")
+        return _render_error("Invalid submission mode.")
 
     return _handle_manual_prediction()
 
@@ -109,7 +108,7 @@ def _handle_manual_prediction():
     except KeyError as exc:
         return _render_error(str(exc), values=form_values)
     except Exception as exc:
-        return _render_error(f"预测失败：{exc}", values=form_values)
+        return _render_error(f"Prediction failed: {exc}", values=form_values)
 
     risk = classify_risk(prediction)
     values = [feature_map[field["column"]] for field in FEATURE_FIELDS]
@@ -155,7 +154,7 @@ def _parse_manual_feature_map():
             return (
                 None,
                 form_values,
-                f"请填写 {field['label_zh']} / {field['label_en']}。",
+                f"Please enter {field['label_en']}.",
             )
 
         try:
@@ -164,20 +163,14 @@ def _parse_manual_feature_map():
             return (
                 None,
                 form_values,
-                f"{field['label_zh']} / {field['label_en']} 必须是数字。",
+                f"{field['label_en']} must be a number.",
             )
 
     return feature_map, form_values, None
 
 
-def _predict_all_branches(feature_map, screening_score=None):
-    raw = {}
-    for spec in BRANCH_MODEL_SPECS:
-        service = branch_services[spec["id"]]
-        raw[spec["id"]] = predict_branch_qfr(service, feature_map)
-
-    if screening_score is not None:
-        raw = resolve_branch_qfr_panel(raw, screening_score)
+def _predict_all_branches(feature_map, screening_score):
+    raw = finalize_branch_panel(feature_map, branch_services, screening_score)
 
     results = []
     for spec in BRANCH_MODEL_SPECS:

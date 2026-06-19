@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ridge-RF 本地预测工具</title>
+  <title>Local Ridge-RF Prediction Tool</title>
   <style>
     body {
       margin: 0;
@@ -1068,37 +1068,36 @@
   </style>
 </head>
 <body>
-  <div class="floating-actions" aria-label="测试参数快捷操作">
+  <div class="floating-actions" aria-label="Quick test parameter actions">
     <button class="floating-action-button floating-case16-button" id="fill-case16-data-button" type="button">
-      填入16号数据 / Fill Case 16
+      Fill Case 16
     </button>
     <button class="floating-action-button floating-case81-button" id="fill-case81-data-button" type="button">
-      填入81号数据 / Fill Case 81
+      Fill Case 81
     </button>
     <button class="floating-action-button floating-high-risk-button" id="fill-high-risk-data-button" type="button">
-      填入高风险参数 / Fill High-Risk Data
+      Fill High-Risk Data
     </button>
     <button class="floating-action-button floating-test-button" id="fill-test-data-button" type="button">
-      填入低风险参数 / Fill Low-Risk Data
+      Fill Low-Risk Data
     </button>
     <button class="floating-action-button floating-reset-button" id="reset-test-data-button" type="button">
-      重置参数 / Reset Data
+      Reset Data
     </button>
   </div>
 
   <main class="card">
-    <h1>Ridge-RF 本地预测工具 / Local Ridge-RF Prediction Tool</h1>
+    <h1>Local Ridge-RF Prediction Tool</h1>
     <p class="desc">
-      输入 33 个模型指标值后，系统会在本机加载 Ridge-RF 模型并显示整体风险与三分支 QFR 预测；AI 报告通过
-      <code>rag_corpus/</code> 资料库检索指南后生成（新材料放入目录后请运行
-      <code>python scripts/rebuild_rag_index.py</code>）。
-      Enter 33 feature values for local Ridge-RF prediction with LAD/LCX/RCA QFR panel; AI reports use the local RAG corpus.
+      Enter 33 feature values to run local Ridge-RF screening with LAD/LCX/RCA QFR outputs.
+      AI reports are generated from the <code>rag_corpus/</code> guideline index
+      (rebuild after adding documents with <code>python scripts/rebuild_rag_index.py</code>).
     </p>
     {% if rag_status %}
       <p class="hint">
-        RAG 资料库：{{ rag_status.document_count }} 份文档，
-        索引状态 {% if rag_status.index_built %}已构建{% else %}未构建{% endif %}
-        （检索模式 {{ rag_status.retrieval_mode }}，Top-{{ rag_status.top_k }}）。
+        RAG corpus: {{ rag_status.document_count }} document(s),
+        index {% if rag_status.index_built %}ready{% else %}not built{% endif %}
+        (mode {{ rag_status.retrieval_mode }}, top-{{ rag_status.top_k }}).
       </p>
     {% endif %}
 
@@ -1108,24 +1107,23 @@
 
     {% if result is not none %}
       <div class="result">
-        预测结果 / Prediction Result
+        Prediction Result
         <strong>Predicted Value: {{ "%.6f"|format(result) }}</strong>
         <div class="risk-badge {{ risk.class_name }}">
-          风险分级 / Risk Level: {{ risk.label_zh }} / {{ risk.label_en }}
+          Risk Level: {{ risk.label_en }}
         </div>
       </div>
 
       {% if branch_predictions %}
         <section class="branch-qfr-panel" aria-label="Branch QFR predictions">
-          <h2>三分支 QFR 预测 / Branch QFR Panel</h2>
+          <h2>Branch QFR Panel</h2>
           <div class="branch-qfr-grid">
             {% for branch in branch_predictions %}
               <article class="branch-qfr-card">
-                <h3>{{ branch.label_zh }}</h3>
-                <span class="branch-name-en">{{ branch.label_en }}</span>
+                <h3>{{ branch.label_en }}</h3>
                 <strong>{{ "%.4f"|format(branch.qfr) }}</strong>
                 <div class="branch-status {{ branch.status.class_name }}">
-                  {{ branch.status.label_zh }} / {{ branch.status.label_en }}
+                  {{ branch.status.label_en }}
                 </div>
               </article>
             {% endfor %}
@@ -1135,11 +1133,10 @@
 
       {% if shap_explanations %}
         <section class="shap-panel" id="shap-panel" aria-label="SHAP interpretability">
-          <h2>SHAP 可解释性分析 / SHAP Interpretability</h2>
+          <h2>SHAP Interpretability</h2>
           <p class="panel-desc">
-            各模型贡献值在同一横轴上叠加展示（Force Plot），并标注影响较大的特征；下方表格列出全部特征明细。
-            红色表示推高预测值，蓝色表示拉低预测值。
             Contributions are stacked on one axis with top features labeled; the table lists all feature details.
+            Red segments push the prediction up; blue segments push it down.
           </p>
 
           <div class="shap-model-tabs" role="tablist" aria-label="SHAP model tabs"{% if shap_explanations | length <= 1 %} hidden{% endif %}>
@@ -1151,7 +1148,7 @@
                 role="tab"
                 aria-selected="{% if loop.first %}true{% else %}false{% endif %}"
               >
-                {{ explanation.title_zh }} / {{ explanation.title_en }}
+                {{ explanation.title_en }}
               </button>
             {% endfor %}
           </div>
@@ -1165,28 +1162,28 @@
             >
               <div class="shap-meta-grid">
                 <div class="shap-meta-card">
-                  <span>基准值 / Base Value</span>
+                  <span>Base Value</span>
                   <strong>{{ "%.6f"|format(explanation.base_value) }}</strong>
                 </div>
                 <div class="shap-meta-card">
-                  <span>模型输出 / Model Output</span>
+                  <span>Model Output</span>
                   <strong>{{ "%.6f"|format(explanation.prediction) }}</strong>
                 </div>
                 <div class="shap-meta-card">
-                  <span>入选特征数 / Selected Features</span>
+                  <span>Selected Features</span>
                   <strong>{{ explanation.feature_count }}</strong>
                 </div>
                 <div class="shap-meta-card">
-                  <span>最大 |SHAP| / Max |SHAP|</span>
+                  <span>Max |SHAP|</span>
                   <strong>{{ "%.6f"|format(explanation.max_abs_shap) }}</strong>
                 </div>
               </div>
 
               <div class="shap-force-wrap">
-                <p class="shap-force-title">单样本 Force Plot / Single-instance Force Plot</p>
+                <p class="shap-force-title">Single-instance Force Plot</p>
                 <div class="shap-force-legend" aria-hidden="true">
-                  <span><i class="positive"></i>推高 / Push Up</span>
-                  <span><i class="negative"></i>拉低 / Push Down</span>
+                  <span><i class="positive"></i>Push Up</span>
+                  <span><i class="negative"></i>Push Down</span>
                 </div>
                 <div
                   class="shap-force-plot"
@@ -1200,10 +1197,10 @@
                   <thead>
                     <tr>
                       <th>#</th>
-                      <th>特征 / Feature</th>
-                      <th>输入值 / Input</th>
-                      <th>SHAP 值</th>
-                      <th>方向 / Direction</th>
+                      <th>Feature</th>
+                      <th>Input</th>
+                      <th>SHAP Value</th>
+                      <th>Direction</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1211,7 +1208,7 @@
                       <tr>
                         <td>{{ loop.index }}</td>
                         <td class="shap-feature-name">
-                          {{ feature.label_zh }}
+                          {{ feature.label_en }}
                         </td>
                         <td>{{ "%.6f"|format(feature.value) }}</td>
                         <td class="{% if feature.direction == 'positive' %}shap-value-positive{% else %}shap-value-negative{% endif %}">
@@ -1219,9 +1216,9 @@
                         </td>
                         <td>
                           {% if feature.direction == 'positive' %}
-                            推高 / Push Up
+                            Push Up
                           {% else %}
-                            拉低 / Push Down
+                            Push Down
                           {% endif %}
                         </td>
                       </tr>
@@ -1234,8 +1231,7 @@
         </section>
       {% elif not shap_enabled %}
         <p class="hint">
-          SHAP 可解释性分析未加载（请确认已安装 <code>shap</code>，且未设置 <code>SHAP_ENABLED=0</code>）。
-          SHAP interpretability is unavailable — install <code>shap</code> or check SHAP_ENABLED.
+          SHAP interpretability is unavailable — install <code>shap</code> or check <code>SHAP_ENABLED</code>.
         </p>
       {% endif %}
 
@@ -1248,29 +1244,30 @@
 
     <section class="ai-analysis" id="analysis-status">
       <div class="ai-analysis-header">
-        <h2>AI 辅助分析 / AI-Assisted Analysis</h2>
+        <h2>AI-Assisted Analysis</h2>
       </div>
       <div class="research-disclaimer" role="note">
-        <strong>研究用途声明：</strong>
-        体表高光谱无创筛查模型（Ridge-RF）的输出旨在为<strong>医学研究</strong>提供<strong>更详细的检查建议</strong>参考，
-        不用于实际临床治疗决策，亦不能替代临床诊断。本系统不会在临床场景中直接指导用药或处置。
+        <strong>Research use only:</strong>
+        Ridge-RF outputs are intended to support <strong>medical research</strong> with
+        <strong>additional evaluation suggestions</strong>. They must not be used for clinical
+        treatment decisions, diagnosis, prescribing, or care pathways.
       </div>
       <div class="analysis-loading" id="analysis-loading" aria-live="polite">
         <span class="loading-spinner" aria-hidden="true"></span>
-        <span>正在生成 AI 辅助分析，请稍候... / Generating AI-assisted analysis, please wait...</span>
+        <span>Generating AI-assisted analysis, please wait...</span>
       </div>
       {% if analysis_report %}
         <article class="analysis-module" data-module="assessment">
-          <h3>诊断评估与检查建议 / Diagnostic Assessment &amp; Recommendations</h3>
+          <h3>Diagnostic Assessment &amp; Recommendations</h3>
           <p class="module-desc">
-            综合判断与检查建议（非治疗处方）；侧重研究场景下「还应完善哪些评估」。
+            Combined assessment and evaluation suggestions for research use (not a treatment prescription).
           </p>
           <div class="ai-analysis-toolbar" data-module-toolbar="assessment">
             <button type="button" class="toolbar-primary is-active" data-action="reader" data-module="assessment">
-              Markdown 阅读器 / Reader
+              Reader
             </button>
             <button type="button" class="toolbar-secondary" data-action="source" data-module="assessment">
-              查看源码 / Source
+              Source
             </button>
           </div>
           <div
@@ -1289,22 +1286,18 @@
         <p class="ai-analysis-warning">{{ ai_analysis.error }}</p>
       {% else %}
         <p class="ai-analysis-warning">
-          点击「综合判断」开始预测后，这里将展示诊断评估与检查建议。
-          After prediction, diagnostic assessment and recommendations will appear here.
+          Run Combined Analysis to generate diagnostic assessment and recommendations here.
         </p>
       {% endif %}
     </section>
 
     <form class="panel" method="post" id="manual-prediction-form">
       <input type="hidden" name="mode" value="manual">
-      <h2>指标输入 / Feature Inputs</h2>
+      <h2>Feature Inputs</h2>
       <div class="feature-groups">
         {% for group in feature_groups %}
           <section class="feature-group" id="{{ group.id }}">
-            <h3>
-              {{ group.title_zh }}
-              <span>{{ group.title_en }}</span>
-            </h3>
+            <h3>{{ group.title_en }}</h3>
             <div class="feature-grid">
               {% for field in group.fields %}
                 <div class="field">
@@ -1319,7 +1312,7 @@
                     step="any"
                     required
                     value="{{ values.get(field.name, '') }}"
-                    placeholder="请输入数值 / Enter value"
+                    placeholder="Enter value"
                   >
                 </div>
               {% endfor %}
@@ -1328,10 +1321,11 @@
         {% endfor %}
       </div>
       <button type="submit" id="submit-combined" class="submit-combined">
-        综合判断 / Combined Analysis
+        Combined Analysis
       </button>
       <div class="hint">
-        使用 RAG 资料库检索 + 模型医学知识进行综合判断；输入在本机处理，LLM 调用需配置 DEEPSEEK_API_KEY。
+        Uses local RAG retrieval plus model knowledge for combined analysis. Inputs stay on this machine;
+        configure <code>DEEPSEEK_API_KEY</code> for LLM calls.
       </div>
     </form>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -1423,7 +1417,7 @@
         const submitButton = form.querySelector("#submit-combined");
         if (submitButton) {
           submitButton.disabled = false;
-          submitButton.textContent = "综合判断 / Combined Analysis";
+          submitButton.textContent = "Combined Analysis";
         }
 
         form.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -1448,7 +1442,7 @@
         }
         submitButtons.forEach((submitButton) => {
           submitButton.disabled = true;
-          submitButton.textContent = "预测与分析中... / Predicting and analyzing...";
+          submitButton.textContent = "Predicting and analyzing...";
         });
       }
 
@@ -1748,9 +1742,9 @@
         const labelNodes = selectForceLabelSegments(segments, totalAbs).map((segment) => {
           const label = document.createElement("div");
           label.className = `shap-force-label ${segment.direction}`;
-          const featureName = segment.label_zh || segment.feature;
+          const featureName = segment.label_en || segment.feature;
           const shapText = formatShapNumber(Number(segment.shap_value));
-          label.title = `${featureName}\n值: ${formatShapNumber(Number(segment.value))}\nSHAP: ${shapText}`;
+          label.title = `${featureName}\nValue: ${formatShapNumber(Number(segment.value))}\nSHAP: ${shapText}`;
           label.textContent = `${featureName} (${shapText})`;
           labels.appendChild(label);
           return { segment, label };

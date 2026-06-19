@@ -15,10 +15,10 @@ if BASE_DIR not in sys.path:
 
 from model_registry import (
     BRANCH_MODEL_SPECS,
+    FEATURE_SPECS,
     OVERALL_FEATURE_NAMES,
+    finalize_branch_panel,
     load_branch_services,
-    predict_branch_qfr,
-    resolve_branch_qfr_panel,
 )
 from model_service import PredictionService
 
@@ -172,15 +172,8 @@ def _predict_frame(
         overall_value = overall_service.predict_values_by_names(overall_map)
         y_predictions.append(overall_value)
 
-        raw_branch = {}
-        for spec in BRANCH_MODEL_SPECS:
-            branch_id = spec["id"]
-            feature_map = {name: float(row[name]) for name in spec["feature_names"]}
-            raw_branch[branch_id] = predict_branch_qfr(
-                branch_services[branch_id], feature_map
-            )
-
-        resolved_branch = resolve_branch_qfr_panel(raw_branch, overall_value)
+        feature_map = {column: float(row[column]) for column, *_rest in FEATURE_SPECS}
+        resolved_branch = finalize_branch_panel(feature_map, branch_services, overall_value)
         for spec in BRANCH_MODEL_SPECS:
             branch_predictions[spec["id"]].append(
                 round(resolved_branch[spec["id"]], 6)

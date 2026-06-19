@@ -45,10 +45,10 @@ class AppTest(unittest.TestCase):
         response = client.post("/", data=data)
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn("三分支 QFR 预测".encode("utf-8"), response.data)
-        self.assertIn("左前降支".encode("utf-8"), response.data)
-        self.assertIn("左回旋支".encode("utf-8"), response.data)
-        self.assertIn("右冠状动脉".encode("utf-8"), response.data)
+        self.assertIn(b"Branch QFR Panel", response.data)
+        self.assertIn(b"LAD (Left Anterior Descending)", response.data)
+        self.assertIn(b"LCX (Left Circumflex)", response.data)
+        self.assertIn(b"RCA (Right Coronary Artery)", response.data)
 
     def test_manual_form_prediction_displays_result(self):
         client = app.test_client()
@@ -59,9 +59,9 @@ class AppTest(unittest.TestCase):
         response = client.post("/", data=data)
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn("预测结果 / Prediction Result".encode("utf-8"), response.data)
-        self.assertIn("Predicted Value".encode("utf-8"), response.data)
-        self.assertIn("风险分级 / Risk Level".encode("utf-8"), response.data)
+        self.assertIn(b"Prediction Result", response.data)
+        self.assertIn(b"Predicted Value", response.data)
+        self.assertIn(b"Risk Level", response.data)
 
     def test_manual_form_prediction_displays_shap_panel(self):
         client = app.test_client()
@@ -72,9 +72,9 @@ class AppTest(unittest.TestCase):
         response = client.post("/", data=data)
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn("SHAP 可解释性分析".encode("utf-8"), response.data)
+        self.assertIn(b"SHAP Interpretability", response.data)
         self.assertIn(b'id="shap-panel"', response.data)
-        self.assertIn("整体筛查".encode("utf-8"), response.data)
+        self.assertIn(b"Overall Screening (Ridge-RF)", response.data)
         self.assertIn(b"shap-table", response.data)
         self.assertIn(b"Push Up", response.data)
 
@@ -86,10 +86,10 @@ class AppTest(unittest.TestCase):
 
         with patch("app.ai_analyzer.analyze") as analyze:
             analyze.return_value = {
-                "content": "### 综合判断\n\nAI 风险分析报告 / AI Risk Analysis Report",
+                "content": "### Combined Analysis\n\nAI Risk Analysis Report",
                 "error": None,
                 "judgment_mode": "combined",
-                "judgment_label": "综合判断",
+                "judgment_label": "Combined Analysis",
             }
             response = client.post("/", data=data)
 
@@ -99,16 +99,16 @@ class AppTest(unittest.TestCase):
             analyze.call_args.kwargs.get("judgment_mode"),
             "combined",
         )
-        self.assertIn("AI 辅助分析".encode("utf-8"), response.data)
+        self.assertIn(b"AI-Assisted Analysis", response.data)
         self.assertIn(b"analysis-report-data", response.data)
         self.assertNotIn(b'data-action="export-md"', response.data)
-        self.assertIn("研究用途声明".encode("utf-8"), response.data)
+        self.assertIn(b"Research use only", response.data)
 
     def test_homepage_contains_combined_submit_button(self):
         response = app.test_client().get("/")
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn("综合判断".encode("utf-8"), response.data)
+        self.assertIn(b"Combined Analysis", response.data)
         self.assertIn(b"submit-combined", response.data)
         self.assertNotIn("0提示词".encode("utf-8"), response.data)
         self.assertNotIn("简易提示词".encode("utf-8"), response.data)
@@ -123,7 +123,7 @@ class AppTest(unittest.TestCase):
             data[field["name"]] = "1.0"
 
         with patch("app.ai_analyzer.analyze") as analyze:
-            analyze.return_value = {"content": "综合报告", "error": None}
+            analyze.return_value = {"content": "Combined report", "error": None}
             client.post("/", data=data)
 
         self.assertEqual(analyze.call_args.kwargs.get("judgment_mode"), "combined")
@@ -133,10 +133,11 @@ class AppTest(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(FEATURE_GROUPS), 4)
-        self.assertIn("面部纹理指标（均值与方差）".encode("utf-8"), response.data)
+        self.assertIn(b"Face Texture Features", response.data)
         self.assertIn(b"face_texture", response.data)
         for group in FEATURE_GROUPS:
-            self.assertIn(group["title_zh"].encode("utf-8"), response.data)
+            title = group["title_en"].replace("&", "&amp;").encode("utf-8")
+            self.assertIn(title, response.data)
 
     def test_homepage_contains_ai_loading_result_area(self):
         response = app.test_client().get("/")
@@ -144,11 +145,11 @@ class AppTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'id="analysis-status"', response.data)
         self.assertIn(b'class="loading-spinner"', response.data)
-        self.assertIn("正在生成 AI 辅助分析".encode("utf-8"), response.data)
+        self.assertIn(b"Generating AI-assisted analysis", response.data)
         self.assertIn(b"showAnalysisLoading", response.data)
         self.assertIn(b"initAnalysisModules", response.data)
         self.assertNotIn("判断依据".encode("utf-8"), response.data)
-        self.assertIn("诊断评估与检查建议".encode("utf-8"), response.data)
+        self.assertIn(b"diagnostic assessment", response.data)
 
     def test_manual_form_renders_markdown_reader_when_analysis_exists(self):
         client = app.test_client()
@@ -158,10 +159,10 @@ class AppTest(unittest.TestCase):
 
         with patch("app.ai_analyzer.analyze") as analyze:
             analyze.return_value = {
-                "content": "### 综合判断\n\n测试内容",
+                "content": "### Combined Analysis\n\nSample content",
                 "error": None,
                 "judgment_mode": "combined",
-                "judgment_label": "综合判断",
+                "judgment_label": "Combined Analysis",
             }
             response = client.post("/", data=data)
 
@@ -169,14 +170,14 @@ class AppTest(unittest.TestCase):
         self.assertNotIn(b'id="evidence-markdown-reader"', response.data)
         self.assertIn(b'id="assessment-markdown-reader"', response.data)
         self.assertIn(b"analysis-report-data", response.data)
-        self.assertIn("\\u7efc\\u5408\\u5224\\u65ad".encode("utf-8"), response.data)
+        self.assertIn(b"Combined Analysis", response.data)
 
     def test_homepage_contains_fill_test_data_button(self):
         response = app.test_client().get("/")
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'id="fill-test-data-button"', response.data)
-        self.assertIn("填入低风险参数".encode("utf-8"), response.data)
+        self.assertIn(b"Fill Low-Risk Data", response.data)
         self.assertIn(b"fillLowRiskData", response.data)
         self.assertIn(b"LOW_RISK_FEATURE_VALUES", response.data)
 
@@ -185,7 +186,7 @@ class AppTest(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'id="reset-test-data-button"', response.data)
-        self.assertIn("重置参数".encode("utf-8"), response.data)
+        self.assertIn(b"Reset Data", response.data)
         self.assertIn(b"resetTestData", response.data)
         self.assertIn(b'id=\"fill-test-data-button\"', response.data)
 
@@ -203,7 +204,7 @@ class AppTest(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'id="fill-high-risk-data-button"', response.data)
-        self.assertIn("填入高风险参数".encode("utf-8"), response.data)
+        self.assertIn(b"Fill High-Risk Data", response.data)
         self.assertIn(b"HIGH_RISK_FEATURE_VALUES", response.data)
         self.assertIn(b"fillHighRiskData", response.data)
         self.assertIn(b"200.980134", response.data)
@@ -215,8 +216,8 @@ class AppTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'id="fill-case16-data-button"', response.data)
         self.assertIn(b'id="fill-case81-data-button"', response.data)
-        self.assertIn("填入16号数据".encode("utf-8"), response.data)
-        self.assertIn("填入81号数据".encode("utf-8"), response.data)
+        self.assertIn(b"Fill Case 16", response.data)
+        self.assertIn(b"Fill Case 81", response.data)
         self.assertIn(b"CASE_16_FEATURE_VALUES", response.data)
         self.assertIn(b"CASE_81_FEATURE_VALUES", response.data)
         self.assertIn(b"fillCase16Data", response.data)

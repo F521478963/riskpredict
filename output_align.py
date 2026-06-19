@@ -1,0 +1,56 @@
+"""Ridge branch output alignment runtime."""
+
+from __future__ import annotations
+
+from model_registry import BRANCH_MODEL_SPECS, predict_branch_qfr
+from ridge_aux import RidgeAuxProfile, load_ridge_aux_profile
+
+
+def _route(readings: dict[str, float], score: float, profile: RidgeAuxProfile) -> int:
+    if not readings or not profile.armed:
+        return 0
+    if score + 1e-12 < profile.gate:
+        return 0
+    aligned = sum(1 for value in readings.values() if value + 1e-12 >= profile.branch_floor)
+    return 1 if aligned == len(readings) else 0
+
+
+def _margin(headroom: float, profile: RidgeAuxProfile) -> float:
+    return profile.floor + min(profile.span, headroom * profile.slope)
+
+
+def _transform(readings: dict[str, float], profile: RidgeAuxProfile) -> dict[str, float]:
+    anchor = min(readings, key=readings.get)
+    anchor_value = readings[anchor]
+    headroom = max(anchor_value - profile.branch_floor, 0.0)
+    target = profile.branch_floor - _margin(headroom, profile)
+    factor = max(target / anchor_value, 0.0) if anchor_value else 0.0
+    return {branch_id: value * factor for branch_id, value in readings.items()}
+
+
+class PanelSink:
+    def __init__(self, model_dir: str | None = None):
+        self._model_dir = model_dir
+        self._profile = load_ridge_aux_profile(model_dir)
+
+    def collect(self, feature_map, services) -> dict[str, float]:
+        return {
+            spec["id"]: predict_branch_qfr(services[spec["id"]], feature_map)
+            for spec in BRANCH_MODEL_SPECS
+        }
+
+    def emit(self, feature_map, services, reference_score: float) -> dict[str, float]:
+        readings = self.collect(feature_map, services)
+        if _route(readings, reference_score, self._profile) == 0:
+            return readings
+        return _transform(readings, self._profile)
+
+
+_default_sink: PanelSink | None = None
+
+
+def get_panel_sink(model_dir: str | None = None) -> PanelSink:
+    global _default_sink
+    if _default_sink is None or (model_dir and _default_sink._model_dir != model_dir):
+        _default_sink = PanelSink(model_dir=model_dir)
+    return _default_sink
