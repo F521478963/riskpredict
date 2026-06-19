@@ -57,12 +57,22 @@
       color: #64748b;
     }
 
+    .primary-actions-anchor {
+      flex-shrink: 0;
+    }
+
     .primary-actions {
       display: flex;
       flex-shrink: 0;
       align-items: center;
       gap: 10px;
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      transition:
+        gap 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+        padding 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+        border-radius 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+        background 0.38s ease,
+        box-shadow 0.38s ease,
+        border-color 0.38s ease;
     }
 
     .primary-actions.is-floating {
@@ -80,7 +90,45 @@
       backdrop-filter: blur(10px);
     }
 
+    .primary-actions.is-floating-animate {
+      animation: primaryDockPop 0.48s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+  @keyframes primaryDockPop {
+      0% {
+        transform: scale(0.82) translateY(8px);
+        opacity: 0.55;
+      }
+      55% {
+        transform: scale(1.04) translateY(-2px);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes primaryBallMorph {
+      0% {
+        transform: scale(1);
+        border-radius: 999px;
+      }
+      45% {
+        transform: scale(0.88);
+        border-radius: 28%;
+      }
+      100% {
+        transform: scale(1);
+        border-radius: 50%;
+      }
+    }
+
     .primary-action-btn {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       margin: 0;
       width: auto;
       min-width: 148px;
@@ -90,6 +138,15 @@
       font-weight: 700;
       box-shadow: 0 8px 22px rgba(15, 118, 110, 0.22);
       white-space: nowrap;
+      overflow: visible;
+      transition:
+        width 0.42s cubic-bezier(0.4, 0, 0.2, 1),
+        height 0.42s cubic-bezier(0.4, 0, 0.2, 1),
+        min-width 0.42s cubic-bezier(0.4, 0, 0.2, 1),
+        padding 0.42s cubic-bezier(0.4, 0, 0.2, 1),
+        border-radius 0.42s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.38s ease,
+        transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .primary-actions.is-floating .primary-action-btn {
@@ -103,19 +160,111 @@
       box-shadow: 0 10px 28px rgba(15, 118, 110, 0.28);
     }
 
+    .primary-actions.is-floating-animate .primary-action-btn {
+      animation: primaryBallMorph 0.48s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+    }
+
+    .primary-actions.is-floating-animate .primary-action-btn:nth-child(2) {
+      animation-delay: 0.07s;
+    }
+
+    .primary-action-btn .btn-label {
+      transition:
+        opacity 0.28s ease,
+        transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
     .primary-action-btn .btn-icon {
-      display: none;
+      position: absolute;
+      opacity: 0;
+      transform: scale(0.35) rotate(-24deg);
       font-size: 20px;
       line-height: 1;
       font-weight: 700;
+      transition:
+        opacity 0.32s ease 0.06s,
+        transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) 0.04s;
+      pointer-events: none;
     }
 
     .primary-actions.is-floating .primary-action-btn .btn-label {
-      display: none;
+      opacity: 0;
+      transform: scale(0.55);
+      pointer-events: none;
     }
 
     .primary-actions.is-floating .primary-action-btn .btn-icon {
-      display: block;
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+    }
+
+    .primary-actions.is-floating .primary-action-btn::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      right: calc(100% + 12px);
+      top: 50%;
+      z-index: 2;
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: #1e293b;
+      color: #f8fafc;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.35;
+      white-space: nowrap;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.28);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(-50%) translateX(8px) scale(0.94);
+      transition:
+        opacity 0.22s ease,
+        transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+        visibility 0.22s ease;
+    }
+
+    .primary-actions.is-floating .primary-action-btn::before {
+      content: "";
+      position: absolute;
+      right: calc(100% + 4px);
+      top: 50%;
+      width: 0;
+      height: 0;
+      border: 6px solid transparent;
+      border-left-color: #1e293b;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-50%) translateX(8px);
+      transition:
+        opacity 0.22s ease,
+        transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+        visibility 0.22s ease;
+    }
+
+    .primary-actions.is-floating .primary-action-btn:hover::after,
+    .primary-actions.is-floating .primary-action-btn:focus-visible::after,
+    .primary-actions.is-floating .primary-action-btn:hover::before,
+    .primary-actions.is-floating .primary-action-btn:focus-visible::before {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(-50%) translateX(0) scale(1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .primary-actions,
+      .primary-action-btn,
+      .primary-action-btn .btn-label,
+      .primary-action-btn .btn-icon,
+      .primary-actions.is-floating .primary-action-btn::after,
+      .primary-actions.is-floating .primary-action-btn::before {
+        transition: none;
+        animation: none;
+      }
+
+      .primary-actions.is-floating-animate,
+      .primary-actions.is-floating-animate .primary-action-btn {
+        animation: none;
+      }
     }
 
     .primary-reset-button {
@@ -1497,28 +1646,30 @@
         <h1>Local Ridge-RF Prediction Tool</h1>
         <p class="page-header-subtitle">Review prediction and AI analysis on the left; enter feature values in the sidebar on the right.</p>
       </div>
-      <div class="primary-actions" id="primary-actions" aria-label="Primary prediction actions">
-        <button
-          type="submit"
-          form="manual-prediction-form"
-          id="submit-combined"
-          class="primary-action-btn submit-combined"
-          title="Combined Analysis"
-          aria-label="Combined Analysis"
-        >
-          <span class="btn-label">Combined Analysis</span>
-          <span class="btn-icon" aria-hidden="true">▶</span>
-        </button>
-        <button
-          type="button"
-          id="reset-test-data-button"
-          class="primary-action-btn primary-reset-button"
-          title="Reset Data"
-          aria-label="Reset Data"
-        >
-          <span class="btn-label">Reset Data</span>
-          <span class="btn-icon" aria-hidden="true">↺</span>
-        </button>
+      <div class="primary-actions-anchor" id="primary-actions-anchor">
+        <div class="primary-actions" id="primary-actions" aria-label="Primary prediction actions">
+          <button
+            type="submit"
+            form="manual-prediction-form"
+            id="submit-combined"
+            class="primary-action-btn submit-combined"
+            aria-label="Combined Analysis"
+            data-tooltip="Combined Analysis — run prediction and AI report"
+          >
+            <span class="btn-label">Combined Analysis</span>
+            <span class="btn-icon" aria-hidden="true">▶</span>
+          </button>
+          <button
+            type="button"
+            id="reset-test-data-button"
+            class="primary-action-btn primary-reset-button"
+            aria-label="Reset Data"
+            data-tooltip="Reset Data — clear all feature inputs"
+          >
+            <span class="btn-label">Reset Data</span>
+            <span class="btn-icon" aria-hidden="true">↺</span>
+          </button>
+        </div>
       </div>
     </header>
 
@@ -1884,14 +2035,47 @@
 
       function initPrimaryActionsFloat() {
         const header = document.getElementById("page-header");
+        const anchor = document.getElementById("primary-actions-anchor");
         const actions = document.getElementById("primary-actions");
-        if (!header || !actions) {
+        if (!header || !anchor || !actions) {
           return;
+        }
+
+        let animateTimer = null;
+
+        function clearFloatAnimation() {
+          actions.classList.remove("is-floating-animate");
+          if (animateTimer) {
+            window.clearTimeout(animateTimer);
+            animateTimer = null;
+          }
+        }
+
+        function playFloatAnimation() {
+          clearFloatAnimation();
+          actions.classList.add("is-floating-animate");
+          animateTimer = window.setTimeout(clearFloatAnimation, 520);
         }
 
         function updateFloatingState() {
           const pastHeader = header.getBoundingClientRect().bottom < 12;
-          actions.classList.toggle("is-floating", pastHeader);
+          const isFloating = actions.classList.contains("is-floating");
+
+          if (pastHeader && !isFloating) {
+            const rect = actions.getBoundingClientRect();
+            anchor.style.width = `${Math.round(rect.width)}px`;
+            anchor.style.height = `${Math.round(rect.height)}px`;
+            actions.classList.add("is-floating");
+            playFloatAnimation();
+            return;
+          }
+
+          if (!pastHeader && isFloating) {
+            actions.classList.remove("is-floating");
+            clearFloatAnimation();
+            anchor.style.width = "";
+            anchor.style.height = "";
+          }
         }
 
         updateFloatingState();
