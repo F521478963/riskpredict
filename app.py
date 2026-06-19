@@ -194,15 +194,15 @@ def _attach_judgment_metadata(ai_analysis, judgment_mode):
 def classify_risk(value):
     if value >= RISK_THRESHOLD:
         return {
-            "label_zh": "低风险",
-            "label_en": "Low Risk",
-            "class_name": "low-risk",
+            "label_zh": "高风险",
+            "label_en": "High Risk",
+            "class_name": "high-risk",
         }
 
     return {
-        "label_zh": "高风险",
-        "label_en": "High Risk",
-        "class_name": "high-risk",
+        "label_zh": "低风险",
+        "label_en": "Low Risk",
+        "class_name": "low-risk",
     }
 
 

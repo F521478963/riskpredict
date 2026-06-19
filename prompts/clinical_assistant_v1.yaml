@@ -30,7 +30,7 @@ user_template: |
   【模型输出】
   - 预测值 / Predicted Value: {prediction:.6f}
   - 风险分级 / Risk Level: {risk_label_zh} / {risk_label_en}
-  - 判定规则：预测值 >= {threshold} 为 Low Risk；预测值 < {threshold} 为 High Risk。
+  - 判定规则：预测值 >= {threshold} 为 High Risk（可能有问题）；预测值 < {threshold} 为 Low Risk（可能没问题）。
 
   {guideline_context}
 

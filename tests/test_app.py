@@ -18,9 +18,9 @@ from risk_config import RISK_THRESHOLD
 
 class AppTest(unittest.TestCase):
     def test_classify_risk_uses_ridge_threshold(self):
-        self.assertEqual(classify_risk(RISK_THRESHOLD + 0.01)["label_en"], "Low Risk")
-        self.assertEqual(classify_risk(RISK_THRESHOLD)["label_en"], "Low Risk")
-        self.assertEqual(classify_risk(RISK_THRESHOLD - 0.01)["label_en"], "High Risk")
+        self.assertEqual(classify_risk(RISK_THRESHOLD + 0.01)["label_en"], "High Risk")
+        self.assertEqual(classify_risk(RISK_THRESHOLD)["label_en"], "High Risk")
+        self.assertEqual(classify_risk(RISK_THRESHOLD - 0.01)["label_en"], "Low Risk")
 
     def test_classify_branch_qfr_uses_point_eight_threshold(self):
         self.assertEqual(classify_branch_qfr(0.85)["label_en"], "Normal")
@@ -202,8 +202,8 @@ class AppTest(unittest.TestCase):
         self.assertIn("填入高风险参数".encode("utf-8"), response.data)
         self.assertIn(b"HIGH_RISK_FEATURE_VALUES", response.data)
         self.assertIn(b"fillHighRiskData", response.data)
-        self.assertIn(b"176.595376", response.data)
-        self.assertIn(b"0.63686", response.data)
+        self.assertIn(b"200.980134", response.data)
+        self.assertIn(b"0.529676", response.data)
 
     def test_app_wires_rag_corpus_store(self):
         self.assertTrue(RAG_CORPUS_DIR.endswith("rag_corpus"))
