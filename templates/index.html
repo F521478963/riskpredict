@@ -989,10 +989,11 @@
 
     .shap-force-label {
       position: absolute;
+      top: 0;
       transform: translateX(-50%);
-      max-width: 180px;
-      font-size: 11px;
-      line-height: 1.35;
+      max-width: 160px;
+      font-size: 10px;
+      line-height: 1.3;
       text-align: center;
       white-space: nowrap;
       overflow: hidden;
@@ -1087,17 +1088,12 @@
         <strong>Predicted Value: {{ "%.6f"|format(result) }}</strong>
         <div class="risk-badge {{ risk.class_name }}">
           风险分级 / Risk Level: {{ risk.label_zh }} / {{ risk.label_en }}
-          （阈值 / Threshold: ≥ {{ risk_threshold }} 为高风险，&lt; {{ risk_threshold }} 为低风险）
         </div>
       </div>
 
       {% if branch_predictions %}
         <section class="branch-qfr-panel" aria-label="Branch QFR predictions">
           <h2>三分支 QFR 预测 / Branch QFR Panel</h2>
-          <p class="panel-desc">
-            展示值为模型输出的绝对值；QFR ≥ {{ branch_qfr_threshold }} 标记为正常，低于该值标记为关注。
-            Displayed values use absolute model output; QFR ≥ {{ branch_qfr_threshold }} is labeled Normal.
-          </p>
           <div class="branch-qfr-grid">
             {% for branch in branch_predictions %}
               <article class="branch-qfr-card">
@@ -1563,48 +1559,39 @@
         return value.toFixed(6);
       }
 
-      const FORCE_LABEL_MAX_COUNT = 8;
-      const FORCE_LABEL_MIN_CONTRIBUTION = 0.08;
-      const FORCE_LABEL_MIN_GAP_PERCENT = 10;
+      const SHAP_FORCE_MAX_LABELS = 6;
+      const SHAP_FORCE_LABEL_MIN_RATIO = 0.03;
 
-      function selectForceLabelSegments(segments) {
-        const totalAbs = segments.reduce(
-          (sum, segment) => sum + Number(segment.abs_shap || 0),
-          0
-        );
-        if (totalAbs <= 0) {
-          return [];
-        }
-
+      function selectForceLabelSegments(segments, totalAbs) {
+        const minAbs = totalAbs * SHAP_FORCE_LABEL_MIN_RATIO;
         return segments
-          .filter(
-            (segment) =>
-              Number(segment.abs_shap || 0) >= totalAbs * FORCE_LABEL_MIN_CONTRIBUTION
-          )
-          .slice(0, FORCE_LABEL_MAX_COUNT)
-          .map((segment) => ({ segment }));
+          .filter((segment) => segment.abs_shap >= minAbs)
+          .slice(0, SHAP_FORCE_MAX_LABELS);
       }
 
-      function filterNonOverlappingForceLabels(labeledSegments, toPercent) {
-        const sorted = [...labeledSegments].sort((left, right) => {
-          const centerLeft = (left.segment.start + left.segment.end) / 2;
-          const centerRight = (right.segment.start + right.segment.end) / 2;
-          return centerLeft - centerRight;
-        });
+      function layoutForceLabels(labelNodes, toPercent) {
+        const minGap = 9;
+        let lastCenter = -Infinity;
+        let row = 0;
 
-        const placedCenters = [];
-        const visible = [];
-        sorted.forEach((item) => {
-          const center = toPercent((item.segment.start + item.segment.end) / 2);
-          const overlaps = placedCenters.some(
-            (position) => Math.abs(position - center) < FORCE_LABEL_MIN_GAP_PERCENT
-          );
-          if (!overlaps) {
-            placedCenters.push(center);
-            visible.push(item);
-          }
-        });
-        return visible;
+        labelNodes
+          .slice()
+          .sort(
+            (left, right) =>
+              toPercent((left.segment.start + left.segment.end) / 2) -
+              toPercent((right.segment.start + right.segment.end) / 2)
+          )
+          .forEach(({ segment, label }) => {
+            const center = toPercent((segment.start + segment.end) / 2);
+            if (center - lastCenter < minGap) {
+              row += 1;
+            } else {
+              row = 0;
+            }
+            label.style.left = `${center}%`;
+            label.style.top = `${row * 17}px`;
+            lastCenter = center;
+          });
       }
 
       function renderShapForcePlot(container, explanation) {
@@ -1612,15 +1599,15 @@
         const prediction = Number(explanation.prediction);
         const features = Array.isArray(explanation.features) ? explanation.features : [];
 
-        // Standard force plot: stack all contributions sequentially from base to f(x).
-        const ordered = [...features].sort((a, b) => b.abs_shap - a.abs_shap);
+        // Stack all features sequentially from base so segments always connect
+        // base -> ... -> f(x) with no gap (standard SHAP force plot layout).
+        const sorted = [...features].sort((a, b) => b.abs_shap - a.abs_shap);
         let cursor = base;
-        const segments = ordered.map((feature) => {
-          const shapValue = Number(feature.shap_value);
+        const segments = sorted.map((feature) => {
           const segment = {
             ...feature,
             start: cursor,
-            end: cursor + shapValue,
+            end: cursor + Number(feature.shap_value),
           };
           cursor = segment.end;
           return segment;
@@ -1638,6 +1625,11 @@
         const maxValue = axisMax + padding;
         const range = maxValue - minValue || 1;
         const toPercent = (value) => ((value - minValue) / range) * 100;
+
+        const totalAbs = features.reduce(
+          (sum, feature) => sum + Number(feature.abs_shap || 0),
+          0
+        );
 
         const axis = document.createElement("div");
         axis.className = "shap-force-axis";
@@ -1667,21 +1659,19 @@
         const labels = document.createElement("div");
         labels.className = "shap-force-labels";
 
-        const labeledSegments = filterNonOverlappingForceLabels(
-          selectForceLabelSegments(segments),
-          toPercent
-        );
-
-        labeledSegments.forEach(({ segment }) => {
+        const labelNodes = selectForceLabelSegments(segments, totalAbs).map((segment) => {
           const label = document.createElement("div");
           label.className = `shap-force-label ${segment.direction}`;
-          const center = (segment.start + segment.end) / 2;
-          label.style.left = `${toPercent(center)}%`;
           const featureName = segment.label_zh || segment.feature;
-          label.title = `${featureName} = ${formatShapNumber(Number(segment.value))}`;
-          label.textContent = `${featureName} = ${formatShapNumber(Number(segment.value))}`;
+          const shapText = formatShapNumber(Number(segment.shap_value));
+          label.title = `${featureName}\n值: ${formatShapNumber(Number(segment.value))}\nSHAP: ${shapText}`;
+          label.textContent = `${featureName} (${shapText})`;
           labels.appendChild(label);
+          return { segment, label };
         });
+
+        layoutForceLabels(labelNodes, toPercent);
+        labels.style.minHeight = `${Math.max(42, 18 + labelNodes.length * 6)}px`;
 
         container.replaceChildren(axis, labels);
       }

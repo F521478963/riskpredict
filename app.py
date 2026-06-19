@@ -16,7 +16,7 @@ from model_service import FeatureShapeError, PredictionService
 from llm_pipeline import JUDGMENT_LABELS
 from rag_store import get_default_corpus_store
 from report_export import build_analysis_report
-from risk_config import BRANCH_QFR_THRESHOLD, RISK_THRESHOLD
+from risk_config import BRANCH_QFR_THRESHOLDS, RISK_THRESHOLD
 
 
 class _NullShapRuntime:
@@ -180,7 +180,7 @@ def _predict_all_branches(feature_map):
                 "label_zh": spec["label_zh"],
                 "label_en": spec["label_en"],
                 "qfr": qfr,
-                "status": classify_branch_qfr(qfr),
+                "status": classify_branch_qfr(qfr, BRANCH_QFR_THRESHOLDS[spec["id"]]),
             }
         )
     return results
@@ -209,8 +209,8 @@ def classify_risk(value):
     }
 
 
-def classify_branch_qfr(value):
-    if value >= BRANCH_QFR_THRESHOLD:
+def classify_branch_qfr(value, threshold):
+    if value >= threshold:
         return {
             "label_zh": "正常",
             "label_en": "Normal",
@@ -251,8 +251,6 @@ def _render_index(
             feature_groups=FEATURE_GROUPS,
             feature_count=len(prediction_service.feature_indexes),
             full_feature_count=len(FEATURE_SPECS),
-            risk_threshold=RISK_THRESHOLD,
-            branch_qfr_threshold=BRANCH_QFR_THRESHOLD,
             rag_status=rag_corpus_store.status(),
             judgment_mode=judgment_mode,
             judgment_labels=JUDGMENT_LABELS,

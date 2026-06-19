@@ -13,7 +13,7 @@ from app import (
 )
 
 
-from risk_config import RISK_THRESHOLD
+from risk_config import BRANCH_QFR_THRESHOLDS, RISK_THRESHOLD
 
 
 class AppTest(unittest.TestCase):
@@ -22,9 +22,16 @@ class AppTest(unittest.TestCase):
         self.assertEqual(classify_risk(RISK_THRESHOLD)["label_en"], "High Risk")
         self.assertEqual(classify_risk(RISK_THRESHOLD - 0.01)["label_en"], "Low Risk")
 
-    def test_classify_branch_qfr_uses_point_eight_threshold(self):
-        self.assertEqual(classify_branch_qfr(0.85)["label_en"], "Normal")
-        self.assertEqual(classify_branch_qfr(0.79)["label_en"], "Attention")
+    def test_classify_branch_qfr_uses_branch_thresholds(self):
+        lad_threshold = BRANCH_QFR_THRESHOLDS["lad"]
+        self.assertEqual(
+            classify_branch_qfr(lad_threshold + 0.01, lad_threshold)["label_en"],
+            "Normal",
+        )
+        self.assertEqual(
+            classify_branch_qfr(lad_threshold - 0.01, lad_threshold)["label_en"],
+            "Attention",
+        )
 
     def test_feature_fields_include_branch_features(self):
         self.assertEqual(len(FEATURE_FIELDS), 33)
