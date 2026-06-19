@@ -173,40 +173,28 @@
 
     @keyframes primaryBallMorph {
       0% {
-        transform: scale(1);
         border-radius: 999px;
       }
-      42% {
-        transform: scale(0.9);
-        border-radius: 36%;
-      }
       100% {
-        transform: scale(1);
         border-radius: 50%;
       }
     }
 
     @keyframes primaryBallMorphReverse {
       0% {
-        transform: scale(1);
         border-radius: 50%;
       }
-      42% {
-        transform: scale(0.9);
-        border-radius: 36%;
-      }
       100% {
-        transform: scale(1);
         border-radius: 999px;
       }
     }
 
     .primary-actions.is-floating-animate.to-float .primary-action-btn {
-      animation: primaryBallMorph 0.52s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+      animation: primaryBallMorph 0.36s cubic-bezier(0.4, 0, 0.2, 1) backwards;
     }
 
     .primary-actions.is-floating-animate.to-dock .primary-action-btn {
-      animation: primaryBallMorphReverse 0.52s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+      animation: primaryBallMorphReverse 0.36s cubic-bezier(0.4, 0, 0.2, 1) backwards;
     }
 
     .primary-action-btn {
@@ -231,7 +219,7 @@
         padding 0.42s cubic-bezier(0.4, 0, 0.2, 1),
         border-radius 0.42s cubic-bezier(0.4, 0, 0.2, 1),
         box-shadow 0.38s ease,
-        transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+        transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .primary-actions.is-floating .primary-action-btn {
@@ -269,7 +257,7 @@
       font-weight: 700;
       transition:
         opacity 0.32s ease 0.06s,
-        transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) 0.04s;
+        transform 0.32s cubic-bezier(0.4, 0, 0.2, 1) 0.04s;
       pointer-events: none;
     }
 
@@ -304,9 +292,9 @@
       pointer-events: none;
       transform: translateY(-50%) translateX(8px) scale(0.94);
       transition:
-        opacity 0.22s ease,
-        transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
-        visibility 0.22s ease;
+        opacity 0.2s ease,
+        transform 0.24s cubic-bezier(0.4, 0, 0.2, 1),
+        visibility 0.2s ease;
     }
 
     .primary-actions.is-floating .primary-action-btn::before {
@@ -322,9 +310,9 @@
       visibility: hidden;
       transform: translateY(-50%) translateX(8px);
       transition:
-        opacity 0.22s ease,
-        transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
-        visibility 0.22s ease;
+        opacity 0.2s ease,
+        transform 0.24s cubic-bezier(0.4, 0, 0.2, 1),
+        visibility 0.2s ease;
     }
 
     .primary-actions.is-floating .primary-action-btn:hover::after,
@@ -355,8 +343,9 @@
       }
 
       .primary-actions-flight-layer,
-      .primary-actions-flight-orb {
-        display: none;
+      .primary-actions-flight-orb,
+      .global-analysis-overlay {
+        display: none !important;
       }
     }
 
@@ -759,6 +748,14 @@
       width: 100%;
       height: 38px;
       font-size: 14px;
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
     }
 
     input[type="number"]::placeholder {
@@ -1207,6 +1204,64 @@
 
     .analysis-loading.is-visible {
       display: flex;
+    }
+
+    .global-analysis-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 220;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(15, 23, 42, 0.46);
+      backdrop-filter: blur(3px);
+      pointer-events: all;
+    }
+
+    .global-analysis-overlay.is-visible {
+      display: flex;
+    }
+
+    body.is-analysis-loading {
+      overflow: hidden;
+    }
+
+    .global-analysis-overlay-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      min-width: min(360px, calc(100vw - 48px));
+      padding: 28px 32px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid #dbe6f6;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+      color: #1e293b;
+      text-align: center;
+    }
+
+    .global-analysis-overlay-panel .loading-spinner {
+      width: 34px;
+      height: 34px;
+      border-width: 4px;
+      border-color: #dbe6f6;
+      border-top-color: #0f766e;
+    }
+
+    .global-analysis-overlay-panel p {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.5;
+      color: #334155;
+    }
+
+    .global-analysis-overlay-hint {
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      color: #64748b !important;
     }
 
     .loading-spinner {
@@ -1718,6 +1773,24 @@
   </style>
 </head>
 <body>
+  <div
+    id="global-analysis-overlay"
+    class="global-analysis-overlay"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="global-analysis-overlay-title"
+    aria-describedby="global-analysis-overlay-desc"
+    aria-hidden="true"
+  >
+    <div class="global-analysis-overlay-panel">
+      <span class="loading-spinner" aria-hidden="true"></span>
+      <p id="global-analysis-overlay-title">Running Combined Analysis</p>
+      <p id="global-analysis-overlay-desc" class="global-analysis-overlay-hint">
+        Please wait. Inputs and results are locked until the report is ready.
+      </p>
+    </div>
+  </div>
+
   <div class="floating-actions" aria-label="Quick test parameter actions">
     <button class="floating-action-button floating-case16-button" id="fill-case16-data-button" type="button">
       Fill Case 16
@@ -2067,6 +2140,16 @@
         fillFeatureValues(CASE_81_FEATURE_VALUES);
       }
 
+      function setGlobalAnalysisLoading(busy) {
+        const overlay = document.getElementById("global-analysis-overlay");
+        if (!overlay) {
+          return;
+        }
+        overlay.classList.toggle("is-visible", busy);
+        overlay.setAttribute("aria-hidden", busy ? "false" : "true");
+        document.body.classList.toggle("is-analysis-loading", busy);
+      }
+
       function resetTestData() {
         const form = document.getElementById("manual-prediction-form");
         if (!form) {
@@ -2080,6 +2163,7 @@
         });
 
         form.classList.remove("is-submitting");
+        setGlobalAnalysisLoading(false);
 
         const loading = document.getElementById("analysis-loading");
         if (loading) {
@@ -2112,17 +2196,10 @@
           return;
         }
 
-        const loading = document.getElementById("analysis-loading");
-        const status = document.getElementById("analysis-status");
         const submitButton = document.getElementById("submit-combined");
 
         form.classList.add("is-submitting");
-        if (loading) {
-          loading.classList.add("is-visible");
-        }
-        if (status) {
-          status.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
+        setGlobalAnalysisLoading(true);
         setSubmitButtonBusy(submitButton, true);
       }
 
@@ -2134,7 +2211,8 @@
           return;
         }
 
-        const FLOAT_TRANSITION_MS = 520;
+        const FLOAT_TRANSITION_MS = 360;
+        const MOTION_EASE = "cubic-bezier(0.4, 0, 0.2, 1)";
         const prefersReducedMotion = window.matchMedia(
           "(prefers-reduced-motion: reduce)"
         ).matches;
@@ -2162,7 +2240,7 @@
 
         function buildArcOffsets(dx, dy) {
           const distance = Math.hypot(dx, dy) || 1;
-          const arc = Math.min(78, distance * 0.24);
+          const arc = Math.min(42, distance * 0.12);
           return {
             perpX: (-dy / distance) * arc,
             perpY: (dx / distance) * arc,
@@ -2180,8 +2258,8 @@
               offset: 0,
             },
             {
-              transform: `translate(${dx * 0.52 + perpX}px, ${dy * 0.52 + perpY}px) scale(${midSx}, ${midSy})`,
-              offset: 0.58,
+              transform: `translate(${dx * 0.5 + perpX}px, ${dy * 0.5 + perpY}px) scale(${midSx}, ${midSy})`,
+              offset: 0.5,
             },
             {
               transform: "translate(0px, 0px) scale(1, 1)",
@@ -2228,7 +2306,7 @@
           path.style.strokeDasharray = `${pathLength}`;
           path.style.strokeDashoffset = `${pathLength}`;
 
-          const easing = "cubic-bezier(0.34, 1.56, 0.64, 1)";
+          const easing = MOTION_EASE;
           const pathAnim = path.animate(
             [
               { strokeDashoffset: pathLength, opacity: 0.15 },
@@ -2245,9 +2323,9 @@
                 opacity: 0,
               },
               {
-                transform: `translate(${controlX - 6}px, ${controlY - 6}px) scale(1.15)`,
-                opacity: 1,
-                offset: 0.55,
+                transform: `translate(${controlX - 6}px, ${controlY - 6}px) scale(1)`,
+                opacity: 0.9,
+                offset: 0.5,
               },
               {
                 transform: `translate(${endX - 6}px, ${endY - 6}px) scale(0.55)`,
@@ -2323,7 +2401,7 @@
               requestAnimationFrame(() => {
                 const animation = actions.animate(buildFlipKeyframes(dx, dy, sx, sy), {
                   duration: FLOAT_TRANSITION_MS,
-                  easing: "cubic-bezier(0.34, 1.56, 0.64, 1)",
+                  easing: MOTION_EASE,
                   fill: "forwards",
                 });
 
